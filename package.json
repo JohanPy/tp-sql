@@ -1,0 +1,19 @@
+{
+  "name": "tp-sql-site",
+  "version": "1.0.0",
+  "description": "Site d'entraînement SQL interactif avec Eleventy",
+  "scripts": {
+    "start": "eleventy --serve",
+    "build": "eleventy",
+    "debug": "DEBUG=Eleventy* eleventy"
+  },
+  "keywords": ["sql", "education", "eleventy"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1",
+    "markdown-it": "^14.0.0",
+    "markdown-it-attrs": "^4.1.6",
+    "sql.js": "^1.8.0"
+  }
+}

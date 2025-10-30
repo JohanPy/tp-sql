@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or "SQL TP - Interface d'apprentissage SQL" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/nord.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/addon/hint/show-hint.min.css">
+  <link rel="stylesheet" href="/assets/css/demo.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/sql/sql.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/addon/hint/sql-hint.min.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>📚 {{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
+    <div class="toolbar">
+      <button id="execute" class="button button-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Exécuter
+      </button>
+      <button id="openHistory" class="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        Historique
+      </button>
+      <label class="button">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        Charger BDD
+        <input type="file" id="dbfile">
+      </label>
+      <button id="savedb" class="button button-success">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+          <polyline points="7 3 7 8 15 8"></polyline>
+        </svg>
+        Sauvegarder BDD
+      </button>
+    </div>
+  </header>
+
+  <div class="main-layout">
+    <!-- Navigation Panel -->
+    <nav class="nav-panel" id="navPanel">
+      <div class="nav-header">
+        <div class="nav-header-content">
+          <a href="/" class="home-link">🏠 Accueil</a>
+          <button id="toggleNav" class="toggle-nav-btn" title="Plier/Dépiler la navigation">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="nav-content">
+        {% for tpNumber, tpExercices in collections.tpsByNumber %}
+        <div class="tp-group">
+          <h3 class="tp-title">TP {{ tpNumber }}</h3>
+          <ul class="exercise-list">
+            {% for exercise in tpExercices %}
+            <li>
+              <a href="{{ exercise.url }}" 
+                 class="exercise-link {% if page.url == exercise.url %}active{% endif %}">
+                {{ exercise.data.titre or ("Exercice " + exercise.data.exerciceNum) }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+    </nav>
+
+    <!-- Content Panel -->
+    <main class="content-panel">
+      <article class="exercise-content">
+        {{ content | safe }}
+      </article>
+    </main>
+
+    <!-- SQL Console Panel -->
+    <aside class="console-panel">
+      <div class="panel-header editor-header">
+        <span>🔧 Console SQL</span>
+      </div>
+      <div class="panel-content">
+        <textarea id="commands"></textarea>
+        <div class="query-history" id="queryHistory">
+          <!-- History items will be added here dynamically -->
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-item" id="editorStatus">
+          Prêt
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Results Area (below the 3-panel layout) -->
+  <div class="results-area">
+    <div class="results-tabs" id="resultsTabs">
+      <button class="tab active" data-tab="tab1">Résultat 1</button>
+      <button id="newTabBtn" class="tab">+</button>
+    </div>
+    <div class="results-panels">
+      <div id="error" class="error"></div>
+      <div class="tab-panel active" id="tab1">
+        <div class="results-content">Les résultats s'afficheront ici après exécution d'une requête</div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-item" id="resultsStatus">
+        Aucune requête exécutée
+      </div>
+      <div class="status-item" id="queryTime">
+        <!-- Query execution time will be shown here -->
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      Interface basée sur <a href='https://github.com/sql-js/sql.js'>SQL.js</a> |
+      Moteur SQLite compilé en WebAssembly pour l'apprentissage du SQL
+    </p>
+  </footer>
+
+  <!-- Modal d'historique -->
+  <div id="historyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📋 Historique des requêtes</h2>
+        <button id="closeHistoryModal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="history-toolbar">
+          <button id="copyAllHistory" class="button button-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            Copier tout
+          </button>
+          <button id="exportHistory" class="button button-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Exporter en SQL
+          </button>
+          <button id="clearHistory" class="button button-sm button-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Effacer tout
+          </button>
+        </div>
+        <div id="historyList" class="history-list">
+          <div class="history-empty">Aucune requête dans l'historique</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates -->
+  <template id="tab-template">
+    <button class="tab">
+      <slot name="tab-title">Result</slot>
+      <span class="tab-close">×</span>
+    </button>
+  </template>
+
+  <template id="tab-panel-template">
+    <div class="tab-panel">
+      <div class="results-content">
+        <slot name="panel-content">Exécutez une requête pour voir les résultats</slot>
+      </div>
+    </div>
+  </template>
+
+  <template id="loading-template">
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Exécution de la requête...</span>
+    </div>
+  </template>
+
+  <template id="table-template">
+    <div class="table-wrapper">
+      <div class="table-caption">
+        <span class="row-count"></span>
+        <span class="column-count"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <slot name="table-headers"></slot>
+          </tr>
+        </thead>
+        <tbody>
+          <slot name="table-rows"></slot>
+        </tbody>
+      </table>
+    </div>
+  </template>
+
+  <template id="error-template">
+    <div class="no-results error-result">
+      <slot name="error-message">La requête a échoué</slot>
+    </div>
+  </template>
+
+  <template id="history-item-template">
+    <div class="history-item">
+      <div class="history-query">
+        <slot name="query-preview"></slot>
+      </div>
+      <div class="history-time">
+        <slot name="query-time"></slot>
+      </div>
+    </div>
+  </template>
+
+  <!-- Métadonnées pour le JavaScript -->
+  <script>
+    window.TP_CONFIG = {
+      base: "{{ base or '' }}",
+      tpNum: {{ tpNum or 0 }},
+      exerciceNum: {{ exerciceNum or 0 }}
+    };
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/sql/sql.min.js"></script>
+  <script type="text/javascript" src="/assets/js/gui.js"></script>
+</body>
+</html>

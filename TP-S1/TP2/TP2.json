@@ -1,0 +1,5 @@
+{
+    "intitule": "TP 2 - Dates et agrégats",
+    "base": "Comptoir2000.sqlite",
+    "fichiers": ["TP-2-1", "TP-2-2", "TP-2-3", "TP-2-4"]
+}

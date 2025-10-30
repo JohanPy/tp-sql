@@ -1,0 +1,5 @@
+{
+    "intitule": "TP 1 - Bien démarrer avec les requêtes SQL",
+    "base": "Comptoir2000.sqlite",
+    "fichiers": ["TP-1-1", "TP-1-2", "TP-1-3", "TP-1-4", "TP-1-5"]
+}

@@ -1,0 +1,5 @@
+{
+    "intitule": "TP 3 - Jointures et sous-requêtes",
+    "base": "Comptoir2000.sqlite",
+    "fichiers": ["TP-3-1", "TP-3-2", "TP-3-3", "TP-3-4"]
+}

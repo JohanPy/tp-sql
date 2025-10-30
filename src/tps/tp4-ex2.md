@@ -1,0 +1,149 @@
+---
+layout: base.njk
+title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
+intitule: "TP 4 - Récapitulatif"
+base: "Gymnase2000.sqlite"
+tpNum: 4
+exerciceNum: 2
+titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
+permalink: "/tp4/exercice2/"
+tags: tp
+---
+
+# Exercice 1 : Partie I - Requêtes de base et jointures simples
+
+## Questions (15 questions)
+
+**1. Afficher tous les sportifs du gymnase**
+
+Affichez la liste complète des sportifs : numéro de licence, nom et prénom.
+
+<details>
+<summary>💡 Indice</summary>
+
+Simple SELECT sur la table `Sportif` sans condition.
+</details>
+
+**2. Lister tous les sports disponibles**
+
+Affichez le numéro et le nom de tous les sports proposés.
+
+<details>
+<summary>💡 Indice</summary>
+
+SELECT sur la table `Sport`.
+</details>
+
+**3. Afficher les sports pratiqués par un sportif donné (ex: NumLicence = "001")**
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Jouer` et `Sport` sur `NumSport`, filtrez sur le NumLicence du sportif.
+</details>
+
+**4. Lister les séances d'entraînement programmées**
+
+Affichez le numéro de séance, le sport, le gymnase, et l'horaire.
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Seance`, `Sport` et `Gymnase`.
+</details>
+
+**5. Afficher les entraîneurs (sportifs qui entraînent) et les sports qu'ils enseignent**
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Entrainer`, `Sportif` et `Sport`.
+</details>
+
+**6. Trouver les arbitres et les sports qu'ils arbitrent**
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Arbitrer`, `Sportif` et `Sport`.
+</details>
+
+**7. Afficher toutes les séances du gymnase numéro 1**
+
+Affichez le sport et l'horaire.
+
+<details>
+<summary>💡 Indice</summary>
+
+Filtrez `Seance` où `NumGymnase = 1`.
+</details>
+
+**8. Lister les sportifs et les séances auxquelles ils peuvent participer (basé sur les sports qu'ils jouent)**
+
+Affichez le nom du sportif, le sport, et l'horaire de la séance.
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Sportif`, `Jouer`, `Sport` et `Seance`.
+</details>
+
+**9. Afficher le nombre de sportifs par sport**
+
+<details>
+<summary>💡 Indice</summary>
+
+Comptez avec `COUNT()` en groupant par sport depuis la table `Jouer`.
+</details>
+
+**10. Trouver les sportifs qui pratiquent plus d'un sport**
+
+<details>
+<summary>💡 Indice</summary>
+
+Comptez les sports par sportif dans `Jouer`, puis filtrez avec `HAVING COUNT(*) > 1`.
+</details>
+
+**11. Afficher les gymnases et le nombre de séances programmées dans chaque**
+
+<details>
+<summary>💡 Indice</summary>
+
+Comptez les séances en groupant par gymnase.
+</details>
+
+**12. Lister les sportifs qui entraînent un sport qu'ils pratiquent eux-mêmes**
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Jouer` et `Entrainer` sur le même `NumLicence` et `NumSport`.
+</details>
+
+**13. Afficher tous les sportifs et indiquer s'ils sont entraîneurs, arbitres, ou joueurs (ou combinaison)**
+
+Utilisez des colonnes CASE pour indiquer le rôle.
+
+<details>
+<summary>💡 Indice</summary>
+
+Utilisez `CASE` avec des sous-requêtes pour vérifier si le sportif existe dans Entrainer, Arbitrer, Jouer.
+</details>
+
+**14. Trouver les paires (entraîneur, sportif) où l'entraîneur entraîne un sport que le sportif pratique**
+
+<details>
+<summary>💡 Indice</summary>
+
+Joignez `Entrainer`, `Jouer` sur le `NumSport` et filtrez les combinaisons compatibles.
+</details>
+
+**15. Afficher les sports sans séances programmées**
+
+Quel sport n'a aucune séance d'entraînement ?
+
+<details>
+<summary>💡 Indice</summary>
+
+Utilisez `LEFT JOIN Seance` et filtrez avec `NumSeance IS NULL`.
+</details>

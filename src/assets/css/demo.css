@@ -564,7 +564,7 @@ input[type="file"] {
 .tab-panel {
 	display: none;
 	height: 100%;
-	overflow: auto;
+	overflow: visible;
 }
 
 .tab-panel.active {
@@ -579,18 +579,19 @@ input[type="file"] {
 }
 
 .schema-content {
-	padding: 20px;
+	padding: 0;
 	max-width: 1200px;
-	margin: 0 auto;
+	margin: -15px -15px 0 -15px; /* Compensate parent padding */
+	padding: 15px;
 }
 
 .schema-section {
-	margin-bottom: 30px;
-	background: rgba(30, 40, 50, 0.4);
-	border: 1px solid var(--border-subtle);
-	border-radius: var(--radius-md);
-	padding: 20px;
-	box-shadow: var(--shadow-subtle);
+	margin-bottom: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	box-shadow: none;
 }
 
 .schema-section h3 {
@@ -625,22 +626,55 @@ input[type="file"] {
 	font-style: italic;
 }
 
-.schema-details {
-	display: grid;
-	gap: 15px;
-}
-
-.table-info {
-	background: rgba(15, 25, 35, 0.4);
-	border: 1px solid var(--border-subtle);
-	border-radius: var(--radius-sm);
-	padding: 15px;
+.schema-link {
+	display: inline-flex;
+	align-items: center;
+	padding: 12px 20px;
+	background: rgba(79, 190, 255, 0.1);
+	border: 1px solid var(--accent-blue);
+	border-radius: var(--radius-md);
+	color: var(--accent-blue);
+	text-decoration: none;
+	font-weight: 500;
 	transition: var(--transition-normal);
 }
 
-.table-info:hover {
+.schema-link:hover {
+	background: rgba(79, 190, 255, 0.2);
 	border-color: var(--accent-blue);
-	box-shadow: 0 0 0 1px rgba(79, 190, 255, 0.2);
+	box-shadow: 0 4px 12px rgba(79, 190, 255, 0.2);
+	transform: translateY(-1px);
+}
+
+.schema-link:active {
+	transform: translateY(0);
+}
+
+.schema-link svg {
+	flex-shrink: 0;
+}
+
+.schema-details {
+	display: grid;
+	gap: 0;
+}
+
+.table-info {
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid var(--border-subtle);
+	border-radius: 0;
+	padding: 8px 0;
+	transition: var(--transition-normal);
+}
+
+.table-info:last-child {
+	border-bottom: none;
+}
+
+.table-info:hover {
+	background: rgba(79, 190, 255, 0.05);
+	border-bottom-color: var(--accent-blue);
 }
 
 .table-name {
@@ -656,6 +690,25 @@ input[type="file"] {
 .table-name::before {
 	content: "📋";
 	font-size: 1.2em;
+}
+
+.table-signature {
+	font-family: 'Fira Code', 'JetBrains Mono', monospace;
+	font-size: 0.9em;
+	line-height: 1.4;
+	color: var(--text-primary);
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	border-left: none;
+}
+
+.table-keyword {
+	color: var(--accent-blue);
+	font-weight: 600;
+	text-transform: uppercase;
+	font-size: 0.85em;
 }
 
 .columns-list {

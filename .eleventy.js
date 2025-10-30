@@ -2,6 +2,11 @@ module.exports = function(eleventyConfig) {
   // Copier les assets statiques
   eleventyConfig.addPassthroughCopy("src/assets");
   
+  // Copier le dossier bases contenant les fichiers .png et .sqlite
+  eleventyConfig.addPassthroughCopy({
+    "bases": "assets/bases"
+  });
+  
   // Copier sql.js depuis node_modules si disponible
   eleventyConfig.addPassthroughCopy({
     "node_modules/sql.js/dist": "assets/sql.js"

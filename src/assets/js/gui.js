@@ -261,7 +261,7 @@ function determineTabForResults(tabId) {
 	const currentTabPanel = document.getElementById(state.currentTabId);
 	const isInitialUnusedTab = state.currentTabId === 'tab1' && 
 		currentTabPanel && 
-		currentTabPanel.querySelector('.results-content').innerHTML.includes('Results will be displayed here');
+		currentTabPanel.querySelector('.results-content').innerHTML.includes('Les résultats s\'afficheront ici');
 	
 	return isInitialUnusedTab ? state.currentTabId : createNewTab();
 }
@@ -1401,7 +1401,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Initial status
-updateStatus('info', 'Ready');
+updateStatus('info', 'Prêt');
 
 // Handle window resize
 window.addEventListener('resize', function() {

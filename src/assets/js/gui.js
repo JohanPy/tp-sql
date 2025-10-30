@@ -232,7 +232,7 @@ function updateStatus(type, message) {
 
 function updateQueryTime(time) {
 	if (elements.queryTimeElm) {
-		elements.queryTimeElm.textContent = `Execution time: ${time.toFixed(2)}ms`;
+		elements.queryTimeElm.textContent = `Temps d'exécution : ${time.toFixed(2)}ms`;
 	}
 	state.lastExecutionTime = time;
 }
@@ -278,7 +278,7 @@ function handleQueryResults(event, outputElement) {
 	const executionTime = toc("Executing SQL");
 	
 	if (!results) {
-		handleError({message: event.data.error || "Unknown error occurred"});
+		handleError({message: event.data.error || "Une erreur inconnue s'est produite"});
 		return;
 	}
 
@@ -300,9 +300,9 @@ function handleQueryResults(event, outputElement) {
 function displayNoResults(outputElement) {
 	const noResultsDiv = document.createElement('div');
 	noResultsDiv.className = 'no-results';
-	noResultsDiv.textContent = 'Query executed successfully. No results to display.';
+	noResultsDiv.textContent = 'Requête exécutée sans résultats.';
 	outputElement.appendChild(noResultsDiv);
-	updateStatus('success', 'Query executed with no results');
+	updateStatus('success', 'Requête exécutée sans résultats');
 }
 
 function displayResultSets(results, outputElement) {

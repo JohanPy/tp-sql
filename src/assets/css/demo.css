@@ -108,10 +108,13 @@ h1 {
 	flex-direction: column;
 	overflow-y: auto;
 	transition: all 0.3s ease;
+	position: relative;
 }
 
 .nav-panel.collapsed {
-	overflow: hidden;
+	overflow: visible;
+	width: 60px !important;
+	min-width: 60px;
 }
 
 .nav-header {
@@ -125,6 +128,16 @@ h1 {
 	align-items: center;
 	justify-content: space-between;
 	gap: 8px;
+}
+
+.nav-panel.collapsed .nav-header {
+	padding: 12px 8px;
+	border-bottom: none;
+}
+
+.nav-panel.collapsed .nav-header-content {
+	flex-direction: column;
+	gap: 10px;
 }
 
 .home-link {
@@ -160,11 +173,19 @@ h1 {
 	justify-content: center;
 	transition: var(--transition-normal);
 	flex-shrink: 0;
+	width: 36px;
+	height: 36px;
 }
 
 .toggle-nav-btn:hover {
 	background: rgba(79, 190, 255, 0.1);
 	color: var(--accent-blue);
+}
+
+.nav-panel.collapsed .toggle-nav-btn {
+	background: rgba(79, 190, 255, 0.15);
+	color: var(--accent-blue);
+	border-radius: 6px;
 }
 
 .toggle-nav-btn svg {

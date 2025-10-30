@@ -54,7 +54,19 @@ module.exports = function(eleventyConfig) {
   
   eleventyConfig.setLibrary("md", markdownLibrary);
   
+  // Déterminer le pathPrefix en fonction de l'environnement
+  const isProduction = process.env.ELEVENTY_ENV === 'production';
+  const pathPrefix = isProduction ? '/tp-sql' : '';
+  
+  // Filtre pour générer les URLs avec le bon pathPrefix
+  eleventyConfig.addFilter("url", (url) => {
+    if (!url) return url;
+    if (url.startsWith('http')) return url;
+    return pathPrefix + (url.startsWith('/') ? url : '/' + url);
+  });
+  
   return {
+    pathPrefix: pathPrefix,
     dir: {
       input: "src",
       output: "_site",

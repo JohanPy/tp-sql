@@ -196,15 +196,15 @@ function updateStatus(type, message) {
 
 	const statusMap = {
 		'executing': {
-			editorStatus: createStatusSpan('status-info', 'Executing query...'),
-			resultsStatus: createStatusSpan('status-info', 'Executing query...')
+			editorStatus: createStatusSpan('status-info', 'Exécution de la requête...'),
+			resultsStatus: createStatusSpan('status-info', 'Exécution de la requête...')
 		},
 		'success': {
-			editorStatus: createStatusSpan('status-success', 'Query executed successfully'),
+			editorStatus: createStatusSpan('status-success', 'Requête exécutée avec succès'),
 			resultsStatus: createStatusSpan('status-success', message)
 		},
 		'error': {
-			editorStatus: createStatusSpan('status-error', 'Query failed'),
+			editorStatus: createStatusSpan('status-error', 'Erreur lors de la requête'),
 			resultsStatus: createStatusSpan('status-error', message)
 		},
 		'info': {
@@ -294,7 +294,7 @@ function handleQueryResults(event, outputElement) {
 	
 	const displayTime = toc("Displaying results");
 	updateQueryTime(executionTime + displayTime);
-	updateStatus('success', `Returned ${results.length} result set${results.length !== 1 ? 's' : ''}`);
+	updateStatus('success', `${results.length} ensemble${results.length !== 1 ? 's' : ''} de résultat${results.length !== 1 ? 's' : ''} retourné${results.length !== 1 ? 's' : ''}`);
 }
 
 function displayNoResults(outputElement) {
@@ -326,8 +326,8 @@ function createResultTable(columns, values) {
 }
 
 function updateTableMetadata(wrapper, columnCount, rowCount) {
-	wrapper.querySelector('.row-count').textContent = `${rowCount} row${rowCount !== 1 ? 's' : ''}`;
-	wrapper.querySelector('.column-count').textContent = `${columnCount} column${columnCount !== 1 ? 's' : ''}`;
+	wrapper.querySelector('.row-count').textContent = `${rowCount} ligne${rowCount !== 1 ? 's' : ''}`;
+	wrapper.querySelector('.column-count').textContent = `${columnCount} colonne${columnCount !== 1 ? 's' : ''}`;
 }
 
 function createTableHeader(table, columns) {
@@ -358,7 +358,7 @@ function createEmptyResultRow(tbody, columnCount) {
 	const emptyRow = document.createElement('tr');
 	const emptyCell = document.createElement('td');
 	emptyCell.className = 'no-results';
-	emptyCell.textContent = 'No results';
+	emptyCell.textContent = 'Aucun résultat';
 	emptyCell.colSpan = columnCount;
 	emptyRow.appendChild(emptyCell);
 	tbody.appendChild(emptyRow);
@@ -839,11 +839,11 @@ function loadDatabaseFromFile() {
 	var r = new FileReader();
 	r.onload = function () {
 		worker.onmessage = function () {
-			toc("Loading database from file");
+			toc("Chargement de la base de données depuis un fichier");
 			editor.setValue("SELECT `name`, `sql`\n  FROM `sqlite_master`\n  WHERE type='table';");
 			execEditorContents();
-			showNotification('Database loaded successfully');
-			updateStatus('success', 'Database loaded successfully');
+			showNotification('Base de données chargée avec succès');
+			updateStatus('success', 'Base de données chargée avec succès');
 			
 			// Mettre à jour les métadonnées pour l'autocomplétion
 			setTimeout(() => {
@@ -861,15 +861,15 @@ function loadDatabaseFromFile() {
 	r.readAsArrayBuffer(f);
 }
 
-// Save the db to a file
+// Sauvegardation de la base de données dans un fichier
 function savedb() {
-	updateStatus('info', 'Saving database...');
+	updateStatus('info', 'Sauvegarde de la base de données...');
 	
 	worker.onmessage = function (event) {
-		toc("Exporting the database");
+		toc("Exportation de la base de données");
 		downloadDatabaseFile(event.data.buffer);
-		showNotification('Database saved successfully');
-		updateStatus('success', 'Database saved successfully');
+		showNotification('Base de données sauvegardée avec succès');
+		updateStatus('success', 'Base de données sauvegardée avec succès');
 		addButtonClickFeedback(elements.savedbElm);
 	};
 	tic();

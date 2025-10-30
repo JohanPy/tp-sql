@@ -73,7 +73,7 @@ worker.onerror = handleError;
 const dbConfig = window.TP_CONFIG || {};
 if (dbConfig.base && dbConfig.base !== '') {
 	// Load the specified database
-	const dbPath = `/assets/db/${dbConfig.base}`;
+	const dbPath = assetPath(`/assets/db/${dbConfig.base}`);
 	fetch(dbPath)
 		.then(response => {
 			if (!response.ok) {

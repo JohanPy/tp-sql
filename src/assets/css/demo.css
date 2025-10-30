@@ -661,7 +661,7 @@ tr:nth-child(even) {
 	border-radius: var(--radius-md);
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 	transition: bottom 0.3s ease;
-	z-index: 1000;
+	z-index: 10001;
 	border-left: 3px solid var(--accent-blue);
 }
 

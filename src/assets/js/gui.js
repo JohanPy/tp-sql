@@ -89,6 +89,9 @@ if (dbConfig.base && dbConfig.base !== '') {
 			console.log(`Database ${dbConfig.base} loaded successfully`);
 			updateStatus('ready', `Base de données ${dbConfig.base} chargée`);
 			
+			// Load database schema for the Schema tab
+			loadDatabaseSchema(dbConfig);
+			
 			// Mettre à jour les métadonnées pour l'autocomplétion après un court délai
 			setTimeout(() => {
 				refreshDatabaseMetadata();
@@ -1399,6 +1402,168 @@ document.addEventListener('keydown', function(e) {
 		closeHistoryModal();
 	}
 });
+
+// Schema loading functions
+function loadDatabaseSchema(dbConfig) {
+	if (!dbConfig || !dbConfig.base) {
+		return;
+	}
+	
+	// Load schema diagram (PNG image)
+	const dbName = dbConfig.base.replace('.db', '');
+	const schemaImagePath = assetPath(`/assets/db/${dbName}.png`);
+	
+	const diagramDiv = document.getElementById('schemaDiagram');
+	if (diagramDiv) {
+		// Try to load the image
+		const img = new Image();
+		img.onload = function() {
+			diagramDiv.innerHTML = `<img src="${schemaImagePath}" alt="Schéma de la base ${dbName}" />`;
+		};
+		img.onerror = function() {
+			diagramDiv.innerHTML = '<p class="schema-placeholder">Aucun diagramme disponible pour cette base de données</p>';
+		};
+		img.src = schemaImagePath;
+	}
+	
+	// Load table structure
+	loadTableStructure();
+}
+
+function loadTableStructure() {
+	// Query to get all tables
+	const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name";
+	
+	// Create a temporary message handler
+	const originalHandler = worker.onmessage;
+	
+	worker.onmessage = function(event) {
+		if (event.data.results && event.data.results.length > 0) {
+			const tables = event.data.results[0].values.map(row => row[0]);
+			
+			// For each table, get its structure
+			loadAllTableDetails(tables);
+		}
+		
+		// Restore original handler
+		worker.onmessage = originalHandler;
+	};
+	
+	worker.postMessage({ action: 'exec', sql: tablesQuery });
+}
+
+function loadAllTableDetails(tables) {
+	if (!tables || tables.length === 0) {
+		const detailsDiv = document.getElementById('schemaDetails');
+		if (detailsDiv) {
+			detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
+		}
+		return;
+	}
+	
+	const detailsDiv = document.getElementById('schemaDetails');
+	if (!detailsDiv) return;
+	
+	detailsDiv.innerHTML = '<p class="schema-placeholder">Chargement des détails des tables...</p>';
+	
+	// Query to get table info including foreign keys
+	const queries = tables.map(table => {
+		return `
+			SELECT 
+				'${table}' as table_name,
+				name as column_name,
+				type as column_type,
+				pk as is_primary_key
+			FROM pragma_table_info('${table}')
+			ORDER BY cid;
+		`;
+	}).join('\n');
+	
+	// Also get foreign keys
+	const fkQueries = tables.map(table => {
+		return `SELECT '${table}' as table_name, * FROM pragma_foreign_key_list('${table}');`;
+	}).join('\n');
+	
+	const combinedQuery = queries + '\n' + fkQueries;
+	
+	const originalHandler = worker.onmessage;
+	
+	worker.onmessage = function(event) {
+		if (event.data.results) {
+			displayTableStructure(tables, event.data.results);
+		}
+		worker.onmessage = originalHandler;
+	};
+	
+	worker.postMessage({ action: 'exec', sql: combinedQuery });
+}
+
+function displayTableStructure(tables, results) {
+	const detailsDiv = document.getElementById('schemaDetails');
+	if (!detailsDiv) return;
+	
+	// Parse results: first half are table structures, second half are foreign keys
+	const numTables = tables.length;
+	const tableStructures = results.slice(0, numTables);
+	const foreignKeyResults = results.slice(numTables);
+	
+	// Build foreign key map
+	const foreignKeys = {};
+	foreignKeyResults.forEach(fkResult => {
+		if (fkResult.values && fkResult.values.length > 0) {
+			fkResult.values.forEach(row => {
+				const tableName = row[0];
+				const fromColumn = row[3]; // 'from' column
+				if (!foreignKeys[tableName]) {
+					foreignKeys[tableName] = new Set();
+				}
+				foreignKeys[tableName].add(fromColumn);
+			});
+		}
+	});
+	
+	// Display each table
+	let html = '';
+	tableStructures.forEach((tableResult, index) => {
+		const tableName = tables[index];
+		const columns = tableResult.values || [];
+		
+		html += `
+			<div class="table-info">
+				<div class="table-name">${tableName}</div>
+				<ul class="columns-list">
+		`;
+		
+		columns.forEach(col => {
+			const colName = col[1];
+			const colType = col[2] || 'TEXT';
+			const isPrimaryKey = col[3] === 1;
+			const isForeignKey = foreignKeys[tableName] && foreignKeys[tableName].has(colName);
+			
+			html += `
+				<li class="column-item">
+					<span class="column-name">${colName}</span>
+					<span class="column-type">${colType}</span>
+			`;
+			
+			if (isPrimaryKey) {
+				html += '<span class="key-badge primary">PK</span>';
+			}
+			if (isForeignKey) {
+				html += '<span class="key-badge foreign">FK</span>';
+			}
+			
+			html += '</li>';
+		});
+		
+		html += `
+				</ul>
+			</div>
+		`;
+	});
+	
+	detailsDiv.innerHTML = html || '<p class="schema-placeholder">Aucune information disponible</p>';
+}
 
 // Initial status
 updateStatus('info', 'Prêt');

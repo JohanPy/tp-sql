@@ -115,11 +115,28 @@
   <!-- Results Area (below the 3-panel layout) -->
   <div class="results-area">
     <div class="results-tabs" id="resultsTabs">
+      <button class="tab schema-tab" data-tab="schemaTab">📊 Schéma</button>
       <button class="tab active" data-tab="tab1">Résultat 1</button>
       <button id="newTabBtn" class="tab">+</button>
     </div>
     <div class="results-panels">
       <div id="error" class="error"></div>
+      <div class="tab-panel" id="schemaTab">
+        <div class="schema-content">
+          <div class="schema-section">
+            <h3>Diagramme de la base de données</h3>
+            <div id="schemaDiagram" class="schema-diagram">
+              <p class="schema-placeholder">Le diagramme s'affichera ici une fois la base chargée</p>
+            </div>
+          </div>
+          <div class="schema-section">
+            <h3>Structure des tables</h3>
+            <div id="schemaDetails" class="schema-details">
+              <p class="schema-placeholder">Les détails des tables s'afficheront ici une fois la base chargée</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="tab-panel active" id="tab1">
         <div class="results-content">Les résultats s'afficheront ici après exécution d'une requête</div>
       </div>

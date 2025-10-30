@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/theme/nord.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="{{ '/assets/css/demo.css' | url }}">
+  <link rel="stylesheet" href="{{ '/assets/css/demo.css' | absUrl }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/codemirror.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/mode/sql/sql.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.1/addon/hint/show-hint.min.js"></script>
@@ -59,7 +59,7 @@
     <nav class="nav-panel" id="navPanel">
       <div class="nav-header">
         <div class="nav-header-content">
-          <a href="/" class="home-link">🏠 Accueil</a>
+          <a href="{{ '/' | absUrl }}" class="home-link">🏠 Accueil</a>
           <button id="toggleNav" class="toggle-nav-btn" title="Plier/Dépiler la navigation">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="15 18 9 12 15 6"></polyline>
@@ -74,7 +74,7 @@
           <ul class="exercise-list">
             {% for exercise in tpExercices %}
             <li>
-              <a href="{{ exercise.url }}" 
+              <a href="{{ exercise.url | absUrl }}" 
                  class="exercise-link {% if page.url == exercise.url %}active{% endif %}">
                 {{ exercise.data.titre or ("Exercice " + exercise.data.exerciceNum) }}
               </a>
@@ -241,10 +241,14 @@
 
   <!-- Métadonnées pour le JavaScript -->
   <script>
+    // Déterminer le basePath (vide en local, "/tp-sql" en production)
+    const basePath = window.location.pathname.includes('/tp-sql/') ? '/tp-sql' : '';
+    
     window.TP_CONFIG = {
       base: "{{ base or '' }}",
       tpNum: {{ tpNum or 0 }},
-      exerciceNum: {{ exerciceNum or 0 }}
+      exerciceNum: {{ exerciceNum or 0 }},
+      basePath: basePath
     };
   </script>
 

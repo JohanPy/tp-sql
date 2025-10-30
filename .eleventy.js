@@ -58,11 +58,12 @@ module.exports = function(eleventyConfig) {
   const isProduction = process.env.ELEVENTY_ENV === 'production';
   const pathPrefix = isProduction ? '/tp-sql' : '';
   
-  // Filtre pour générer les URLs avec le bon pathPrefix
-  eleventyConfig.addFilter("url", (url) => {
+  // Filtre personnalisé pour les URLs relatives
+  eleventyConfig.addFilter("absUrl", (url) => {
     if (!url) return url;
     if (url.startsWith('http')) return url;
-    return pathPrefix + (url.startsWith('/') ? url : '/' + url);
+    const cleanUrl = (url.startsWith('/') ? url : '/' + url);
+    return pathPrefix + cleanUrl;
   });
   
   return {

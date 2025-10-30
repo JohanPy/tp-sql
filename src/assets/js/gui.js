@@ -1,6 +1,14 @@
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
 
+// Récupérer le basePath depuis la configuration
+const basePath = window.TP_CONFIG?.basePath || '';
+
+// Fonction utilitaire pour construire les chemins d'assets
+function assetPath(path) {
+	return basePath + path;
+}
+
 // DOM Elements
 const elements = {
 	execBtn: document.getElementById("execute"),
@@ -58,7 +66,7 @@ const sqlSnippets = {
 };
 
 // Start the worker in which sql.js will run
-const worker = new Worker("/assets/sql.js/worker.sql-wasm.js");
+const worker = new Worker(assetPath("/assets/sql.js/worker.sql-wasm.js"));
 worker.onerror = handleError;
 
 // Open a database - check if we need to load a specific database
@@ -526,7 +534,7 @@ function updateDatabaseMetadata() {
 					
 					const tableName = dbMetadataCache.tables[tableIndex];
 					
-					const columnWorker = new Worker("/assets/sql.js/worker.sql-wasm.js");
+					const columnWorker = new Worker(assetPath("/assets/sql.js/worker.sql-wasm.js"));
 					columnWorker.onmessage = function(colEvent) {
 						if (colEvent.data && colEvent.data.results && colEvent.data.results[0]) {
 							const columnsResult = colEvent.data.results[0];

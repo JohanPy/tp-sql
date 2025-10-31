@@ -1,51 +1,145 @@
 ---
-layout: base.njk
+layout: home.njk
 title: "Accueil - SQL TP"
-intitule: "SQL TP - Travaux Pratiques"
 permalink: "/"
 ---
 
-# 📚 Bienvenue sur la plateforme SQL TP
+<div class="home-grid">
+  <!-- Section Cours SQL -->
+  <div class="home-card home-card-cours">
+    <div class="card-icon">📚</div>
+    <h2>Cours SQL</h2>
+    <p class="card-description">
+      Apprenez les concepts fondamentaux du SQL avec des explications claires et des exemples interactifs que vous pouvez tester en temps réel.
+    </p>
+    
+    <div class="card-features">
+      <div class="feature">
+        <span class="feature-icon">✨</span>
+        <span>Explications détaillées</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">💻</span>
+        <span>Exemples interactifs</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📖</span>
+        <span>6 chapitres progressifs</span>
+      </div>
+    </div>
 
-Cette plateforme vous permet de vous entraîner au SQL directement dans votre navigateur. Chaque exercice charge automatiquement la base de données appropriée.
+    <div class="card-categories">
+      <a href="/cours/interrogation/" class="category-link">
+        <span class="category-icon">🔍</span>
+        <div class="category-info">
+          <strong>Interrogation de données</strong>
+          <small>SELECT, WHERE, JOIN, sous-requêtes...</small>
+        </div>
+      </a>
+      
+      <div class="category-link category-disabled">
+        <span class="category-icon">🔧</span>
+        <div class="category-info">
+          <strong>Création de bases</strong>
+          <small>À venir prochainement</small>
+        </div>
+      </div>
+    </div>
 
-## 🎯 Comment utiliser cette plateforme ?
+    <a href="/cours/" class="card-cta">
+      Accéder aux cours
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
 
-1. **Sélectionnez un TP** dans le menu de navigation à gauche
-2. **Lisez les consignes** affichées au centre
-3. **Écrivez votre requête SQL** dans la console à droite
-4. **Exécutez** votre requête avec le bouton "Exécuter" ou `Ctrl+Enter`
-5. **Consultez les résultats** en bas de la page
+  <!-- Section Travaux Pratiques -->
+  <div class="home-card home-card-tps">
+    <div class="card-icon">🎯</div>
+    <h2>Travaux Pratiques</h2>
+    <p class="card-description">
+      Mettez en pratique vos connaissances avec des exercices progressifs sur des bases de données réelles. Console SQL intégrée et correction automatique.
+    </p>
+    
+    <div class="card-features">
+      <div class="feature">
+        <span class="feature-icon">🗄️</span>
+        <span>Bases de données réelles</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <span>Exécution instantanée</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">📊</span>
+        <span>18 exercices pratiques</span>
+      </div>
+    </div>
 
-## 📖 TPs disponibles
+    <div class="card-categories">
+      <a href="/tps/interrogation/" class="category-link">
+        <span class="category-icon">🔍</span>
+        <div class="category-info">
+          <strong>Interrogation de données</strong>
+          <small>4 TPs • 18 exercices progressifs</small>
+        </div>
+      </a>
+      
+      <div class="category-link category-disabled">
+        <span class="category-icon">🔧</span>
+        <div class="category-info">
+          <strong>Création de bases</strong>
+          <small>À venir prochainement</small>
+        </div>
+      </div>
+    </div>
 
-{% for tpNumber, tpExercices in collections.tpsByNumber %}
-<div class="tp-card">
-  <h3>TP {{ tpNumber }} - {{ tpExercices[0].data.intitule }}</h3>
-  <p><strong>Base de données :</strong> <code>{{ tpExercices[0].data.base }}</code></p>
-  <p><strong>{{ tpExercices.length }} exercices disponibles</strong></p>
-  <ul>
-    {% for exercise in tpExercices %}
-    <li>
-      <a href="{{ exercise.url }}">{{ exercise.data.titre }}</a>
-    </li>
-    {% endfor %}
-  </ul>
+    <a href="/tps/" class="card-cta">
+      Accéder aux TPs
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </div>
 </div>
-{% endfor %}
 
-## 💡 Fonctionnalités
+## 💡 Comment utiliser cette plateforme ?
+
+<div class="info-grid">
+  <div class="info-box">
+    <span class="info-number">1</span>
+    <h3>Choisissez votre parcours</h3>
+    <p>Commencez par les cours pour apprendre ou allez directement aux TPs si vous êtes à l'aise.</p>
+  </div>
+  
+  <div class="info-box">
+    <span class="info-number">2</span>
+    <h3>Suivez la progression</h3>
+    <p>Les chapitres et exercices sont organisés du plus simple au plus complexe.</p>
+  </div>
+  
+  <div class="info-box">
+    <span class="info-number">3</span>
+    <h3>Pratiquez en temps réel</h3>
+    <p>Testez vos requêtes SQL directement dans le navigateur, sans installation.</p>
+  </div>
+  
+  <div class="info-box">
+    <span class="info-number">4</span>
+    <h3>Consultez le schéma</h3>
+    <p>Visualisez la structure des tables pour mieux comprendre les relations entre les données.</p>
+  </div>
+</div>
+
+## � Fonctionnalités
 
 - ✅ **Exécution SQL en temps réel** dans le navigateur (aucune installation requise)
-- ✅ **Bases de données pré-chargées** pour chaque TP
+- ✅ **Bases de données pré-chargées** pour chaque exercice
 - ✅ **Éditeur avec coloration syntaxique** (CodeMirror)
-- ✅ **Historique des requêtes**
-- ✅ **Résultats formatés en tableaux**
-- ✅ **Sauvegarde et chargement de bases de données**
-
-## 🚀 Démarrer maintenant
-
-Choisissez un TP dans le menu de gauche pour commencer !
+- ✅ **Historique des requêtes** pour retrouver vos essais précédents
+- ✅ **Visualisation du schéma** avec clés primaires et étrangères
+- ✅ **Sauvegarde et chargement** de bases de données personnalisées
 
 ---
 

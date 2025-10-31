@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or "SQL TP - Plateforme d'apprentissage SQL" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/assets/css/demo.css' | absUrl }}">
+</head>
+
+<body class="home-page">
+  <header class="home-header">
+    <h1>📚 SQL TP - Plateforme d'apprentissage</h1>
+    <p class="home-subtitle">Apprenez le SQL à votre rythme avec des cours interactifs et des exercices pratiques</p>
+  </header>
+
+  <main class="home-content">
+    {{ content | safe }}
+  </main>
+
+  <footer class="home-footer">
+    <p>Plateforme développée pour l'apprentissage du SQL • Interface basée sur <a href="https://sql.js.org/" target="_blank">SQL.js</a></p>
+  </footer>
+</body>
+</html>

@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 3 : Partie III - Requêtes très avancées"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"

@@ -298,6 +298,15 @@ function handleQueryResults(event, outputElement) {
 	const displayTime = toc("Displaying results");
 	updateQueryTime(executionTime + displayTime);
 	updateStatus('success', `${results.length} ensemble${results.length !== 1 ? 's' : ''} de résultat${results.length !== 1 ? 's' : ''} retourné${results.length !== 1 ? 's' : ''}`);
+	
+	// Vérifier si la requête modifie la structure (CREATE/DROP/ALTER)
+	const sqlText = editor.getValue().toUpperCase().trim();
+	if (sqlText.match(/^(CREATE|DROP|ALTER)\s+(TABLE|INDEX|VIEW)/m)) {
+		console.log('Schema modification detected, refreshing metadata...');
+		setTimeout(() => {
+			refreshDatabaseMetadata();
+		}, 200);
+	}
 }
 
 function displayNoResults(outputElement) {
@@ -434,6 +443,9 @@ var editor = CodeMirror.fromTextArea(elements.commandsElm, {
 	}
 });
 
+// Expose editor globally for clickable-sql.js
+window.editor = editor;
+
 // Configuration de l'autocomplétion automatique intelligente
 let hintTimer = null;
 let lastHintPos = null;
@@ -511,13 +523,23 @@ let dbMetadataCache = {
 	lastUpdate: null
 };
 
+// Flag pour éviter les conflits avec worker.onmessage
+let isUpdatingMetadata = false;
+
 // Fonction pour récupérer les métadonnées de la base
 function updateDatabaseMetadata() {
-	// Utiliser le worker pour récupérer les métadonnées
-	const metadataWorker = worker;
+	if (isUpdatingMetadata) {
+		console.log('Metadata update already in progress, skipping...');
+		return;
+	}
 	
-	// Récupérer la liste des tables
-	metadataWorker.onmessage = function(event) {
+	isUpdatingMetadata = true;
+	
+	// Sauvegarder le handler actuel
+	const originalOnMessage = worker.onmessage;
+	
+	// Phase 1: Récupérer la liste des tables
+	worker.onmessage = function(event) {
 		if (event.data && event.data.results && event.data.results[0]) {
 			const tablesResult = event.data.results[0];
 			
@@ -525,55 +547,13 @@ function updateDatabaseMetadata() {
 				dbMetadataCache.tables = tablesResult.values.map(row => row[0]);
 				dbMetadataCache.columns = {};
 				
-				// Pour chaque table, récupérer les colonnes
-				let tableIndex = 0;
-				
-				function fetchNextTableColumns() {
-					if (tableIndex >= dbMetadataCache.tables.length) {
-						dbMetadataCache.lastUpdate = Date.now();
-						console.log('Database metadata updated:', dbMetadataCache);
-						return;
-					}
-					
-					const tableName = dbMetadataCache.tables[tableIndex];
-					
-					const columnWorker = new Worker(assetPath("/assets/sql.js/worker.sql-wasm.js"));
-					columnWorker.onmessage = function(colEvent) {
-						if (colEvent.data && colEvent.data.results && colEvent.data.results[0]) {
-							const columnsResult = colEvent.data.results[0];
-							if (columnsResult.values) {
-								dbMetadataCache.columns[tableName] = columnsResult.values.map(col => ({
-									name: col[1],
-									type: col[2],
-									notNull: col[3] === 1,
-									defaultValue: col[4],
-									pk: col[5] === 1
-								}));
-							}
-						}
-						tableIndex++;
-						fetchNextTableColumns();
-					};
-					
-					columnWorker.onerror = function() {
-						console.warn(`Could not get columns for table ${tableName}`);
-						tableIndex++;
-						fetchNextTableColumns();
-					};
-					
-					// Cette approche ne fonctionne pas car le worker n'a pas accès à la base
-					// On va plutôt exécuter une seule requête qui récupère tout
-				}
-				
-				// Nouvelle approche : récupérer toutes les colonnes en une seule requête
+				// Phase 2: Récupérer toutes les colonnes en une seule requête
 				const allColumnsQuery = dbMetadataCache.tables.map(tableName => 
-					`SELECT '${tableName}' as table_name, name, type FROM pragma_table_info('${tableName}')`
+					`SELECT '${tableName.replace(/'/g, "''")}' as table_name, name, type FROM pragma_table_info('${tableName.replace(/'/g, "''")}')`
 				).join(' UNION ALL ');
 				
 				if (allColumnsQuery) {
-					const columnsWorkerMsg = worker;
-					const originalOnMessage = worker.onmessage;
-					
+					// Handler pour les colonnes
 					worker.onmessage = function(colEvent) {
 						if (colEvent.data && colEvent.data.results && colEvent.data.results[0]) {
 							const allColumnsResult = colEvent.data.results[0];
@@ -589,30 +569,42 @@ function updateDatabaseMetadata() {
 									
 									dbMetadataCache.columns[tableName].push({
 										name: colName,
-										type: colType,
-										notNull: false,
-										defaultValue: null,
-										pk: false
+										type: colType
 									});
 								});
 							}
 						}
 						
 						dbMetadataCache.lastUpdate = Date.now();
-						console.log('Database metadata updated:', dbMetadataCache);
+						console.log('✓ Database metadata updated:', dbMetadataCache.tables.length, 'tables,', 
+							Object.keys(dbMetadataCache.columns).length, 'columns mapped');
 						
-						// Restaurer le handler original
+						// Restaurer le handler original et libérer le flag
 						worker.onmessage = originalOnMessage;
+						isUpdatingMetadata = false;
 					};
 					
+					// Exécuter la requête pour les colonnes
 					worker.postMessage({ action: 'exec', sql: allColumnsQuery });
+				} else {
+					// Pas de tables, restaurer et libérer
+					worker.onmessage = originalOnMessage;
+					isUpdatingMetadata = false;
+					dbMetadataCache.lastUpdate = Date.now();
+					console.log('✓ Database metadata updated: 0 tables');
 				}
+			} else {
+				// Pas de résultats, restaurer et libérer
+				worker.onmessage = originalOnMessage;
+				isUpdatingMetadata = false;
+				dbMetadataCache.lastUpdate = Date.now();
+				console.log('✓ Database metadata updated: 0 tables');
 			}
 		}
 	};
 	
 	// Lancer la requête pour récupérer les tables
-	metadataWorker.postMessage({ 
+	worker.postMessage({ 
 		action: 'exec', 
 		sql: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name" 
 	});

@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 1 : Jointures"
 intitule: "TP 3 - Jointures et sous-requêtes"
 base: "Comptoir2000.sqlite"

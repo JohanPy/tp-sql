@@ -1,126 +1,129 @@
-# 📚 SQL TP - Plateforme d'entraînement SQL
+# 📚 TP SQL - Plateforme d'apprentissage SQL interactive
 
-Site statique d'entraînement SQL avec exécution en temps réel dans le navigateur.
+Plateforme web interactive pour l'apprentissage du SQL avec cours théoriques et travaux pratiques. Construite avec Eleventy, sql.js et CodeMirror.
 
 ## 🎯 Fonctionnalités
 
-- ✅ **Exécution SQL en temps réel** : Moteur SQLite via WebAssembly (sql.js)
-- ✅ **Interface 3 panneaux** : Navigation | Contenu | Console SQL
-- ✅ **Multi-pages** : Une page par exercice de TP
-- ✅ **Bases de données pré-chargées** : Chargement automatique selon le TP
-- ✅ **Éditeur avec coloration syntaxique** : CodeMirror
-- ✅ **Site statique** : Généré avec Eleventy
+- **Cours théoriques structurés** : 6 chapitres couvrant SELECT, WHERE, ORDER/LIMIT, agrégation, jointures et sous-requêtes
+- **Exercices pratiques** : 18 exercices répartis en 4 TPs avec bases de données intégrées
+- **Console SQL interactive** : Éditeur CodeMirror avec coloration syntaxique et autocomplétion
+- **Schéma de base de données** : Visualisation PNG + structure détaillée des tables avec détection automatique des clés
+- **Navigation intelligente** : Organisation par catégories (Interrogation/Création) avec breadcrumbs contextuels
+- **Système de progression** : Tracking localStorage des chapitres et exercices consultés
+- **Design moderne** : Interface dark theme avec Nord color scheme, responsive jusqu'à 768px
 
-## 🚀 Développement local
+## 🚀 Installation et utilisation
+
+### Prérequis
+- Node.js 16+ et npm
 
 ### Installation
-
 ```bash
 npm install
 ```
 
-### Lancer le serveur de développement
-
+### Développement
 ```bash
-npm start
+npm start  # http://localhost:8080
 ```
 
-Le site sera accessible sur http://localhost:8081
-
-### Build de production
-
+### Build production
 ```bash
-npm run build
+ELEVENTY_ENV=production npm run build
 ```
-
-Les fichiers générés sont dans le dossier `_site/`.
 
 ## 📁 Structure du projet
 
 ```
-tp-sql/
-├── src/                      # Sources Eleventy
-│   ├── _includes/           # Layouts Nunjucks
-│   │   └── base.njk        # Layout principal 3 panneaux
-│   ├── tps/                # Fichiers markdown des TPs
-│   │   ├── tp1-ex1.md
-│   │   ├── tp1-ex2.md
-│   │   └── ...
-│   ├── assets/             # Assets statiques
-│   │   ├── css/
-│   │   │   └── demo.css
-│   │   ├── js/
-│   │   │   └── gui.js
-│   │   └── db/             # Bases de données SQLite
-│   │       ├── Comptoir2000.sqlite
-│   │       ├── Gymnase2000.sqlite
-│   │       └── ...
-│   └── index.md            # Page d'accueil
-├── .eleventy.js            # Configuration Eleventy
-├── convert_tps.py          # Script de conversion des TPs
-├── package.json
-└── _site/                  # Site généré (ignoré par git)
+src/
+├── _includes/          # Templates Nunjucks
+│   ├── base.njk        # Template TPs (3 colonnes)
+│   ├── cours.njk       # Template cours (50/50)
+│   └── home.njk        # Template pages d'index
+├── cours/              # Contenu cours
+│   ├── interrogation/  # 6 chapitres + index
+│   └── creation/       # (À venir)
+├── tps/                # Travaux pratiques
+│   ├── interrogation/  # 18 exercices + index
+│   └── creation/       # Placeholder
+└── index.md            # Homepage
+
+bases/                  # SQLite + PNG diagrammes
+.eleventy.js            # Config Eleventy
 ```
 
-## ✏️ Ajouter un nouveau TP
+## 📝 Ajouter du contenu
 
-### 1. Créer le fichier markdown
+### Nouveau chapitre de cours
 
-Créez un fichier dans `src/tps/` avec le front-matter suivant :
+Créer `src/cours/{category}/NN-titre.md` :
 
-```markdown
+```yaml
+---
+layout: cours.njk
+title: "Chapitre N : Titre"
+category: interrogation
+chapNum: N
+base: Comptoir2000.sqlite
+permalink: "/cours/interrogation/chapitre-N/"
+---
+```
+
+Les blocs SQL sont cliquables pour charger dans l'éditeur.
+
+### Nouvel exercice TP
+
+Créer `src/tps/{category}/tpN-exM.md` :
+
+```yaml
 ---
 layout: base.njk
-title: "Titre de l'exercice"
-intitule: "TP X - Titre du TP"
-base: "NomDeLaBase.sqlite"
-tpNum: X
-exerciceNum: Y
-titre: "Titre de l'exercice"
-permalink: "/tpX/exerciceY/"
+category: interrogation
+intitule: "TP N - Titre général"
+base: "Comptoir2000.sqlite"
+tpNum: N
+exerciceNum: M
+permalink: "/tpN/exerciceM/"
 tags: tp
 ---
-
-# Votre exercice ici
-
-Contenu en markdown...
 ```
 
-### 2. Ajouter la base de données
+## 🏗️ Architecture
 
-Si vous utilisez une nouvelle base, placez le fichier `.sqlite` dans `src/assets/db/`.
+### Collections Eleventy
+- `allTPs` : Tous les TPs triés
+- `tpsByNumber` : TPs groupés par numéro
+- `cours` : Tous les cours
+- `coursByCategory` : Cours par catégorie
+- `tpsByCategory` : TPs par catégorie
 
-### 3. Rebuild
+### Templates
+- **base.njk** : 3 colonnes (nav | contenu | console)
+- **cours.njk** : 50/50 (article | console) avec prev/next
+- **home.njk** : Minimaliste pour index
 
-Le site se régénère automatiquement en mode développement (`npm start`).
+### JavaScript
+- **gui.js** : Console SQL, schema tab, historique
+- **progression.js** : Tracking localStorage
 
-## 🔧 Technologies utilisées
+### CSS
+3600+ lignes avec variables CSS, responsive 1200/1024/768px
 
-- **[Eleventy](https://www.11ty.dev/)** : Générateur de site statique
-- **[Nunjucks](https://mozilla.github.io/nunjucks/)** : Moteur de templates
-- **[sql.js](https://github.com/sql-js/sql.js)** : SQLite compilé en WebAssembly
-- **[CodeMirror](https://codemirror.net/)** : Éditeur de code
-- **[Markdown-it](https://github.com/markdown-it/markdown-it)** : Parser Markdown
+## 📊 Stats
 
-## 📦 Déploiement
+- 30 pages (6 cours + 18 TPs + 6 index)
+- ~15 000 mots de cours
+- ~120 exemples SQL
+- Build: ~0.2s
 
-Le site est automatiquement déployé sur GitHub Pages via GitHub Actions lors d'un push sur la branche `main`.
+## 🐛 Debug
 
-Configuration requise dans les paramètres du dépôt :
-- Settings > Pages > Source : "GitHub Actions"
+**Base non chargée** : Vérifier `base:` dans front matter et fichier dans `bases/`
 
-## 🛠️ Script de conversion
+**Navigation vide** : Vérifier `category:` présent dans front matter
 
-Le script `convert_tps.py` permet de convertir l'ancien format de TPs (multiples fichiers markdown + JSON) en format Eleventy (un fichier markdown avec front-matter par exercice).
+**Prev/Next cassé** : Vérifier `chapNum` est un nombre et même `category`
 
-```bash
-python3 convert_tps.py
-```
+## 📄 License
 
-## 📝 Licence
-
-MIT
-
-## 👤 Auteur
-
-Plateforme d'entraînement SQL pour les étudiants IUT
+(À définir)

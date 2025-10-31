@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 2 : Choix multiple (CASE) et Dates"
 intitule: "TP 2 - Dates et agrégats"
 base: "Comptoir2000.sqlite"

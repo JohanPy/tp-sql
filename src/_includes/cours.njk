@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title or "SQL TP - Interface d'apprentissage SQL" }}</title>
+  <title>{{ title or "SQL - Cours" }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -14,24 +14,22 @@
   <link rel="stylesheet" href="{{ '/assets/css/demo.css' | absUrl }}">
 </head>
 
-<body>
-  <header>
-    <!-- Breadcrumb navigation -->
-    <div class="breadcrumb" style="margin-bottom: 10px;">
+<body class="cours-page">
+  <header class="cours-header">
+    <div class="breadcrumb">
       <a href="{{ '/' | absUrl }}">🏠 Accueil</a>
       <span class="breadcrumb-sep">›</span>
-      <a href="{{ '/tps/' | absUrl }}">🎯 Travaux Pratiques</a>
+      <a href="{{ '/cours/' | absUrl }}">📚 Cours</a>
       {% if category %}
       <span class="breadcrumb-sep">›</span>
-      <a href="{{ ('/tps/' + category + '/') | absUrl }}">{{ categoryTitle or (category | capitalize) }}</a>
+      <a href="{{ ('/cours/' + category + '/') | absUrl }}">{{ categoryTitle or category }}</a>
       {% endif %}
-      {% if tpNum %}
+      {% if chapNum %}
       <span class="breadcrumb-sep">›</span>
-      <span class="breadcrumb-current">TP{{ tpNum }} - Ex{{ exerciceNum }}</span>
+      <span class="breadcrumb-current">Chapitre {{ chapNum }}</span>
       {% endif %}
     </div>
-    
-    <h1>📚 {{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
+    <h1>{{ title or "Cours SQL" }}</h1>
     <div class="toolbar">
       <button id="execute" class="button button-primary">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -66,138 +64,98 @@
     </div>
   </header>
 
-  <div class="main-layout">
-    <!-- Navigation Panel -->
-    <nav class="nav-panel" id="navPanel">
-      <div class="nav-header">
-        <div class="nav-header-content">
-          <a href="{{ '/' | absUrl }}" class="home-link">🏠 Accueil</a>
-          <button id="toggleNav" class="toggle-nav-btn" title="Plier/Dépiler la navigation">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="nav-content">
-        {% if category %}
-        <!-- Navigation contextuelle par catégorie -->
-        {% set categoryTps = collections.tpsByCategory[category] or [] %}
-        
-        {# Group TPs by tpNum #}
-        {% set currentTpNum = null %}
-        {% for tp in categoryTps %}
-          {% if tp.data.tpNum != currentTpNum %}
-            {% if currentTpNum != null %}
-            </ul>
-          </div>
-            {% endif %}
-            {% set currentTpNum = tp.data.tpNum %}
-          <div class="tp-group">
-            <h3 class="tp-title">TP {{ currentTpNum }}</h3>
-            <ul class="exercise-list">
-          {% endif %}
-              <li>
-                <a href="{{ tp.url | absUrl }}" 
-                   class="exercise-link {% if page.url == tp.url %}active{% endif %}">
-                  {{ tp.data.titre or ("Exercice " + tp.data.exerciceNum) }}
-                </a>
-              </li>
-        {% endfor %}
-        {% if currentTpNum != null %}
-            </ul>
-          </div>
-        {% endif %}
-        
-        {% else %}
-        <!-- Fallback: afficher tous les TPs -->
-        {% for tpNumber, tpExercices in collections.tpsByNumber %}
-        <div class="tp-group">
-          <h3 class="tp-title">TP {{ tpNumber }}</h3>
-          <ul class="exercise-list">
-            {% for exercise in tpExercices %}
-            <li>
-              <a href="{{ exercise.url | absUrl }}" 
-                 class="exercise-link {% if page.url == exercise.url %}active{% endif %}">
-                {{ exercise.data.titre or ("Exercice " + exercise.data.exerciceNum) }}
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endfor %}
-        {% endif %}
-      </div>
-    </nav>
-
-    <!-- Content Panel -->
-    <main class="content-panel">
-      <article class="exercise-content">
+  <div class="cours-layout">
+    <!-- Contenu du cours (50%) -->
+    <main class="cours-content">
+      <article class="cours-article">
         {{ content | safe }}
       </article>
+      
+      <!-- Navigation chapitre précédent/suivant -->
+      <nav class="cours-nav">
+        {% set prevCours = collections | getPrevCours(category, chapNum) %}
+        {% set nextCours = collections | getNextCours(category, chapNum) %}
+        {% if prevCours %}
+        <a href="{{ prevCours.url | absUrl }}" class="cours-nav-btn prev-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>
+            <small>Précédent</small>
+            <strong>Chapitre {{ prevCours.data.chapNum }} : {{ prevCours.data.title }}</strong>
+          </span>
+        </a>
+        {% endif %}
+        {% if nextCours %}
+        <a href="{{ nextCours.url | absUrl }}" class="cours-nav-btn next-btn">
+          <span>
+            <small>Suivant</small>
+            <strong>Chapitre {{ nextCours.data.chapNum }} : {{ nextCours.data.title }}</strong>
+          </span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </a>
+        {% endif %}
+      </nav>
     </main>
 
-    <!-- SQL Console Panel -->
-    <aside class="console-panel">
-      <div class="panel-header editor-header">
-        <span>🔧 Console SQL</span>
+    <!-- Console SQL (50%) -->
+    <aside class="cours-console">
+      <div class="panel-header">
+        <span>🔧 Console SQL Interactive</span>
+        <button id="toggleConsole" class="toggle-console-btn" title="Plier/Déplier la console">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
       </div>
       <div class="panel-content">
         <textarea id="commands"></textarea>
-        <div class="query-history" id="queryHistory">
-          <!-- History items will be added here dynamically -->
-        </div>
       </div>
       <div class="status-bar">
         <div class="status-item" id="editorStatus">
           Prêt
         </div>
       </div>
-    </aside>
-  </div>
 
-  <!-- Results Area (below the 3-panel layout) -->
-  <div class="results-area">
-    <div class="results-tabs" id="resultsTabs">
-      <button class="tab schema-tab" data-tab="schemaTab">📊 Schéma</button>
-      <button class="tab active" data-tab="tab1">Résultat 1</button>
-      <button id="newTabBtn" class="tab">+</button>
-    </div>
-    <div class="results-panels">
-      <div id="error" class="error"></div>
-      <div class="tab-panel" id="schemaTab">
-        <div class="schema-content">
-          <div class="schema-section">
-            <div id="schemaDiagram" style="margin-bottom: 15px;">
-              <p class="schema-placeholder">Le diagramme s'affichera ici une fois la base chargée</p>
+      <!-- Résultats -->
+      <div class="console-results">
+        <div class="results-tabs" id="resultsTabs">
+          <button class="tab schema-tab" data-tab="schemaTab">📊 Schéma</button>
+          <button class="tab active" data-tab="tab1">Résultat 1</button>
+          <button id="newTabBtn" class="tab">+</button>
+        </div>
+        <div class="results-panels">
+          <div id="error" class="error"></div>
+          <div class="tab-panel" id="schemaTab">
+            <div class="schema-content">
+              <div class="schema-section">
+                <div id="schemaDiagram" style="margin-bottom: 15px;">
+                  <p class="schema-placeholder">Le diagramme s'affichera ici une fois la base chargée</p>
+                </div>
+                <h3>Structure des tables</h3>
+                <div id="schemaDetails" class="schema-details">
+                  <p class="schema-placeholder">Les détails des tables s'afficheront ici une fois la base chargée</p>
+                </div>
+              </div>
             </div>
-            <h3>Structure des tables</h3>
-            <div id="schemaDetails" class="schema-details">
-              <p class="schema-placeholder">Les détails des tables s'afficheront ici une fois la base chargée</p>
-            </div>
+          </div>
+          <div class="tab-panel active" id="tab1">
+            <div class="results-content">Les résultats s'afficheront ici après exécution d'une requête</div>
+          </div>
+        </div>
+        <div class="status-bar">
+          <div class="status-item" id="resultsStatus">
+            Aucune requête exécutée
+          </div>
+          <div class="status-item" id="queryTime">
+            <!-- Query execution time will be shown here -->
           </div>
         </div>
       </div>
-      <div class="tab-panel active" id="tab1">
-        <div class="results-content">Les résultats s'afficheront ici après exécution d'une requête</div>
-      </div>
-    </div>
-    <div class="status-bar">
-      <div class="status-item" id="resultsStatus">
-        Aucune requête exécutée
-      </div>
-      <div class="status-item" id="queryTime">
-        <!-- Query execution time will be shown here -->
-      </div>
-    </div>
+    </aside>
   </div>
-
-  <footer>
-    <p>
-      Interface basée sur <a href='https://github.com/sql-js/sql.js'>SQL.js</a> |
-      Moteur SQLite compilé en WebAssembly pour l'apprentissage du SQL
-    </p>
-  </footer>
 
   <!-- Modal d'historique -->
   <div id="historyModal" class="modal">
@@ -304,9 +262,8 @@
     
     window.TP_CONFIG = {
       base: "{{ base or '' }}",
-      tpNum: {{ tpNum or 0 }},
-      exerciceNum: {{ exerciceNum or 0 }},
-      basePath: basePath
+      basePath: basePath,
+      pageType: 'cours'
     };
   </script>
 

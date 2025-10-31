@@ -42,9 +42,84 @@ module.exports = function(eleventyConfig) {
     return tps;
   });
   
+  // Créer une collection pour tous les cours
+  eleventyConfig.addCollection("cours", function(collectionApi) {
+    return collectionApi.getFilteredByGlob("src/cours/**/*.md")
+      .sort((a, b) => {
+        // Trier par numéro de chapitre
+        const orderA = a.data.chapNum || 0;
+        const orderB = b.data.chapNum || 0;
+        return orderA - orderB;
+      });
+  });
+  
+  // Créer une collection de cours groupés par catégorie
+  eleventyConfig.addCollection("coursByCategory", function(collectionApi) {
+    const categories = {};
+    collectionApi.getFilteredByGlob("src/cours/**/*.md").forEach(item => {
+      const category = item.data.category || 'autre';
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push(item);
+    });
+    
+    // Trier les cours dans chaque catégorie
+    Object.keys(categories).forEach(key => {
+      categories[key].sort((a, b) => (a.data.chapNum || 0) - (b.data.chapNum || 0));
+    });
+    
+    return categories;
+  });
+  
+  // Créer une collection de TPs groupés par catégorie
+  eleventyConfig.addCollection("tpsByCategory", function(collectionApi) {
+    const categories = {};
+    collectionApi.getFilteredByGlob("src/tps/**/*.md").forEach(item => {
+      const category = item.data.category || 'autre';
+      if (!categories[category]) {
+        categories[category] = [];
+      }
+      categories[category].push(item);
+    });
+    
+    // Trier les TPs dans chaque catégorie
+    Object.keys(categories).forEach(key => {
+      categories[key].sort((a, b) => {
+        const orderA = (a.data.tpNum || 0) * 100 + (a.data.exerciceNum || 0);
+        const orderB = (b.data.tpNum || 0) * 100 + (b.data.exerciceNum || 0);
+        return orderA - orderB;
+      });
+    });
+    
+    return categories;
+  });
+  
   // Filtre pour afficher les dates
   eleventyConfig.addFilter("readableDate", dateObj => {
     return new Date(dateObj).toLocaleDateString('fr-FR');
+  });
+
+  // Filtre pour obtenir le chapitre précédent
+  eleventyConfig.addFilter("getPrevCours", function(collections, category, chapNum) {
+    if (!category || !chapNum) return null;
+    const coursList = collections.coursByCategory && collections.coursByCategory[category] 
+      ? collections.coursByCategory[category] 
+      : [];
+    const currentIndex = coursList.findIndex(c => c.data.chapNum === chapNum);
+    return currentIndex > 0 ? coursList[currentIndex - 1] : null;
+  });
+
+  // Filtre pour obtenir le chapitre suivant
+  eleventyConfig.addFilter("getNextCours", function(collections, category, chapNum) {
+    if (!category || !chapNum) return null;
+    const coursList = collections.coursByCategory && collections.coursByCategory[category] 
+      ? collections.coursByCategory[category] 
+      : [];
+    const currentIndex = coursList.findIndex(c => c.data.chapNum === chapNum);
+    return currentIndex >= 0 && currentIndex < coursList.length - 1 
+      ? coursList[currentIndex + 1] 
+      : null;
   });
   
   // Configuration markdown avec support des attributs

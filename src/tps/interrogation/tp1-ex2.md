@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 1 : Fonctions basiques"
 intitule: "TP 1 - Bien démarrer avec les requêtes SQL"
 base: "Comptoir2000.sqlite"

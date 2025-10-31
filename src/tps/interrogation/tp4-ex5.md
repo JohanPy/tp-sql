@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 4 : Bonus - Défis Gymnase2000"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"

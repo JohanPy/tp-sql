@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 3 : Chaînes de caractères"
 intitule: "TP 1 - Bien démarrer avec les requêtes SQL"
 base: "Comptoir2000.sqlite"

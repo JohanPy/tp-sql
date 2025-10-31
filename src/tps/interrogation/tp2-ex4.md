@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 3 : Bonus - Requêtes avancées"
 intitule: "TP 2 - Dates et agrégats"
 base: "Comptoir2000.sqlite"

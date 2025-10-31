@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 3 : Bonus - Requêtes très complexes"
 intitule: "TP 3 - Jointures et sous-requêtes"
 base: "Comptoir2000.sqlite"

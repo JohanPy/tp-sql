@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"

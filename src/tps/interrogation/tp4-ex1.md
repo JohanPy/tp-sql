@@ -1,5 +1,6 @@
 ---
 layout: base.njk
+category: interrogation
 title: "TP 4 : Gymnase2000 - Complexe et performant"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"

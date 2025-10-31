@@ -112,7 +112,7 @@ h1 {
 }
 
 .nav-panel.collapsed {
-	overflow: visible;
+	overflow: hidden;
 	width: 60px !important;
 	min-width: 60px;
 }
@@ -261,7 +261,10 @@ h1 {
 .content-panel {
 	background: var(--bg-panel-lighter);
 	overflow-y: auto;
+	overflow-x: hidden;
 	padding: 30px 40px;
+	height: 100%;
+	position: relative;
 }
 
 .exercise-content {
@@ -1623,5 +1626,343 @@ body.resizing {
 	background: rgba(220, 38, 38, 0.1);
 	border-color: rgba(220, 38, 38, 0.3);
 	color: #fca5a5;
+}
+
+/* ==========================================
+   BLOCS SQL CLIQUABLES AVEC PRISM.JS
+   ========================================== */
+
+/* Bloc SQL cliquable - Style de base */
+pre.sql-clickable {
+	position: relative;
+	border: 1px solid rgba(79, 190, 255, 0.2);
+	border-radius: var(--radius-md);
+	transition: all 0.2s ease;
+	cursor: pointer;
+	user-select: none;
+}
+
+pre.sql-clickable:hover {
+	border-color: rgba(79, 190, 255, 0.5);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(79, 190, 255, 0.15);
+}
+
+/* Icône de lecture */
+.sql-click-icon {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 24px;
+	height: 24px;
+	background: rgba(79, 190, 255, 0.2);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: var(--accent-blue);
+	opacity: 0.5;
+	transition: all 0.2s ease;
+	pointer-events: none;
+	z-index: 10;
+}
+
+pre.sql-clickable:hover .sql-click-icon {
+	opacity: 1;
+	background: rgba(79, 190, 255, 0.3);
+	transform: scale(1.1);
+}
+
+/* Coloration syntaxique Prism.js - Tokens SQL */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #6a9955;
+	font-style: italic;
+}
+
+.token.punctuation {
+	color: #d4d4d4;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #b5cea8;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #ce9178;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #d4d4d4;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #c586c0;
+}
+
+.token.function,
+.token.class-name {
+	color: #dcdcaa;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #d16969;
+}
+
+/* Tokens SQL spécifiques */
+.token.keyword {
+	color: #569cd6;
+	font-weight: 600;
+}
+
+.token.string {
+	color: #ce9178;
+}
+
+.token.number {
+	color: #b5cea8;
+}
+
+.token.operator {
+	color: #d4d4d4;
+}
+
+.token.punctuation {
+	color: #d4d4d4;
+}
+
+/* Blocs de code pre/code */
+pre[class*="language-"] {
+	background: var(--bg-panel);
+	padding: 16px;
+	border-radius: var(--radius-md);
+	overflow: auto;
+	margin: 16px 0;
+	line-height: 1.5;
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 14px;
+}
+
+code[class*="language-"] {
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--text-primary);
+	text-shadow: none;
+}
+
+/* Inline code (non Prism) */
+:not(pre) > code {
+	background: rgba(79, 190, 255, 0.1);
+	color: var(--accent-blue);
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-family: 'JetBrains Mono', 'Courier New', monospace;
+	font-size: 0.9em;
+}
+
+/* ============================================
+   ONGLET SCHÉMA - DIAGRAMME ET STRUCTURE
+   ============================================ */
+
+.schema-tab {
+	background: rgba(79, 190, 255, 0.05);
+	border-right: 2px solid var(--accent-blue);
+	font-weight: 500;
+}
+
+.schema-content {
+	padding: 0;
+	max-width: 1200px;
+	margin: -15px -15px 0 -15px; /* Compensate parent padding */
+	padding: 15px;
+}
+
+.schema-section {
+	margin-bottom: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	padding: 0;
+	box-shadow: none;
+}
+
+.schema-section h3 {
+	margin: 0 0 15px 0;
+	color: var(--accent-blue);
+	font-size: 1.2em;
+	font-weight: 600;
+	border-bottom: 2px solid rgba(79, 190, 255, 0.3);
+	padding-bottom: 10px;
+}
+
+.schema-diagram {
+	text-align: center;
+	padding: 0;
+	min-height: auto;
+	display: block;
+}
+
+.schema-diagram img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius-sm);
+	box-shadow: var(--shadow-strong);
+	background: white;
+	padding: 10px;
+}
+
+.schema-placeholder {
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+.schema-link {
+	display: inline-flex;
+	align-items: center;
+	padding: 12px 20px;
+	background: rgba(79, 190, 255, 0.1);
+	border: 1px solid var(--accent-blue);
+	border-radius: var(--radius-md);
+	color: var(--accent-blue);
+	text-decoration: none;
+	font-weight: 500;
+	transition: var(--transition-normal);
+}
+
+.schema-link:hover {
+	background: rgba(79, 190, 255, 0.2);
+	border-color: var(--accent-blue);
+	box-shadow: 0 4px 12px rgba(79, 190, 255, 0.2);
+	transform: translateY(-1px);
+}
+
+.schema-link:active {
+	transform: translateY(0);
+}
+
+.schema-link svg {
+	flex-shrink: 0;
+}
+
+.schema-details {
+	display: grid;
+	gap: 0;
+}
+
+.table-info {
+	background: transparent;
+	border: none;
+	border-bottom: 1px solid var(--border-subtle);
+	border-radius: 0;
+	padding: 8px 0;
+	transition: var(--transition-normal);
+}
+
+.table-info:hover {
+	background: rgba(79, 190, 255, 0.02);
+}
+
+.table-name {
+	font-size: 1.1em;
+	font-weight: 600;
+	color: var(--accent-blue);
+	margin-bottom: 10px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.table-name::before {
+	content: "📋";
+	font-size: 1.2em;
+}
+
+.columns-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.column-item {
+	padding: 6px 10px;
+	margin: 3px 0;
+	background: rgba(255, 255, 255, 0.02);
+	border-radius: 4px;
+	font-family: 'Fira Code', 'JetBrains Mono', monospace;
+	font-size: 0.9em;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.column-item:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.column-name {
+	color: var(--text-primary);
+	font-weight: 500;
+}
+
+.column-type {
+	color: var(--text-secondary);
+	font-size: 0.85em;
+}
+
+.key-badge {
+	display: inline-block;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-size: 0.75em;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-left: auto;
+}
+
+.key-badge.primary {
+	background: rgba(79, 190, 255, 0.2);
+	color: var(--accent-blue);
+	border: 1px solid var(--accent-blue);
+}
+
+.key-badge.foreign {
+	background: rgba(255, 193, 7, 0.2);
+	color: #ffc107;
+	border: 1px solid #ffc107;
+}
+
+.table-signature {
+	font-family: 'Fira Code', 'JetBrains Mono', monospace;
+	font-size: 0.9em;
+	line-height: 1.4;
+	color: var(--text-primary);
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0;
+	border-left: none;
 }
 

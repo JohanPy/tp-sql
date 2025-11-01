@@ -8,6 +8,8 @@ exerciceNum: 4
 titre: "Exercice 4 : Dates et Formats"
 permalink: "/tp2/exercice4/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 4 : Dates et Formats

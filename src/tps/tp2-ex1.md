@@ -8,6 +8,8 @@ exerciceNum: 1
 titre: "TP 2 : Agrégats, Choix multiple et Dates"
 permalink: "/tp2/exercice1/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # TP 2 : Agrégats, Choix multiple et Dates

@@ -729,6 +729,26 @@ editor.on('change', function() {
 // Initial status
 updateStatus('info', 'Ready');
 
+// Function to control button visibility based on data attributes
+function updateButtonVisibility() {
+	const showLoadDb = document.body.dataset.showLoadDb === 'true';
+	const showSaveDb = document.body.dataset.showSaveDb === 'true';
+
+	const loadDbButton = document.getElementById('dbfile').parentElement;
+	const saveDbButton = document.getElementById('savedb');
+
+	if (loadDbButton) {
+			loadDbButton.style.display = showLoadDb ? '' : 'none';
+	}
+
+	if (saveDbButton) {
+			saveDbButton.style.display = showSaveDb ? '' : 'none';
+	}
+}
+
+// Call the function on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', updateButtonVisibility);
+
 // Handle window resize
 window.addEventListener('resize', function() {
 	const isMobileView = window.innerWidth <= 768;

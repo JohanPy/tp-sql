@@ -30,6 +30,8 @@ def create_eleventy_page(tp_num, config, md_files_dir):
     intitule = config.get('intitule', f'TP {tp_num}')
     base = config.get('base', '')
     fichiers = config.get('fichiers', [])
+    show_load_db = config.get('show_load_db', False)
+    show_save_db = config.get('show_save_db', False)
     
     pages = []
     
@@ -60,6 +62,8 @@ exerciceNum: {idx}
 titre: "{titre}"
 permalink: "/tp{tp_num}/exercice{idx}/"
 tags: tp
+show_load_db: {str(show_load_db).lower()}
+show_save_db: {str(show_save_db).lower()}
 ---
 
 """

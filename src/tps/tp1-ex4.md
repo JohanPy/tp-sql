@@ -8,6 +8,8 @@ exerciceNum: 4
 titre: "Exercice 3 : Chaînes de caractères"
 permalink: "/tp1/exercice4/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 3 : Chaînes de caractères

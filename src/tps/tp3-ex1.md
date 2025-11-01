@@ -8,6 +8,8 @@ exerciceNum: 1
 titre: "TP 3 : Jointures et Sous-requêtes"
 permalink: "/tp3/exercice1/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # TP 3 : Jointures et Sous-requêtes

@@ -8,6 +8,8 @@ exerciceNum: 2
 titre: "Exercice 1 : Fonctions basiques"
 permalink: "/tp1/exercice2/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 1 : Fonctions basiques
@@ -109,11 +111,11 @@ SELECT * FROM Produit ORDER BY PrixUnit ASC;
 ```
 
 ```sql
-SELECT * FROM Produit WHERE Pays IN ('Suisse', 'Allemagne');
+SELECT * FROM Client WHERE Pays IN ('Suisse', 'Allemagne');
 ```
 
 ```sql
-SELECT DISTINCT Pays FROM Client;
+SELECT DISTINCT Pays FROM Produit;
 ```
 
 ```sql

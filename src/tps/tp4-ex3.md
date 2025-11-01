@@ -8,6 +8,8 @@ exerciceNum: 3
 titre: "Exercice 2 : Partie II - Requêtes intermédiaires"
 permalink: "/tp4/exercice3/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 2 : Partie II - Requêtes intermédiaires

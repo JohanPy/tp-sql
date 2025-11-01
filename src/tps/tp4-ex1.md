@@ -8,6 +8,8 @@ exerciceNum: 1
 titre: "TP 4 : Gymnase2000 - Complexe et performant"
 permalink: "/tp4/exercice1/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # TP 4 : Gymnase2000 - Complexe et performant

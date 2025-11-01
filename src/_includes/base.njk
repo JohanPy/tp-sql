@@ -14,7 +14,10 @@
   <link rel="stylesheet" href="{{ '/assets/css/demo.css' | absUrl }}">
 </head>
 
-<body>
+<body
+  data-show-load-db="{{ show_load_db or false }}"
+  data-show-save-db="{{ show_save_db or false }}"
+>
   <header>
     <h1>📚 {{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
     <div class="toolbar">

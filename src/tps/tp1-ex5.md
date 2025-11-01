@@ -8,6 +8,8 @@ exerciceNum: 5
 titre: "Exercice 4 : Bonus - Requêtes complexes"
 permalink: "/tp1/exercice5/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 4 : Bonus - Requêtes complexes

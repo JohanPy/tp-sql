@@ -8,6 +8,8 @@ exerciceNum: 2
 titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
 permalink: "/tp4/exercice2/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 1 : Partie I - Requêtes de base et jointures simples

@@ -8,6 +8,8 @@ exerciceNum: 1
 titre: "TP1 - Descriptif de la base Comptoir2000"
 permalink: "/tp1/exercice1/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # TP1 - Descriptif de la base Comptoir2000

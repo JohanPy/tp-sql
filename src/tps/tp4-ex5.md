@@ -8,6 +8,8 @@ exerciceNum: 5
 titre: "Exercice 4 : Bonus - Défis Gymnase2000"
 permalink: "/tp4/exercice5/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 4 : Bonus - Défis Gymnase2000

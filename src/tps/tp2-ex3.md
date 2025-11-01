@@ -8,6 +8,8 @@ exerciceNum: 3
 titre: "Exercice 2 : Choix multiple (CASE) et Dates"
 permalink: "/tp2/exercice3/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
 # Exercice 2 : Choix multiple (CASE) et Dates

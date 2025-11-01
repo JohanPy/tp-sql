@@ -20,68 +20,30 @@ show_save_db: false
 
 Affichez le nom du sportif et le nombre de sports.
 
-<details>
-<summary>💡 Indice</summary>
-
-Comptez les entrées dans `Jouer` en groupant par NumLicence, puis joignez avec `Sportif`.
-</details>
-
 **2. Afficher les sports par niveau de compétence des pratiquants**
 
 Pour chaque sport, affichez le nombre de débutants, confirmés, etc.
 
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `GROUP BY NumSport` et `CASE` ou `COUNT()` avec des conditions sur le champ Niveau.
-</details>
-
 **3. Trouver les sportifs qui ont le plus de niveaux différents (polyvalents)**
 
-<details>
-<summary>💡 Indice</summary>
-
-Comptez les niveaux distincts par sportif (en combinant Jouer, Entrainer, Arbitrer), puis trouvez le maximum.
-</details>
+Identifiez les sportifs avec des rôles variés.
 
 **4. Calculer le nombre d'entraîneurs par sport**
 
-<details>
-<summary>💡 Indice</summary>
-
-Comptez les entrées distinctes dans `Entrainer` en groupant par NumSport.
-</details>
+Comptez les entraîneurs disponibles pour chaque discipline.
 
 **5. Afficher les sports avec au moins 5 pratiquants de niveau "Confirmé"**
 
-<details>
-<summary>💡 Indice</summary>
-
-Filtrez `Jouer` où Niveau = "Confirmé", comptez, et appliquez HAVING pour le minimum de 5.
-</details>
+Filtrez les sports populaires auprès des confirmés.
 
 **6. Lister les gymnases avec le nombre total de séances et le nombre de sports distincts offerts**
 
-<details>
-<summary>💡 Indice</summary>
-
-Comptez les séances et les sports distincts en groupant par NumGymnase.
-</details>
+Analysez la diversité de chaque gymnase.
 
 **7. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "101")**
 
 Basez-vous sur les sports de la séance et les sports que le sportif pratique.
 
-<details>
-<summary>💡 Indice</summary>
-
-Trouvez d'abord le sport de la séance, puis les sportifs qui pratiquent ce sport.
-</details>
-
 **8. Calculer le nombre moyen de sportifs par séance pour chaque gymnase**
 
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez le champ `MaxSportifs` dans `Seance` et groupez par gymnase (ou comptez les participants réels).
-</details>
+Évaluez la capacité moyenne utilisée par gymnase.

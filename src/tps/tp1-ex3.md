@@ -20,23 +20,8 @@ show_save_db: false
 
 Pour chaque produit, calculez le total d'unités disponibles (unités en stock + unités en commande).
 
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez l'opérateur `+` pour additionner deux colonnes :
-```sql
-SELECT Nomprod, UnitesStock + UnitesCom AS TotalUnites FROM Produit
-```
-</details>
-
 **2. À partir de la table DetailCommande, calculez pour chaque produit de la commande numéro 10251 : le montant de la remise (exprimé en %) et le montant à payer**
 
 Affichez le montant original, la remise en euros et le montant final.
-
-<details>
-<summary>💡 Indice</summary>
-
-La remise en euros est `(Qte * PrixUnit) * (Remise / 100)`.
-</details>
 
 

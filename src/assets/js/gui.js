@@ -9,6 +9,26 @@ function assetPath(path) {
 	return basePath + path;
 }
 
+// Fonction pour afficher/masquer les boutons de chargement/sauvegarde BDD
+function updateButtonVisibility() {
+	const showLoadDb = document.body.dataset.showLoadDb === 'true';
+	const showSaveDb = document.body.dataset.showSaveDb === 'true';
+
+	// Le bouton de chargement est le parent du input#dbfile
+	const loadDbButton = document.getElementById('dbfile')?.parentElement;
+	const saveDbButton = document.getElementById('savedb');
+
+	if (loadDbButton) {
+		loadDbButton.style.display = showLoadDb ? '' : 'none';
+	}
+	if (saveDbButton) {
+		saveDbButton.style.display = showSaveDb ? '' : 'none';
+	}
+}
+
+// Appeler la fonction au chargement du DOM
+updateButtonVisibility();
+
 // DOM Elements
 const elements = {
 	execBtn: document.getElementById("execute"),

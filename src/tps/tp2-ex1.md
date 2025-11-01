@@ -39,3 +39,25 @@ La base `Comptoir2000` contient les tables principales :
 - Pour les agrégats : n'oubliez pas que `WHERE` filtre par lignes AVANT l'agrégation, `HAVING` qui filtre par groupe APRÈS
 - Pour les dates : `STRFTIME` permet d'extraire année, mois, jour (`'%Y'`, `'%m'`, `'%d'`)
 - Utilisez les indices pour vérifier votre compréhension du concept, pas pour vous éviter de vous tromper, c'est comme ça que l'on apprend.
+
+## Exemples de requêtes SQL de manipulation de dates
+```sql
+-- Extraire l'année d'une date
+SELECT STRFTIME('%Y', DateCom) AS AnneeCommande FROM Commande;
+```
+
+```sql
+-- Compter les commandes par année
+SELECT STRFTIME('%Y', DateCom) AS Annee, COUNT(*) AS NombreCommandes
+FROM Commande
+GROUP BY Annee;
+```
+
+## Exemples de requêtes SQL utilisant Having
+```sql
+-- Compter les produits par catégorie et ne garder que celles avec plus de 10 produits
+SELECT Categorie, COUNT(*) AS NombreProduits
+FROM Produit
+GROUP BY Categorie
+HAVING NombreProduits > 10;
+```

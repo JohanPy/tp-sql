@@ -1,115 +1,35 @@
 ---
 layout: base.njk
-title: "Exercice 3 : Bonus - Requêtes avancées"
-intitule: "TP 2 - Dates et agrégats"
+title: "Exercice 4 : Dates et Formats"
+intitule: "TP 2 - Agrégats et Choix multiple"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 4
-titre: "Exercice 3 : Bonus - Requêtes avancées"
+titre: "Exercice 4 : Dates et Formats"
 permalink: "/tp2/exercice4/"
 tags: tp
 ---
 
-# Exercice 3 : Bonus - Requêtes avancées
+# Exercice 4 : Dates et Formats
 
-## Questions bonus
+## Questions
 
-Combinez agrégats, CASE et dates pour résoudre des problèmes complexes. À faire uniquement si vous avez le temps !
+**1. Afficher l'année et le mois pour toutes les commandes**
 
-**1. Calculer le montant moyen des commandes par trimestre (CASE + dates)**
+Pour chaque commande, montrez la date sous le format "2024-03" (année-mois).
 
-Affichez le trimestre, le nombre de commandes et le montant moyen par trimestre.
+**2. Calculer le délai de livraison en jours**
 
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `STRFTIME('%Y-%m', DateCom)` pour extraire le mois, puis `CASE` pour convertir en trimestre (01-03 = Q1, etc.).
-</details>
-
-**2. Identifier les produits "saisonniers" : vendus intensivement certains mois seulement**
-
-Un produit est saisonnier s'il a une vente 3x supérieure certains mois vs autres mois.
+Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivraison.
 
 <details>
 <summary>💡 Indice</summary>
 
-Calculez la quantité vendue par produit/mois, puis comparez le max et min par produit.
+La fonction `JULIANDAY()` convertit une date en nombre de jours depuis une date de référence.
 </details>
 
-**3. Afficher les commandes "à risque" : délai de livraison > 30 jours OU remise > 15%**
+**3. Lister les commandes passées au cours du mois de décembre 1999**
 
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `CASE` pour calculer le délai avec `JULIANDAY`, puis une condition combinant délai ET remise.
-</details>
-
-**4. Créer un "classement" mensuel des employés par CA généré**
-
-Affichez le mois et les employés en fonction de leurs chiffre d'affaires.
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `ORDER BY` et `GROUP BY` pour établir le classement par mois.
-</details>
-
-**5. Calculer le "cycle de vie" du client : temps écoulé depuis première commande**
-
-Affichez le client, sa première commande et le nombre de jours depuis.
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `MIN(DateCom)` pour trouver la première commande, puis calculez les jours avec `JULIANDAY`.
-</details>
-
-**6. Identifier les produits "à relancer" : peu vendus mais en stock**
-
-Produits avec stock > moyenne ET quantité vendue < 10 unités.
-
-<details>
-<summary>💡 Indice</summary>
-
-Comparez `AVG(UnitesStock)` avec les quantités vendues (SUM des ventes).
-</details>
-
-**7. Calculer la marge potentielle par catégorie (prix de vente vs prix de revient)**
-
-Affichez la catégorie et le pourcentage de marge moyenne.
-
-<details>
-<summary>💡 Indice</summary>
-
-Vous aurez besoin de la table `Fournisseur` ou d'une estimation de prix de revient. Sinon, supposez un coût = 60% du PrixUnit.
-</details>
-
-**8. Afficher les anomalies : commandes sans livraison (DateLivraison NULL) après 60 jours**
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `DateLivraison IS NULL` et calculez les jours avec `JULIANDAY(DATE('now') - JULIANDAY(DateCom))`.
-</details>
-
-**9. Créer une segmentation client : "VIP" (> 5000€), "Régulier" (1000-5000€), "Occasionnel" (< 1000€)**
-
-Affichez la segmentation avec le nombre de clients par catégorie.
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez `CASE` pour classifier, puis `COUNT()` et `GROUP BY` pour compter par segment.
-</details>
-
-**10. Analyser la tendance : comparer le CA des 3 premiers mois vs les 3 derniers mois**
-
-Affichez la croissance ou décroissance en %.
-
-<details>
-<summary>💡 Indice</summary>
-
-Calculez le CA des 3 premiers mois et des 3 derniers mois, puis faites (CA_recent - CA_ancien) / CA_ancien * 100.
-</details>
+Affichez toutes les commandes dont la date est en décembre 1999.
 
 

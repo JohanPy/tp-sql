@@ -485,6 +485,12 @@ input[type="file"] {
 	color: var(--text-secondary);
 }
 
+/* Small status item shown in panel headers (e.g. Console SQL) */
+.panel-header .status-item {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+}
+
 .panel-content {
 	flex: 1;
 	overflow: auto;

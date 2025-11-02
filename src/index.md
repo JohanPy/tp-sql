@@ -5,11 +5,11 @@ intitule: "SQL TP - Travaux Pratiques"
 permalink: "/"
 ---
 
-# 📚 Bienvenue sur la plateforme SQL TP
+# Bienvenue sur la plateforme SQL TP
 
 Cette plateforme vous permet de vous entraîner au SQL directement dans votre navigateur. Chaque exercice charge automatiquement la base de données appropriée.
 
-## 🎯 Comment utiliser cette plateforme ?
+## Comment utiliser cette plateforme ?
 
 1. **Sélectionnez un TP** dans le menu de navigation à gauche
 2. **Lisez les consignes** affichées au centre
@@ -17,7 +17,7 @@ Cette plateforme vous permet de vous entraîner au SQL directement dans votre na
 4. **Exécutez** votre requête avec le bouton "Exécuter" ou `Ctrl+Enter`
 5. **Consultez les résultats** en bas de la page
 
-## 📖 TPs disponibles
+## TPs disponibles
 
 {% for tpNumber, tpExercices in collections.tpsByNumber %}
 <div class="tp-card">
@@ -34,11 +34,11 @@ Cette plateforme vous permet de vous entraîner au SQL directement dans votre na
 </div>
 {% endfor %}
 
-## 💡 Fonctionnalités
+## Fonctionnalités
 
 - ✅ **Exécution SQL en temps réel** dans le navigateur (aucune installation requise)
 - ✅ **Bases de données pré-chargées** pour chaque TP
-- ✅ **Éditeur avec coloration syntaxique** (CodeMirror)
+- ✅ **Éditeur avec coloration syntaxique et autocomplétion**
 - ✅ **Historique des requêtes**
 - ✅ **Résultats formatés en tableaux**
 - ✅ **Sauvegarde et chargement de bases de données**

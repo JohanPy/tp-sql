@@ -19,7 +19,7 @@
   data-show-save-db="{{ show_save_db or false }}"
 >
   <header>
-    <h1>📚 {{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
+    <h1>{{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
     <div class="toolbar">
       <button id="execute" class="button button-primary">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -96,17 +96,13 @@
     <!-- SQL Console Panel -->
     <aside class="console-panel">
       <div class="panel-header editor-header">
-        <span>🔧 Console SQL</span>
+        <span>⌨️ Console SQL</span>
+        <div class="status-item" id="editorStatus">Prêt</div>
       </div>
       <div class="panel-content">
         <textarea id="commands"></textarea>
         <div class="query-history" id="queryHistory">
           <!-- History items will be added here dynamically -->
-        </div>
-      </div>
-      <div class="status-bar">
-        <div class="status-item" id="editorStatus">
-          Prêt
         </div>
       </div>
     </aside>
@@ -115,7 +111,7 @@
   <!-- Results Area (below the 3-panel layout) -->
   <div class="results-area">
     <div class="results-tabs" id="resultsTabs">
-      <button class="tab schema-tab" data-tab="schemaTab">📊 Schéma</button>
+      <button class="tab schema-tab" data-tab="schemaTab">Schéma</button>
       <button class="tab active" data-tab="tab1">Résultat 1</button>
       <button id="newTabBtn" class="tab">+</button>
     </div>

@@ -107,7 +107,7 @@ if (dbConfig.base && dbConfig.base !== '') {
 				buffer: buffer 
 			});
 			console.log(`Database ${dbConfig.base} loaded successfully`);
-			updateStatus('ready', `Base de données ${dbConfig.base} chargée`);
+			updateStatus('ready', `${dbConfig.base.replace(/\.sqlite$/i, '')} chargée`);
 			
 			// Charger le schéma de la base de données
 			setTimeout(() => {
@@ -120,7 +120,7 @@ if (dbConfig.base && dbConfig.base !== '') {
 		})
 		.catch(error => {
 			console.error('Error loading database:', error);
-			updateStatus('error', `Erreur lors du chargement de la base de données: ${error.message}`);
+			updateStatus('error', `Erreur lors du chargement de la BD: ${error.message}`);
 			// Open empty database as fallback
 			worker.postMessage({ action: 'open' });
 		});

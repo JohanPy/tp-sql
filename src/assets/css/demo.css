@@ -843,6 +843,62 @@ tr:nth-child(even) {
 	margin-bottom: 20px;
 }
 
+/* Allow horizontal scrolling for wide result tables */
+.table-wrapper {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.table-wrapper table {
+	width: max-content; /* size to content so parent can scroll */
+	min-width: 100%;
+	border-collapse: collapse;
+}
+
+.table-wrapper table th,
+.table-wrapper table td {
+	white-space: nowrap; /* prevent wrapping so columns remain side-by-side */
+}
+
+/* Top scrollbar above wide tables so users can scroll horizontally without
+   having to reach the bottom of the table. */
+.table-scroll-top {
+	height: 12px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	-webkit-overflow-scrolling: touch;
+	background: transparent;
+}
+.table-scroll-top-inner {
+	height: 1px; /* minimal height; width is driven by JS */
+}
+
+/* Make the top scroller visually unobtrusive while keeping native scrollbar */
+.table-scroll-top::-webkit-scrollbar {
+	height: 8px;
+}
+.table-scroll-top::-webkit-scrollbar-thumb {
+	background: rgba(79,190,255,0.18); /* soft blue tint */
+	border-radius: 6px;
+	box-shadow: 0 0 0 3px rgba(15,25,35,0.35) inset; /* subtle inset to improve contrast */
+}
+.table-scroll-top::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+/* Firefox scrollbar coloring */
+.table-scroll-top {
+	scrollbar-color: rgba(79,190,255,0.25) transparent; /* thumb track */
+}
+
+/* On hover make thumb stronger */
+.table-scroll-top:hover::-webkit-scrollbar-thumb {
+	background: rgba(79,190,255,0.28);
+}
+.table-scroll-top:hover {
+	scrollbar-color: rgba(79,190,255,0.35) transparent;
+}
+
 .table-caption {
 	color: var(--text-secondary);
 	font-size: 0.85em;

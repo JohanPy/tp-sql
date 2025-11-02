@@ -354,8 +354,54 @@ function createResultTable(columns, values) {
 	updateTableMetadata(wrapper, columns.length, values.length);
 	createTableHeader(table, columns);
 	createTableBody(table, columns, values);
+	// Add a top scrollbar synced with the wrapper to allow horizontal scroll without
+	// having to scroll to the bottom of the table.
+	setupTableTopScroller(wrapper, table);
 	
 	return wrapper;
+}
+
+// Create a small top scroller that mirrors the horizontal scroll of the table wrapper.
+function setupTableTopScroller(wrapper, table) {
+	// avoid adding multiple scrollers
+	if (wrapper.querySelector('.table-scroll-top')) return;
+
+	const topScroller = document.createElement('div');
+	topScroller.className = 'table-scroll-top';
+	const topInner = document.createElement('div');
+	topInner.className = 'table-scroll-top-inner';
+	topScroller.appendChild(topInner);
+
+	// insert the scroller above the caption/table
+	const firstChild = wrapper.firstChild;
+	wrapper.insertBefore(topScroller, firstChild);
+
+	// sync scrolling both ways
+	topScroller.addEventListener('scroll', () => {
+		wrapper.scrollLeft = topScroller.scrollLeft;
+	});
+	wrapper.addEventListener('scroll', () => {
+		topScroller.scrollLeft = wrapper.scrollLeft;
+	});
+
+	// update the width of the inner element to match the table's scrollWidth
+	const updateWidth = () => {
+		// table may not be laid out yet; use scrollWidth which reflects content
+		const w = table.scrollWidth || table.offsetWidth || 0;
+		topInner.style.width = w + 'px';
+	};
+
+	// ResizeObserver to update when table size/content changes
+	if (window.ResizeObserver) {
+		const ro = new ResizeObserver(updateWidth);
+		ro.observe(table);
+	} else {
+		// fallback: recalc on window resize
+		window.addEventListener('resize', updateWidth);
+	}
+
+	// initial update on next frame
+	requestAnimationFrame(updateWidth);
 }
 
 function updateTableMetadata(wrapper, columnCount, rowCount) {

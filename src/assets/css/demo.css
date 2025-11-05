@@ -571,20 +571,33 @@ input[type="file"] {
 
 .results-content {
 	flex: 1;
-	overflow: auto;
+	/* Make the panel a flex column so children can size correctly
+	   and an inner element (the table-wrapper) can take the scrolling. */
+	display: flex;
+	flex-direction: column;
 	padding: 15px;
 	background: rgba(15, 25, 35, 0.4);
 	box-shadow: var(--shadow-inset);
+	/* Let the inner .table-wrapper handle scrolling (vertical/horizontal)
+	   to ensure the table can fill the available height. */
+	overflow: visible;
+	min-height: 0; /* allow flex children to shrink and scroll */
 }
 
 .tab-panel {
 	display: none;
 	height: 100%;
 	overflow: visible;
+	/* ensure flex children can size correctly when active */
+	min-height: 0;
 }
 
 .tab-panel.active {
-	display: block;
+	/* Use flex layout so results-content + table-wrapper can size and scroll
+	   independently inside the panel */
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 /* Schema Tab Styles */
@@ -812,7 +825,7 @@ thead {
 	background: rgba(40, 60, 80, 0.6);
 	position: sticky;
 	top: 0;
-	z-index: 1;
+	z-index: 10;
 }
 
 th {
@@ -840,13 +853,13 @@ tr:nth-child(even) {
 }
 
 .table-wrapper {
-	margin-bottom: 20px;
-}
-
-/* Allow horizontal scrolling for wide result tables */
-.table-wrapper {
-	overflow-x: auto;
-	-webkit-overflow-scrolling: touch;
+	 margin-bottom: 0; /* let the wrapper fill the available vertical space */
+	 /* Allow both horizontal and vertical scrolling inside the wrapper so
+		 the table can take the full panel height and scroll internally. */
+	 flex: 1 1 auto;
+	 min-height: 0;
+	 overflow: auto;
+	 -webkit-overflow-scrolling: touch;
 }
 
 .table-wrapper table {
@@ -868,6 +881,7 @@ tr:nth-child(even) {
 	overflow-y: hidden;
 	-webkit-overflow-scrolling: touch;
 	background: transparent;
+	margin-bottom: 6px;
 }
 .table-scroll-top-inner {
 	height: 1px; /* minimal height; width is driven by JS */

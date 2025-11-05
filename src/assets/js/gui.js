@@ -130,8 +130,31 @@ if (dbConfig.base && dbConfig.base !== '') {
 	updateStatus('ready', 'Base de données vide prête');
 }
 
+// Normalize possible legacy nested markup: if a .tab-panel contains a child
+// .results-content (from older templates), move the inner nodes up and remove
+// the extra wrapper so scrolling and selectors behave consistently.
+function normalizeResultsPanels() {
+	const panels = document.querySelectorAll('.results-panels .tab-panel');
+	panels.forEach(panel => {
+		// Find a direct child with class results-content
+		const child = Array.from(panel.children).find(c => c.classList && c.classList.contains('results-content'));
+		if (child) {
+			// Move all child nodes of the inner element into the outer panel
+			while (child.firstChild) {
+				panel.appendChild(child.firstChild);
+			}
+			// Ensure the outer panel has the results-content class
+			panel.classList.add('results-content');
+			// Remove the now-empty wrapper
+			child.remove();
+		}
+	});
+}
+
 // Initialize UI components
 if (elements.panelResizerElm) initResizer();
+// Normalize DOM in case some pages still contain the older nested structure
+normalizeResultsPanels();
 initTabs();
 initKeyboardShortcuts();
 initHistoryModal();
@@ -162,51 +185,41 @@ function initNavToggle() {
 	}
 }
 
-// Error handling
+// Error handling: show errors inside the current results panel
 function handleError(e) {
 	console.log(e);
-	elements.errorElm.style.height = 'auto';
-	elements.errorElm.textContent = e.message;
-	elements.errorElm.style.opacity = 1;
-	
 	updateStatus('error', `Error: ${e.message}`);
-	
 	showErrorInCurrentTab(e.message);
-	
-	setTimeout(() => {
-		elements.errorElm.style.opacity = 0;
-		setTimeout(() => {
-			elements.errorElm.style.height = '0';
-		}, 300);
-	}, 5000);
 }
 
 function showErrorInCurrentTab(errorMessage) {
-	const tabOutputElm = document.querySelector(`#${state.currentTabId} .results-content`);
-	if (!tabOutputElm) return;
-	
-	tabOutputElm.innerHTML = '';
-	
+	// The tab panel itself now has class results-content, so select the panel by id
+	const tabPanel = document.getElementById(state.currentTabId);
+	if (!tabPanel) return;
+
+	tabPanel.innerHTML = '';
+
 	const errorTemplate = document.getElementById('error-template');
 	if (!errorTemplate) return;
-	
+
 	const errorClone = errorTemplate.content.cloneNode(true);
 	const errorDiv = errorClone.querySelector('.error-result');
 	if (!errorDiv) return;
-	
+
 	const errorMessageSpan = document.createElement('span');
 	errorMessageSpan.slot = 'error-message';
 	errorMessageSpan.textContent = `Query failed: ${errorMessage}`;
 	errorDiv.appendChild(errorMessageSpan);
-	
-	tabOutputElm.appendChild(errorDiv);
+
+	tabPanel.appendChild(errorDiv);
 }
 
 function clearError() {
-	if (elements.errorElm) {
-		elements.errorElm.style.height = '0';
-		elements.errorElm.style.opacity = 0;
-	}
+	// remove inline error result in current tab if present
+	const tabPanel = document.getElementById(state.currentTabId);
+	if (!tabPanel) return;
+	const err = tabPanel.querySelector('.error-result');
+	if (err) err.remove();
 }
 
 // Status updates
@@ -267,7 +280,7 @@ function execute(commands, tabId = state.currentTabId) {
 	updateStatus('executing');
 	
 	const tabToUse = determineTabForResults(tabId);
-	const tabOutputElm = document.querySelector(`#${tabToUse} .results-content`);
+	const tabOutputElm = document.getElementById(tabToUse);
 	if (!tabOutputElm) return;
 	
 	showLoadingIndicator(tabOutputElm);
@@ -285,7 +298,7 @@ function determineTabForResults(tabId) {
 	const currentTabPanel = document.getElementById(state.currentTabId);
 	const isInitialUnusedTab = state.currentTabId === 'tab1' && 
 		currentTabPanel && 
-		currentTabPanel.querySelector('.results-content').innerHTML.includes('Les résultats s\'afficheront ici');
+		currentTabPanel.innerHTML.includes('Les résultats s\'afficheront ici');
 	
 	return isInitialUnusedTab ? state.currentTabId : createNewTab();
 }

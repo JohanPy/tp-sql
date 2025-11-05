@@ -116,7 +116,6 @@
       <button id="newTabBtn" class="tab">+</button>
     </div>
     <div class="results-panels">
-      <div id="error" class="error"></div>
       <div class="tab-panel" id="schemaTab">
         <div class="schema-content">
           <div class="schema-section">
@@ -130,9 +129,7 @@
           </div>
         </div>
       </div>
-      <div class="tab-panel active" id="tab1">
-        <div class="results-content">Les résultats s'afficheront ici après exécution d'une requête</div>
-      </div>
+      <div class="tab-panel active results-content" id="tab1">Les résultats s'afficheront ici après exécution d'une requête</div>
     </div>
     <div class="status-bar">
       <div class="status-item" id="resultsStatus">
@@ -199,10 +196,8 @@
   </template>
 
   <template id="tab-panel-template">
-    <div class="tab-panel">
-      <div class="results-content">
-        <slot name="panel-content">Exécutez une requête pour voir les résultats</slot>
-      </div>
+    <div class="tab-panel results-content">
+      <slot name="panel-content">Exécutez une requête pour voir les résultats</slot>
     </div>
   </template>
 

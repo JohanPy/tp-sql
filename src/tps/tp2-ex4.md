@@ -1,18 +1,18 @@
 ---
 layout: base.njk
-title: "Exercice 4 : Dates et Formats"
+title: "Exercice 3 : Dates et Formats"
 intitule: "TP 2 - Agrégats et Choix multiple"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 4
-titre: "Exercice 4 : Dates et Formats"
+titre: "Exercice 3 : Dates et Formats"
 permalink: "/tp2/exercice4/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 4 : Dates et Formats
+# Exercice 3 : Dates et Formats
 
 ## Questions
 
@@ -30,8 +30,8 @@ Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivra
 La fonction `JULIANDAY()` convertit une date en nombre de jours depuis une date de référence.
 </details>
 
-**3. Lister les commandes passées au cours du mois de décembre 1999**
+**3. Lister les commandes passées au cours du mois de décembre 2014**
 
-Affichez toutes les commandes dont la date est en décembre 1999.
+Affichez toutes les commandes dont la date est en décembre 2014.
 
 

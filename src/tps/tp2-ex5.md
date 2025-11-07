@@ -1,29 +1,29 @@
 ---
 layout: base.njk
-title: "Exercice 5 : Bonus - Requêtes avancées"
+title: "Exercice 4 : Bonus - Requêtes avancées"
 intitule: "TP 2 - Agrégats et Choix multiple"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 5
-titre: "Exercice 5 : Bonus - Requêtes avancées"
+titre: "Exercice 4 : Bonus - Requêtes avancées"
 permalink: "/tp2/exercice5/"
 tags: tp
 ---
 
-# Exercice 5 : Bonus - Requêtes avancées
+# Exercice 4 : Bonus - Requêtes avancées
 
 ## Questions bonus
 
 Combinez agrégats, CASE et dates pour résoudre des problèmes complexes. À faire uniquement si vous avez le temps !
 
-**1. Calculer le montant moyen des commandes par trimestre**
+**1. Calculer le montant moyen des commandes par semestre**
 
-Affichez le trimestre, le nombre de commandes et le montant moyen par trimestre.
+Affichez le semestre, le nombre de commandes et le montant moyen par semestre.
 
 <details>
 <summary>💡 Indice</summary>
 
-Vous devez d'abord extraire le mois, puis convertir en trimestre (01-03 = Q1, 04-06 = Q2, etc.).
+Vous devez d'abord extraire le mois, puis convertir en semestre (01-06 = S1, 07-12 = S2).
 </details>
 
 **2. Identifier les produits "saisonniers" : vendus intensivement certains mois seulement**
@@ -34,7 +34,7 @@ Un produit est saisonnier s'il a une vente 3x supérieure certains mois vs autre
 
 Listez les commandes avec un problème potentiel.
 
-**4. Créer un "classement" mensuel des employés par CA généré**
+**4. Créer un "classement" mensuel des employés par nombre de commande**
 
 Affichez le mois et les employés en fonction de leurs chiffre d'affaires.
 

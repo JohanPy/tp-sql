@@ -26,14 +26,14 @@ Ce TP poursuit l'apprentissage SQL sur la base **`Comptoir2000`** en se concentr
 
 La base `Comptoir2000` contient les tables principales :
 
-- **Client** : CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax
-- **Produit** : Refprod, Nomprod, Fournisseur, Categorie, UnitesStock, UnitesCom, PrixUnit, QteParUnit, Indisponible
-- **Commande** : NoCom, CodeCli, DateCom, NoEmp, DateEnv, DateLivraison, ALivAvant, VilleLiv, AdresseLiv, CodePostalLiv, PaysLiv, Frais, Remise
-- **DetailCommande** : NoCom, Refprod, Qte, Remise
-- **Employe** : NoEmp, Nom, Prenom, Fonction, Responsable, DateEmbauche, DateNaissance, Adresse, Ville, Region, CodePostal, Pays, Tel, Notes
-- **Fournisseur** : CodeFournisseur, NomFournisseur, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax
-- **Categorie** : CodeCategorie, NomCategorie, Description
-- **Messager** : CodeMessager, NomMessager
+Categorie (🔑 CodeCateg, NomCateg, Description)
+Client (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
+Commande (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
+DetailCommande (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
+Employe (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
+Fournisseur (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
+Messager (🔑 NoMess, NomMess, Tel)
+Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
 
 ## Conseils pour bien démarrer
 

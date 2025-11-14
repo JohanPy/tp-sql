@@ -35,16 +35,17 @@ Affichez les clients de la base qui n'ont aucune commande enregistrée.
 <details>
 <summary>💡 Indice</summary>
 
-Un LEFT JOIN conserve toutes les lignes de la table de gauche, même sans correspondance.
+Pensez au LEFT JOIN qui conserve toutes les lignes de la table de gauche, même sans correspondance.
 </details>
 
 **5. Afficher tous les produits, qu'ils aient été commandés ou non**
 
 Affichez le nom du produit et le nombre de fois qu'il a été commandé (0 si jamais commandé).
 
-**6. Lister les employés et leurs responsables (auto-jointure)**
+**6. Lister les employés et leurs responsables **
 
 Pour chaque employé, affichez son nom et le nom de son responsable.
+Regardez bien le schéma de la table Employe pour comprendre comment les employés sont liés à leurs responsables.
 
 <details>
 <summary>💡 Indice</summary>

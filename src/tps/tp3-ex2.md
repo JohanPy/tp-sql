@@ -40,17 +40,17 @@ Pensez au LEFT JOIN qui conserve toutes les lignes de la table de gauche, même 
 
 **5. Afficher tous les produits, qu'ils aient été commandés ou non**
 
-Affichez le nom du produit et le nombre de fois qu'il a été commandé (0 si jamais commandé).
+Affichez le nom du produit et le nombre de fois qu'il a été commandé et 0 si le produit n'a jamais été commandé (ne confondez pas avec le champs uniteCom).
 
-**6. Lister les employés et leurs responsables **
+**6. Lister les employés et leurs responsables**
 
 Pour chaque employé, affichez son nom et le nom de son responsable.
 Regardez bien le schéma de la table Employe pour comprendre comment les employés sont liés à leurs responsables.
 
 <details>
 <summary>💡 Indice</summary>
-
-Joignez la table Employe avec elle-même en utilisant deux alias différents.
+Les responsables sont aussi des employés.
+Joignez la table Employe avec elle-même en utilisant deux alias différents. 
 </details>
 
 **7. Afficher les commandes groupées avec client, employé, et informations complètes**

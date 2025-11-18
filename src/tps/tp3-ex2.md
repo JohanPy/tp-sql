@@ -22,7 +22,7 @@ Pour chaque commande, affichez le numéro, la date, le nom du client et le nom d
 
 **2. Lister tous les produits avec leur catégorie et leur fournisseur**
 
-Affichez le nom du produit, la catégorie et le fournisseur.
+Affichez le nom du produit, le nom de la catégorie et le nom du fournisseur.
 
 **3. Afficher les détails de toutes les commandes avec les noms des produits**
 
@@ -30,7 +30,7 @@ Pour chaque ligne de commande, affichez le numéro de commande, la référence d
 
 **4. Trouver les clients qui n'ont jamais commandé (LEFT JOIN)**
 
-Affichez les clients de la base qui n'ont aucune commande enregistrée.
+Affichez les clients (societe) de la base qui n'ont aucune commande enregistrée.
 
 <details>
 <summary>💡 Indice</summary>

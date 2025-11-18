@@ -24,13 +24,13 @@ Affichez la liste complète des sportifs : numéro de licence, nom et prénom.
 
 Affichez le numéro et le nom de tous les sports proposés.
 
-**3. Afficher les sports pratiqués par un sportif donné (ex: NumLicence = "001")**
+**3. Afficher les sports pratiqués par un sportif donné (ex: id 1)**
 
 Trouvez tous les sports qu'un sportif particulier pratique.
 
 **4. Lister les séances d'entraînement programmées**
 
-Affichez le numéro de séance, le sport, le gymnase, et l'horaire.
+Affichez le sport, le gymnase, et l'horaire pour chaque séance programmée.
 
 **5. Afficher les entraîneurs (sportifs qui entraînent) et les sports qu'ils enseignent**
 

@@ -24,41 +24,68 @@ Afficher le nom des sociétés clientes qui ont commandé le produit le plus che
 Trouvez d'abord le produit avec le prix maximum, puis les clients qui ont commandé ce produit.
 </details>
 
-**2. Afficher les employés qui ont traité plus de commandes que la moyenne**
+**2. Afficher les employés qui ont traité au moins 20 commandes**
 
-Comparez le nombre de commandes de chaque employé avec la moyenne.
+Listez les employés ayant géré 20 commandes ou plus.
+
+<details>
+<summary>💡 Indice</summary>
+Utilisez GROUP BY sur NoEmp, puis HAVING pour filtrer ceux avec COUNT(*) >= 20.
+</details>
 
 **3. Lister les produits dont le prix est supérieur au prix moyen de leur catégorie**
 
 Utilisez une sous-requête pour comparer avec la moyenne de la catégorie.
 
+<details>
+<summary>💡 Indice</summary>
+Calculez la moyenne des prix par CodeCateg en sous-requête, puis comparez PrixUnit de chaque produit à la moyenne de sa catégorie.
+</details>
+
 **4. Trouver les clients qui n'ont jamais commandé un produit spécifique (ex: Refprod = "123")**
 
 Utilisez une sous-requête avec NOT IN.
 
-**5. Afficher les commandes avec un montant supérieur au montant moyen**
+<details>
+<summary>💡 Indice</summary>
+Faites une sous-requête pour récupérer tous les CodeCli ayant commandé le produit spécifique, puis utiliser NOT IN pour exclure ces clients.
+</details>
 
-Calculez le montant total par commande et comparez.
-
-**6. Lister les produits commandés par tous les clients (couverture client totale)**
+**5. Lister les produits commandés par tous les clients (couverture client totale)**
 
 Trouvez les produits présents dans toutes les commandes clients.
 
-**7. Afficher le client qui a dépensé le plus d'argent en achats**
+<details>
+<summary>💡 Indice</summary>
+Comptez le nombre de clients distincts ayant commandé chaque produit ; comparez avec le nombre total de clients. Utilisez HAVING COUNT(DISTINCT CodeCli) = (SELECT COUNT(DISTINCT CodeCli) FROM Commande).
+</details>
+
+**6. Afficher le client qui a dépensé le plus d'argent en achats**
 
 Calculez le total par client et trouvez le maximum.
 
-**8. Trouver les produits jamais commandés**
+<details>
+<summary>💡 Indice</summary>
+Calculez SUM(PrixUnit * Qte * (1 - Remise)) par CodeCli, puis trouvez le maximum avec une sous-requête MAX().
+</details>
 
-Alternative avec sous-requête NOT IN.
-
-**9. Afficher les clients ayant une première commande datant de plus de 1 an**
+**7. Afficher les clients ayant une première commande datant de plus de 1 an**
 
 Calculez la date de première commande pour chaque client.
 
-**10. Lister les catégories dont le prix moyen dépasse le prix moyen global**
+<details>
+<summary>💡 Indice</summary>
+Utilisez MIN(DateCom) par CodeCli pour trouver la date la plus ancienne, puis comparez avec la date d'aujourd'hui moins 1 an (DATETIME('now', '-1 year')).
+</details>
+
+**8. Lister les catégories dont le prix moyen dépasse le prix moyen global**
 
 Comparez la moyenne par catégorie avec la moyenne générale.
+
+<details>
+<summary>💡 Indice</summary>
+Calculez AVG(PrixUnit) par CodeCateg ; comparez avec la moyenne générale de tous les produits via une sous-requête (SELECT AVG(PrixUnit) FROM Produit).
+</details>
 
 ## Exemples de requêtes
 

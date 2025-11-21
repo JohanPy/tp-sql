@@ -37,31 +37,11 @@ La base `Gymnase2000` contient :
 
 ### Tables principales
 
-- **Sportif** : NumLicence, NomSportif, PrenomSportif, Adresse, Tel, DateNaissance, Genre, NumGroupe
-- **Sport** : NumSport, NomSport, Description
-- **Gymnase** : NumGymnase, NomGymnase, Adresse, NumTel
-- **Seance** : NumSeance, NumSport, NumGymnase, Horaire, Moniteur, MaxSportifs
-- **Jouer** : NumLicence, NumSport, Niveau, DateDebut
-- **Arbitrer** : NumLicence, NumSport, Niveau
-- **Entrainer** : NumLicence, NumSport, Niveau
 
-### Clés de liaison
-
-- Jouer.NumLicence → Sportif.NumLicence
-- Jouer.NumSport → Sport.NumSport
-- Arbitrer.NumLicence → Sportif.NumLicence
-- Arbitrer.NumSport → Sport.NumSport
-- Entrainer.NumLicence → Sportif.NumLicence
-- Entrainer.NumSport → Sport.NumSport
-- Seance.NumSport → Sport.NumSport
-- Seance.NumGymnase → Gymnase.NumGymnase
-
-## Conseils pour bien démarrer
-
-- **Changement de contexte** : Gymnase2000 est très différente de Comptoir2000. Les noms de tables et de colonnes sont nouveaux
-- **Vérifiez les clés** : Avant chaque jointure, vérifiez que vous avez la bonne clé étrangère
-- **Pensez au métier** : Un sportif peut jouer plusieurs sports, un entraîneur peut entraîner plusieurs sports
-- **Niveaux** : Les colonnes "Niveau" représentent les compétences (débutant, confirmé, expert, etc.)
-- **Séances** : Les séances sont des sessions programmées, différentes d'une relation directe
-- Les indices vous aident à comprendre le concept, pas à copier la réponse
-
+**Arbitrer** (🔑🔗 IdSportif, 🔑🔗 IdSport)
+**Entrainer** (🔑🔗 IdSportifEntraineur, 🔑🔗 IdSport)
+**Gymnases** (🔑 IdGymnase, NomGymnase, Adresse, Ville, Surface)
+**Jouer** (🔑🔗 IdSportif, 🔑🔗 IdSport)
+**Seances** (🔑🔗 IdGymnase, 🔑🔗 IdSport, 🔑🔗 IdSportifEntraineur, 🔑 Jour, 🔑 Horaire, Duree)
+**Sportifs** (🔑 IdSportif, Nom, Prenom, Sexe, Age, IdSportifConseiller)
+**Sports** (🔑 IdSport, Libelle)

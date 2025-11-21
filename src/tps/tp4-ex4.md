@@ -14,60 +14,62 @@ show_save_db: false
 
 # Exercice 3 : Partie III - Requêtes très avancées
 
-## Questions (14 questions)
+## Questions (12 questions)
 
 **1. Créer un classement des sportifs par polyvalence (nombre total de rôles/activités)**
 
 Affichez le nom du sportif et le nombre total d'activités (joueur + entraîneur + arbitre, avec les doublons).
 
-**2. Trouver les "clusters" : groupes de sportifs pratiquant exactement les mêmes sports**
+**2. Trouver les sportifs qui jouent un sport arbitré par leur propre conseiller**
 
-Quels sportifs pratiquent la même combinaison de sports ?
+Combinez les informations de jeu, de conseil et d'arbitrage.
 
-**3. Analyser la "couverture pédagogique" : pour chaque sport, afficher les niveaux représentés**
+**3. Quel est le gymnase le plus occupé ? (Somme des durées des séances la plus élevée)**
 
-Évaluez la diversité des niveaux disponibles.
+Affichez le nom du gymnase et la durée totale.
 
-**4. Identifier les "manques" : sports sans entraîneurs ou sans arbitres**
+<details>
+<summary>💡 Indice</summary>
+Utilisez un tri et une limite pour trouver le maximum.
+</details>
 
-Trouvez les lacunes dans l'encadrement sportif.
+**4. Identifier les "Super-Sportifs" : à la fois Joueur, Arbitre et Entraîneur**
 
-**5. Créer une "matrice de compatibilité" : pour chaque paire entraîneur-sportif, vérifier la compatibilité**
+Peu importe le sport, ils doivent avoir les trois rôles.
 
-Vérifiez si l'entraîneur entraîne un sport que le sportif pratique.
+**5. Identifier les sports "fantômes" : pas de joueurs, pas d'arbitres, pas de séances**
 
-**6. Calculer la "densité d'activité" par gymnase : ratio (séances) / (capacité totale)**
+Trouvez les sports qui existent dans la base mais ne sont utilisés nulle part.
 
-Analysez l'utilisation des installations.
+**6. Trouver les sportifs ayant le même nom de famille mais des prénoms différents**
 
-**7. Trouver les sportifs "sur-engagés" : pratiquant 3+ sports ET entraînant 2+ sports ET arbitrant au moins 1**
+Détectez les potentielles familles de sportifs.
 
-Identifiez les sportifs très actifs.
+**7. Trouver les gymnases qui ont des séances le Lundi et le Mercredi, mais PAS le Mardi**
 
-**8. Analyser les "chaînes d'influence" : A entraîne B qui entraîne C (sur le même sport)**
+Analysez les "trous" dans l'emploi du temps des gymnases.
 
-Tracez les relations transitives d'entraînement.
+**8. Trouver les paires de sportifs du même âge**
 
-**9. Créer un "profil complet" pour chaque sportif : tous les rôles, sports, niveaux, et seances disponibles**
+Affichez les deux noms et l'âge.
 
-Consolidez toutes les informations d'un sportif.
+<details>
+<summary>💡 Indice</summary>
+Utilisez une auto-jointure avec une condition d'inégalité sur les IDs pour éviter les doublons (A-B et B-A).
+</details>
 
-**10. Calculer la "stabilité" des niveaux : ratio (nombre de confirmés) / (nombre total de pratiquants) par sport**
+**9. Le sport le plus pratiqué (en nombre de joueurs) pour chaque gymnase**
 
-Évaluez la maturité de chaque discipline.
+Affichez le gymnase, le sport et le nombre de joueurs.
 
-**11. Identifier les sportifs "isolés" : ne pratiquant aucun sport disponible dans les séances programmées**
+**10. Les sportifs qui ont un conseiller, mais qui ne pratiquent aucun des sports de ce conseiller**
 
-Trouvez les sportifs sans séances compatibles.
+Affichez le nom du sportif et le nom du conseiller.
 
-**12. Analyser les "déficits de capacité" : seances où le nombre de pratiquants potentiels dépasse MaxSportifs**
+**11. Les gymnases qui accueillent au moins 3 sports différents le même jour**
 
-Identifiez les surcharges potentielles.
+Affichez le gymnase et le jour concerné.
 
-**13. Créer une "recommandation de doublons" : sportifs avec nom/prénom similaires qui pourraient être la même personne**
+**12. Moyenne d'âge des sportifs par sport, uniquement pour les sports ayant plus de 5 pratiquants**
 
-Détectez les entrées potentiellement dupliquées.
-
-**14. Calculer la "distance sociale" : combien de degrés de séparation entre deux sportifs via l'entraînement/arbitrage?**
-
-Exemple : A est entraîné par B, B entraîne C, donc distance(A,C) = 2.
+Affichez le sport et la moyenne d'âge.

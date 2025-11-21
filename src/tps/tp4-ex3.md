@@ -14,36 +14,50 @@ show_save_db: false
 
 # Exercice 2 : Partie II - Requêtes intermédiaires
 
-## Questions (8 questions)
+## Questions (9 questions)
 
 **1. Calculer le nombre de sports pratiqués par chaque sportif**
 
 Affichez le nom du sportif et le nombre de sports.
 
-**2. Afficher les sports par niveau de compétence des pratiquants**
+**2. Afficher le nom des sportifs et le nom de leur conseiller**
 
-Pour chaque sport, affichez le nombre de débutants, confirmés, etc.
+Affichez le nom du sportif et le nom de son conseiller.
 
-**3. Trouver les sportifs qui ont le plus de niveaux différents (polyvalents)**
+<details>
+<summary>💡 Indice</summary>
+Utilisez une auto-jointure sur la table Sportifs.
+</details>
 
-Identifiez les sportifs avec des rôles variés.
-
-**4. Calculer le nombre d'entraîneurs par sport**
+**3. Calculer le nombre d'entraîneurs par sport**
 
 Comptez les entraîneurs disponibles pour chaque discipline.
 
-**5. Afficher les sports avec au moins 5 pratiquants de niveau "Confirmé"**
+**4. Lister les gymnases avec le nombre total de séances et le nombre de sports distincts offerts**
 
-Filtrez les sports populaires auprès des confirmés.
+Analysez le gymnase, le nombre de séances programmées et le nombre de sports différents proposés.
 
-**6. Lister les gymnases avec le nombre total de séances et le nombre de sports distincts offerts**
-
-Analysez la diversité de chaque gymnase.
-
-**7. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "101")**
+**5. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "10")**
 
 Basez-vous sur les sports de la séance et les sports que le sportif pratique.
 
-**8. Calculer le nombre moyen de sportifs par séance pour chaque gymnase**
+**6. Calculer la durée moyenne des séances par sport**
 
-Évaluez la capacité moyenne utilisée par gymnase.
+Affichez le sport et la durée moyenne en minutes.
+
+**7. Trouver les sportifs qui ne pratiquent aucun sport**
+
+Identifiez les sportifs absents de la table Jouer.
+
+**8. Pour chaque gymnase, compter le nombre de séances par jour de la semaine**
+
+Affichez le nom du gymnase, le jour, et le nombre de séances.
+
+**9. Lister les sportifs en indiquant s'ils sont majeurs ou mineurs (Age >= 18)**
+
+Affichez le nom, l'âge et une colonne "Statut" ("Majeur" ou "Mineur").
+
+<details>
+<summary>💡 Indice</summary>
+Utilisez une structure conditionnelle (CASE) pour créer une nouvelle colonne "Statut".
+</details>

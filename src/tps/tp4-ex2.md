@@ -18,7 +18,7 @@ show_save_db: false
 
 **1. Afficher tous les sportifs du gymnase**
 
-Affichez la liste complète des sportifs : numéro de licence, nom et prénom.
+Affichez la liste complète des sportifs : numéro de licence (idsportif), nom et prénom.
 
 **2. Lister tous les sports disponibles**
 
@@ -64,13 +64,19 @@ Comptez les activités par gymnase.
 
 Trouvez les entraîneurs-pratiquants.
 
-**13. Afficher tous les sportifs et indiquer s'ils sont entraîneurs, arbitres, ou joueurs (ou combinaison)**
+<details>
+<summary>💡 Indice</summary>
+les id_sportif_entraineur sont des id_sportifs qui ont un rôle d'entraîneur. 
+</details>
 
-Utilisez des colonnes pour indiquer le rôle.
+**13. Afficher les sportifs âgés de 20 à 30 ans**
+
+Filtrez les sportifs sur leur âge.
 
 **14. Trouver les paires (entraîneur, sportif) où l'entraîneur entraîne un sport que le sportif pratique**
 
 Identifiez les relations entraîneur-apprenant potentielles.
+
 
 **15. Afficher les sports sans séances programmées**
 

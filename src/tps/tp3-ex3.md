@@ -28,10 +28,6 @@ Trouvez d'abord le produit avec le prix maximum, puis les clients qui ont comman
 
 Listez les employés ayant géré 20 commandes ou plus.
 
-<details>
-<summary>💡 Indice</summary>
-Utilisez GROUP BY sur NoEmp, puis HAVING pour filtrer ceux avec COUNT(*) >= 20.
-</details>
 
 **3. Lister les produits dont le prix est supérieur au prix moyen de leur catégorie**
 
@@ -46,10 +42,6 @@ Calculez la moyenne des prix par CodeCateg en sous-requête, puis comparez PrixU
 
 Utilisez une sous-requête avec NOT IN.
 
-<details>
-<summary>💡 Indice</summary>
-Faites une sous-requête pour récupérer tous les CodeCli ayant commandé le produit spécifique, puis utiliser NOT IN pour exclure ces clients.
-</details>
 
 **5. Lister les produits commandés par tous les clients (couverture client totale)**
 
@@ -73,10 +65,6 @@ Calculez SUM(PrixUnit * Qte * (1 - Remise)) par CodeCli, puis trouvez le maximum
 
 Calculez la date de première commande pour chaque client.
 
-<details>
-<summary>💡 Indice</summary>
-Utilisez MIN(DateCom) par CodeCli pour trouver la date la plus ancienne, puis comparez avec la date d'aujourd'hui moins 1 an (DATETIME('now', '-1 year')).
-</details>
 
 **8. Lister les catégories dont le prix moyen dépasse le prix moyen global**
 

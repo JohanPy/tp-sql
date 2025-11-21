@@ -14,47 +14,54 @@ show_save_db: false
 
 # Exercice 4 : Bonus - Défis Gymnase2000
 
-## Questions bonus
+## Questions bonus (8 questions)
 
 Combinez tous les concepts pour résoudre des problèmes complexes sur Gymnase2000. À faire uniquement si vous avez le temps !
 
-**1. Créer une "hiérarchie de compétence" : lister qui peut enseigner à qui**
+**1. Le "Grand Chelem" : Sportifs ayant les 4 casquettes**
 
-Affichez les paires (entraîneur, apprenant) si l'entraîneur a un niveau supérieur au apprenant dans un sport.
+Trouvez les sportifs qui sont à la fois : Joueur, Entraîneur, Arbitre ET Conseiller (ils conseillent quelqu'un).
 
-**2. Identifier les "super-athlètes" : sportifs ayant tous les niveaux dans au moins un sport**
+<details>
+<summary>💡 Indice</summary>
+Utilisez `INTERSECT` ou des jointures multiples (`INNER JOIN`). Pour "Conseiller", vérifiez si leur ID apparaît dans la colonne `IdSportifConseiller` de la table `Sportifs`.
+</details>
 
-Trouvez les sportifs maîtrisant complètement une discipline.
+**2. Les "Intrus" : Entraîneurs qui animent une séance d'un sport qu'ils ne pratiquent pas**
 
-**3. Analyser la "santé" du gymnase : quelle capacité reste disponible par jour?**
+Identifiez les entraîneurs qui donnent une séance (table `Seances`) pour un sport qu'ils ne sont pas censés jouer (table `Jouer`).
 
-Calculez la somme des MaxSportifs par jour, comparez avec les inscriptions réelles.
+**3. La "Division" : Trouver les sportifs qui pratiquent TOUS les sports**
 
-**4. Détecter les "singletons" : sportifs de jour et entraîneurs de nuit (ou vice-versa)**
+C'est le problème de la division relationnelle : quels sportifs ont une relation avec la totalité des éléments de la table Sports ?
 
-Identifiez les conflits d'horaires.
+<details>
+<summary>💡 Indice</summary>
+Comparez le nombre de sports distincts pratiqués par le sportif avec le nombre total de sports existants (`COUNT`).
+</details>
 
-**5. Créer une "force de frappe" : pour chaque sport, évaluer le ratio entraîneurs/participants**
+**4. L' "Ubiquité" : Détecter les conflits d'horaire des entraîneurs**
 
-Évaluez l'encadrement disponible par sport.
+Trouvez les entraîneurs qui ont deux séances programmées le même jour à la même heure.
 
-**6. Identifier les "apprentissages croisés" : sportifs entraînés par un peer (de même niveau) plutôt que par un supérieur**
+<details>
+<summary>💡 Indice</summary>
+Faites une auto-jointure sur la table `Seances` pour trouver deux lignes différentes avec le même entraîneur, le même jour et le même horaire.
+</details>
 
-Trouvez les situations d'entraînement atypiques.
+**5. La "Chaîne de conseil" : Afficher les trios hiérarchiques**
 
-**7. Analyser les "trous" : quelles séances ont une participation très faible?**
+Affichez le nom du "Grand-Conseiller", du "Conseiller" et du "Conseillé" (A conseille B qui conseille C).
 
-Affichez les séances avec moins de 20% de leur capacité utilisée.
+**6. La "Densité" : Classement des gymnases par occupation au m²**
 
-**8. Créer un "tournoi imaginaire" : équipes par niveau + sport + gymnase pour favoriser les matchs équitables**
+Calculez le nombre de séances par unité de surface pour chaque gymnase.
 
-Groupez les sportifs pour des compétitions équilibrées.
+**7. Les "Sports Orphelins" : Sports avec joueurs mais sans séances**
 
-**9. Identifier les "maîtres": sportifs entraînant le plus de pairs (transitifs) dans la même discipline**
+Quels sports ont des pratiquants inscrits (table `Jouer`) mais n'ont aucune séance programmée dans aucun gymnase ?
 
-Utilisez une transitivité d'entraînement (graphe d'influence).
+**8. L' "Exclusivité" : Les sports gérés par un seul entraîneur**
 
-**10. Analyser les "spécialisations cachées" : sportifs pratiquant plusieurs sports mais excelle dans un seul**
-
-Quelqu'un qui joue 5 sports mais arbitre et entraîne seulement 1 = spécialiste caché.
+Trouvez les sports pour lesquels il n'y a qu'un seul entraîneur distinct qui anime des séances (sur l'ensemble de tous les gymnases).
 

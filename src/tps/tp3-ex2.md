@@ -69,3 +69,38 @@ Affichez le numéro de commande, la date de commande, la date de livraison et le
 
 Affichez pour chaque commande : Societe, DateCom, NoCom, Nomprod, Qte, Remise, montant ligne.
 
+## Rappel de cours
+
+### Jointure Interne (INNER JOIN)
+
+Ne retourne que les lignes qui ont une correspondance dans les deux tables.
+
+```sql
+-- Clients ayant passé au moins une commande
+SELECT Client.Societe, Commande.DateCom
+FROM Client
+INNER JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+```
+
+### Jointure Externe (LEFT JOIN)
+
+Retourne toutes les lignes de la table de gauche, même s'il n'y a pas de correspondance à droite (les colonnes de droite seront NULL).
+
+```sql
+-- Tous les clients, avec leurs commandes s'ils en ont
+SELECT Client.Societe, Commande.NoCom
+FROM Client
+LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+```
+
+### Auto-jointure (Self-Join)
+
+Joindre une table avec elle-même. Utile pour les hiérarchies (Employé -> Chef).
+
+```sql
+-- Employés et leur responsable
+SELECT E.Nom AS Employe, Chef.Nom AS Responsable
+FROM Employe E
+LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
+```
+

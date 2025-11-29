@@ -48,3 +48,46 @@ Trouvez les quantités extrêmes dans la table DetailCommande.
 
 Filtrez les produits peu vendus.
 
+## Rappel de cours
+
+### Fonctions d'agrégation
+
+Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
+
+```sql
+-- Compter le nombre de lignes
+SELECT COUNT(*) FROM Client;
+
+-- Calculer la somme
+SELECT SUM(PrixUnit) FROM Produit;
+
+-- Calculer la moyenne
+SELECT AVG(PrixUnit) FROM Produit;
+
+-- Trouver le minimum et le maximum
+SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
+```
+
+### Regroupement (GROUP BY)
+
+Permet de grouper les résultats selon une ou plusieurs colonnes.
+
+```sql
+-- Compter le nombre de produits par fournisseur
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour;
+```
+
+### Filtrage sur les groupes (HAVING)
+
+`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
+
+```sql
+-- Fournisseurs ayant plus de 5 produits
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour 
+HAVING COUNT(*) > 5;
+```
+

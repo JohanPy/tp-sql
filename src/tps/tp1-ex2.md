@@ -74,14 +74,47 @@ Affichez le nom et le prix de ces produits.
 Attention à la priorité des opérateurs ! Utilisez des parenthèses pour grouper les conditions OR.
 </details>
 
-## Exemples de requêtes SQL
+## Rappel de cours
+
+### Sélection et Tri
 
 ```sql
--- Exemple de tri
-SELECT * FROM Produit ORDER BY PrixUnit ASC;
+-- Sélectionner toutes les colonnes
+SELECT * FROM Table;
+
+-- Sélectionner des colonnes spécifiques
+SELECT Colonne1, Colonne2 FROM Table;
+
+-- Trier les résultats (ASC pour croissant, DESC pour décroissant)
+SELECT * FROM Table ORDER BY Colonne1 ASC;
 ```
 
+### Filtrage
+
 ```sql
--- Exemple d'utilisation de IN
-SELECT * FROM Client WHERE Pays IN ('Suisse', 'Allemagne');
+-- Filtrer avec une condition simple
+SELECT * FROM Table WHERE Colonne1 = 'Valeur';
+
+-- Filtrer avec plusieurs valeurs (IN)
+SELECT * FROM Table WHERE Colonne1 IN ('Val1', 'Val2');
+
+-- Recherche partielle (LIKE)
+-- % remplace n'importe quelle suite de caractères
+SELECT * FROM Table WHERE Colonne1 LIKE '%texte%';
+
+-- Conditions multiples (AND / OR)
+SELECT * FROM Table WHERE Colonne1 = 'A' AND Colonne2 > 10;
+```
+
+### Autres fonctions
+
+```sql
+-- Supprimer les doublons
+SELECT DISTINCT Colonne1 FROM Table;
+
+-- Limiter le nombre de résultats
+SELECT * FROM Table LIMIT 5;
+
+-- Convertir en majuscules
+SELECT UPPER(Colonne1) FROM Table;
 ```

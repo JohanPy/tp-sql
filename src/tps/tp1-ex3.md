@@ -24,4 +24,29 @@ Pour chaque produit, calculez le total d'unités disponibles (unités en stock +
 
 Affichez le montant original, la remise en euros et le montant final.
 
+## Rappel de cours
+
+### Opérateurs arithmétiques
+
+Vous pouvez effectuer des calculs directement dans le SELECT :
+
+- Addition : `+`
+- Soustraction : `-`
+- Multiplication : `*`
+- Division : `/`
+
+```sql
+-- Calculer un prix total
+SELECT PrixUnit * Qte FROM DetailCommande;
+```
+
+### Alias de colonnes
+
+Pour renommer une colonne ou le résultat d'un calcul, utilisez `AS`.
+
+```sql
+-- Renommer une colonne dans le résultat
+SELECT PrixUnit * Qte AS MontantTotal FROM DetailCommande;
+```
+
 

@@ -62,3 +62,23 @@ Affichez la segmentation avec le nombre de clients par catégorie.
 
 Affichez la croissance ou décroissance en %.
 
+## Rappel de cours
+
+### Combinaison de concepts
+
+Pour les requêtes complexes, vous devrez souvent combiner `JOIN`, `GROUP BY`, `HAVING` et `CASE`.
+
+```sql
+-- Exemple complexe : CA par année avec classification
+SELECT 
+    STRFTIME('%Y', DateCom) AS Annee,
+    SUM(PrixUnit * Qte) AS CA,
+    CASE 
+        WHEN SUM(PrixUnit * Qte) > 100000 THEN 'Excellent'
+        ELSE 'Normal'
+    END AS Performance
+FROM Commande
+JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom
+GROUP BY Annee;
+```
+

@@ -90,3 +90,26 @@ Trouvez les produits souvent achetés ensemble.
 Pour chaque paire de produits, comptez le nombre de commandes où les deux apparaissent et divisez par le nombre total de commandes contenant l'un d'eux (ou par total général selon la définition) ; une auto-jointure sur DetailCommande par NoCom et Refprod permet d'obtenir les paires.
 </details>
 
+## Rappel de cours
+
+### Stratégie pour requêtes complexes
+
+1. **Décomposer le problème** : Ne cherchez pas à tout écrire d'un coup.
+2. **Commencer par le "FROM"** : Quelles tables contiennent les données ? Comment sont-elles liées ?
+3. **Filtrer (WHERE)** : Quelles lignes garder ?
+4. **Grouper (GROUP BY)** : Quel est le niveau de détail (par client, par mois...) ?
+5. **Filtrer les groupes (HAVING)** : Conditions sur les agrégats ?
+6. **Trier (ORDER BY)** : Ordre final ?
+
+### Exemple de structure complexe
+
+```sql
+SELECT C.Societe, COUNT(O.NoCom) AS NbCommandes
+FROM Client C
+LEFT JOIN Commande O ON C.CodeCli = O.CodeCli
+WHERE C.Pays = 'France'
+GROUP BY C.Societe
+HAVING COUNT(O.NoCom) > 10
+ORDER BY NbCommandes DESC;
+```
+

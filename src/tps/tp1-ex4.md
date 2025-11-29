@@ -40,3 +40,31 @@ Affichez le nom de chaque société en minuscule.
 
 Remplacez tous les "marketing" dans le champ `Fonction` par "mercatique".
 
+## Rappel de cours
+
+### Concaténation
+
+Pour assembler plusieurs chaînes de caractères, utilisez l'opérateur `||`.
+
+```sql
+-- Assembler Nom et Prénom
+SELECT Nom || ' ' || Prenom AS NomComplet FROM Employe;
+```
+
+### Manipulation de chaînes
+
+```sql
+-- Extraire une partie de la chaîne (SUBSTR)
+-- SUBSTR(chaine, debut, longueur)
+SELECT SUBSTR(Nom, 1, 3) FROM Client; -- 3 premiers caractères
+SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères
+
+-- Remplacer du texte (REPLACE)
+-- REPLACE(chaine, ancien, nouveau)
+SELECT REPLACE(Fonction, 'Manager', 'Directeur') FROM Employe;
+
+-- Minuscules / Majuscules
+SELECT LOWER(Nom) FROM Client;
+SELECT UPPER(Nom) FROM Client;
+```
+

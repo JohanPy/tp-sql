@@ -27,3 +27,20 @@ Affichez tous les produits avec leur nom et un statut "Disponible" ou "Indispo" 
 **3. Catégoriser les commandes par montant total**
 
 Pour chaque NoCom calculer le prix total et classer en 'Petit' (< 100), 'Moyen' (100-500), 'Gros' (> 500).
+
+## Rappel de cours
+
+### Expression CASE
+
+L'expression `CASE` permet d'ajouter de la logique conditionnelle dans vos requêtes (comme un IF/ELSE).
+
+```sql
+-- Créer une colonne personnalisée selon une condition
+SELECT NomProd, PrixUnit,
+    CASE
+        WHEN PrixUnit < 10 THEN 'Pas cher'
+        WHEN PrixUnit BETWEEN 10 AND 50 THEN 'Moyen'
+        ELSE 'Cher'
+    END AS CategoriePrix
+FROM Produit;
+```

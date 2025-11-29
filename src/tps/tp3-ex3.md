@@ -81,3 +81,42 @@ Calculez AVG(PrixUnit) par CodeCateg ; comparez avec la moyenne générale de to
 -- Exemple de sous-requête pour trouver le max
 SELECT * FROM Produit WHERE PrixUnit = (SELECT MAX(PrixUnit) FROM Produit);
 ```
+
+## Rappel de cours
+
+### Sous-requête scalaire
+
+Retourne une seule valeur. Utilisée souvent avec `=`, `<`, `>`.
+
+```sql
+-- Produits plus chers que la moyenne
+SELECT NomProd, PrixUnit
+FROM Produit
+WHERE PrixUnit > (SELECT AVG(PrixUnit) FROM Produit);
+```
+
+### Sous-requête de liste (IN)
+
+Retourne une liste de valeurs.
+
+```sql
+-- Clients ayant commandé le produit 1
+SELECT Societe FROM Client
+WHERE CodeCli IN (
+    SELECT CodeCli FROM Commande
+    JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom
+    WHERE RefProd = 1
+);
+```
+
+### Sous-requête corrélée (EXISTS)
+
+La sous-requête dépend d'une valeur de la requête principale.
+
+```sql
+-- Clients ayant passé au moins une commande (alternative au JOIN)
+SELECT Societe FROM Client C
+WHERE EXISTS (
+    SELECT 1 FROM Commande O WHERE O.CodeCli = C.CodeCli
+);
+```

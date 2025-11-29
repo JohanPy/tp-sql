@@ -63,3 +63,48 @@ Affichez pour chaque client tous les fournisseurs dont il a acheté des produits
 **10. Calculer le Top 5 des meilleures ventes en montant, avec le ratio par rapport au montant total**
 
 Affichez les 5 produits générant le plus de chiffre d'affaires et leur % du CA total.
+
+## Rappel de cours
+
+### Agrégation (GROUP BY)
+
+Permet de regrouper les lignes ayant des valeurs communes.
+
+```sql
+-- Compter le nombre de produits par catégorie
+SELECT CodeCateg, COUNT(*) 
+FROM Produit 
+GROUP BY CodeCateg;
+```
+
+### Filtrer sur les groupes (HAVING)
+
+`WHERE` filtre les lignes avant le regroupement, `HAVING` filtre les groupes après.
+
+```sql
+-- Catégories ayant plus de 10 produits
+SELECT CodeCateg, COUNT(*) 
+FROM Produit 
+GROUP BY CodeCateg 
+HAVING COUNT(*) > 10;
+```
+
+### Jointures (JOIN)
+
+Permet de combiner des données de plusieurs tables.
+
+```sql
+-- Récupérer les produits avec le nom de leur catégorie
+SELECT Produit.NomProd, Categorie.NomCateg
+FROM Produit
+JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg;
+```
+
+### Opérateurs ensemblistes
+
+```sql
+-- INTERSECT : Valeurs communes aux deux requêtes
+SELECT Pays FROM Client
+INTERSECT
+SELECT Pays FROM Fournisseur;
+```

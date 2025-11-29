@@ -27,7 +27,7 @@ Cette plateforme vous permet de vous entraîner au SQL directement dans votre na
   <ul>
     {% for exercise in tpExercices %}
     <li>
-      <a href="{{ exercise.url }}">{{ exercise.data.titre }}</a>
+      <a href="{{ exercise.url | absUrl }}">{{ exercise.data.titre }}</a>
     </li>
     {% endfor %}
   </ul>

@@ -38,7 +38,7 @@ Categorie (CodeCateg, NomCateg, Description)
 ## Conseils pour le TP
 
 - Lisez attentivement les énoncés
-- Vous allez utiliser des requêtes SELECT 
+- Vous allez utiliser des requêtes SELECT
 - Vérifiez la cohérence de vos résultats
 - Utilisez les spoilers pour les indices si vous êtes bloqué
 - Les bonus ne sont à faire que si vous avez le temps

@@ -1,52 +1,70 @@
 ---
 layout: base.njk
-title: "Exercice 2 : Calculs"
+title: "Exercice 3 : Chaînes de caractères"
 intitule: "TP 1 - Bien démarrer avec les requêtes SQL"
 base: "Comptoir2000.sqlite"
 tpNum: 1
 exerciceNum: 3
-titre: "Exercice 2 : Calculs"
+titre: "Exercice 3 : Chaînes de caractères"
 permalink: "/tp1/exercice3/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 2 : Calculs
+# Exercice 3 : Chaînes de caractères
 
 ## Questions
 
-**1. Affichez pour chaque produit, le nombre d'unité en ajoutant les unités en stock et celles commandées**
+Dans une même requête, sur la table Client, vous devez :
 
-Pour chaque produit, calculez le total d'unités disponibles (unités en stock + unités en commande).
+**1. Concaténer les champs Adresse, Ville, CodePostal et Pays dans un nouveau champ nommé "AdresseComplete"**
 
-**2. À partir de la table DetailCommande, calculez pour chaque produit de la commande numéro 10251 : le montant de la remise (exprimé en %) et le montant à payer**
+Le format doit être : `Adresse, CodePostal Ville, Pays`
 
-Affichez le montant original, la remise en euros et le montant final.
+<details>
+<summary>💡 Indice</summary>
+
+Utilisez l'opérateur de concaténation `||` pour joindre des chaînes.
+</details>
+
+**2. Extraire les deux derniers caractères des codes clients**
+
+Créez une colonne affichant les 2 derniers caractères de `CodeCli`.
+
+**3. Mettre en minuscule le nom des sociétés**
+
+Affichez le nom de chaque société en minuscule.
+
+**4. Affichez le nom des clients et leur fonction en remplaçant le terme "marketing" par "mercatique"**
+
+Remplacez tous les "marketing" dans le champ `Fonction` par "mercatique".
 
 ## Rappel de cours
 
-### Opérateurs arithmétiques
+### Concaténation
 
-Vous pouvez effectuer des calculs directement dans le SELECT :
-
-- Addition : `+`
-- Soustraction : `-`
-- Multiplication : `*`
-- Division : `/`
+Pour assembler plusieurs chaînes de caractères, utilisez l'opérateur `||`.
 
 ```sql
--- Calculer un prix total
-SELECT PrixUnit * Qte FROM DetailCommande;
+-- Assembler Nom et Prénom
+SELECT Nom || ' ' || Prenom AS NomComplet FROM Employe;
 ```
 
-### Alias de colonnes
-
-Pour renommer une colonne ou le résultat d'un calcul, utilisez `AS`.
+### Manipulation de chaînes
 
 ```sql
--- Renommer une colonne dans le résultat
-SELECT PrixUnit * Qte AS MontantTotal FROM DetailCommande;
-```
+-- Extraire une partie de la chaîne (SUBSTR)
+-- SUBSTR(chaine, debut, longueur)
+SELECT SUBSTR(Nom, 1, 3) FROM Client; -- 3 premiers caractères
+SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères
 
+-- Remplacer du texte (REPLACE)
+-- REPLACE(chaine, ancien, nouveau)
+SELECT REPLACE(Fonction, 'Manager', 'Directeur') FROM Employe;
+
+-- Minuscules / Majuscules
+SELECT LOWER(Nom) FROM Client;
+SELECT UPPER(Nom) FROM Client;
+```
 

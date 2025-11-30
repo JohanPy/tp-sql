@@ -1,47 +1,83 @@
 ---
 layout: base.njk
-title: "TP 4 : Gymnase2000 - Complexe et performant"
+title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"
 tpNum: 4
 exerciceNum: 1
-titre: "TP 4 : Gymnase2000 - Complexe et performant"
+titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
 permalink: "/tp4/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# TP 4 : Gymnase2000 - Complexe et performant
+# Exercice 1 : Partie I - Requêtes de base et jointures simples
 
-## Description
+## Questions (15 questions)
 
-Ce dernier TP vous fait travailler sur la base **`Gymnase2000`**, une base complètement différente de Comptoir2000. Elle gère un complexe sportif avec :
+**1. Afficher tous les sportifs du gymnase**
 
-- **Sportifs** : Les adhérents du gymnase
-- **Sports** : Types d'activités proposées
-- **Gymnases** : Différents lieux du complexe
-- **Seances** : Séances d'entraînement programmées
-- **Jouer** : Association entre sportifs et sports
-- **Arbitrer** : Arbitres et sports qu'ils arbitrent
-- **Entrainer** : Entraîneurs et sports qu'ils enseignent
+Affichez la liste complète des sportifs : numéro de licence (idsportif), nom et prénom.
 
-Progression pédagogique :
-- **Partie I** : Requêtes de base et jointures simples (15 questions)
-- **Partie II** : Requêtes intermédiaires avec agrégats et conditions (8 questions)
-- **Partie III** : Requêtes avancées et sous-requêtes complexes (14 questions)
+**2. Lister tous les sports disponibles**
 
-## Schéma de la base de données
+Affichez le numéro et le nom de tous les sports proposés.
 
-La base `Gymnase2000` contient :
+**3. Afficher les sports pratiqués par un sportif donné (ex: id 1)**
 
-### Tables principales
+Trouvez tous les sports qu'un sportif particulier pratique.
+
+**4. Lister les séances d'entraînement programmées**
+
+Affichez le sport, le gymnase, et l'horaire pour chaque séance programmée.
+
+**5. Afficher les entraîneurs (sportifs qui entraînent) et les sports qu'ils enseignent**
+
+Identifiez les sportifs ayant un rôle d'entraîneur.
+
+**6. Trouver les arbitres et les sports qu'ils arbitrent**
+
+Listez les sportifs arbitres et leurs sports.
+
+**7. Afficher toutes les séances du gymnase numéro 1**
+
+Affichez le sport et l'horaire.
+
+**8. Lister les sportifs et les séances auxquelles ils peuvent participer (basé sur les sports qu'ils jouent)**
+
+Affichez le nom du sportif, le sport, et l'horaire de la séance.
+
+**9. Afficher le nombre de sportifs par sport**
+
+Comptez combien de sportifs pratiquent chaque sport.
+
+**10. Trouver les sportifs qui pratiquent plus d'un sport**
+
+Identifiez les sportifs polyvalents.
+
+**11. Afficher les gymnases et le nombre de séances programmées dans chaque**
+
+Comptez les activités par gymnase.
+
+**12. Lister les sportifs qui entraînent un sport qu'ils pratiquent eux-mêmes**
+
+Trouvez les entraîneurs-pratiquants.
+
+<details>
+<summary>💡 Indice</summary>
+les id_sportif_entraineur sont des id_sportifs qui ont un rôle d'entraîneur. 
+</details>
+
+**13. Afficher les sportifs âgés de 20 à 30 ans**
+
+Filtrez les sportifs sur leur âge.
+
+**14. Trouver les paires (entraîneur, sportif) où l'entraîneur entraîne un sport que le sportif pratique**
+
+Identifiez les relations entraîneur-apprenant potentielles.
 
 
-**Arbitrer** (🔑🔗 IdSportif, 🔑🔗 IdSport)
-**Entrainer** (🔑🔗 IdSportifEntraineur, 🔑🔗 IdSport)
-**Gymnases** (🔑 IdGymnase, NomGymnase, Adresse, Ville, Surface)
-**Jouer** (🔑🔗 IdSportif, 🔑🔗 IdSport)
-**Seances** (🔑🔗 IdGymnase, 🔑🔗 IdSport, 🔑🔗 IdSportifEntraineur, 🔑 Jour, 🔑 Horaire, Duree)
-**Sportifs** (🔑 IdSportif, Nom, Prenom, Sexe, Age, IdSportifConseiller)
-**Sports** (🔑 IdSport, Libelle)
+**15. Afficher les sports sans séances programmées**
+
+Quel sport n'a aucune séance d'entraînement ?

@@ -1,75 +1,67 @@
 ---
 layout: base.njk
-title: "Exercice 3 : Partie III - Requêtes très avancées"
+title: "Exercice 4 : Bonus - Défis Gymnase2000"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"
 tpNum: 4
 exerciceNum: 4
-titre: "Exercice 3 : Partie III - Requêtes très avancées"
+titre: "Exercice 4 : Bonus - Défis Gymnase2000"
 permalink: "/tp4/exercice4/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 3 : Partie III - Requêtes très avancées
+# Exercice 4 : Bonus - Défis Gymnase2000
 
-## Questions (12 questions)
+## Questions bonus (8 questions)
 
-**1. Créer un classement des sportifs par polyvalence (nombre total de rôles/activités)**
+Combinez tous les concepts pour résoudre des problèmes complexes sur Gymnase2000. À faire uniquement si vous avez le temps !
 
-Affichez le nom du sportif et le nombre total d'activités (joueur + entraîneur + arbitre, avec les doublons).
+**1. Le "Grand Chelem" : Sportifs ayant les 4 casquettes**
 
-**2. Trouver les sportifs qui jouent un sport arbitré par leur propre conseiller**
-
-Combinez les informations de jeu, de conseil et d'arbitrage.
-
-**3. Quel est le gymnase le plus occupé ? (Somme des durées des séances la plus élevée)**
-
-Affichez le nom du gymnase et la durée totale.
+Trouvez les sportifs qui sont à la fois : Joueur, Entraîneur, Arbitre ET Conseiller (ils conseillent quelqu'un).
 
 <details>
 <summary>💡 Indice</summary>
-Utilisez un tri et une limite pour trouver le maximum.
+Utilisez `INTERSECT` ou des jointures multiples (`INNER JOIN`). Pour "Conseiller", vérifiez si leur ID apparaît dans la colonne `IdSportifConseiller` de la table `Sportifs`.
 </details>
 
-**4. Identifier les "Super-Sportifs" : à la fois Joueur, Arbitre et Entraîneur**
+**2. Les "Intrus" : Entraîneurs qui animent une séance d'un sport qu'ils ne pratiquent pas**
 
-Peu importe le sport, ils doivent avoir les trois rôles.
+Identifiez les entraîneurs qui donnent une séance (table `Seances`) pour un sport qu'ils ne sont pas censés jouer (table `Jouer`).
 
-**5. Identifier les sports "fantômes" : pas de joueurs, pas d'arbitres, pas de séances**
+**3. La "Division" : Trouver les sportifs qui pratiquent TOUS les sports**
 
-Trouvez les sports qui existent dans la base mais ne sont utilisés nulle part.
-
-**6. Trouver les sportifs ayant le même nom de famille mais des prénoms différents**
-
-Détectez les potentielles familles de sportifs.
-
-**7. Trouver les gymnases qui ont des séances le Lundi et le Mercredi, mais PAS le Mardi**
-
-Analysez les "trous" dans l'emploi du temps des gymnases.
-
-**8. Trouver les paires de sportifs du même âge**
-
-Affichez les deux noms et l'âge.
+C'est le problème de la division relationnelle : quels sportifs ont une relation avec la totalité des éléments de la table Sports ?
 
 <details>
 <summary>💡 Indice</summary>
-Utilisez une auto-jointure avec une condition d'inégalité sur les IDs pour éviter les doublons (A-B et B-A).
+Comparez le nombre de sports distincts pratiqués par le sportif avec le nombre total de sports existants (`COUNT`).
 </details>
 
-**9. Le sport le plus pratiqué (en nombre de joueurs) pour chaque gymnase**
+**4. L' "Ubiquité" : Détecter les conflits d'horaire des entraîneurs**
 
-Affichez le gymnase, le sport et le nombre de joueurs.
+Trouvez les entraîneurs qui ont deux séances programmées le même jour à la même heure.
 
-**10. Les sportifs qui ont un conseiller, mais qui ne pratiquent aucun des sports de ce conseiller**
+<details>
+<summary>💡 Indice</summary>
+Faites une auto-jointure sur la table `Seances` pour trouver deux lignes différentes avec le même entraîneur, le même jour et le même horaire.
+</details>
 
-Affichez le nom du sportif et le nom du conseiller.
+**5. La "Chaîne de conseil" : Afficher les trios hiérarchiques**
 
-**11. Les gymnases qui accueillent au moins 3 sports différents le même jour**
+Affichez le nom du "Grand-Conseiller", du "Conseiller" et du "Conseillé" (A conseille B qui conseille C).
 
-Affichez le gymnase et le jour concerné.
+**6. La "Densité" : Classement des gymnases par occupation au m²**
 
-**12. Moyenne d'âge des sportifs par sport, uniquement pour les sports ayant plus de 5 pratiquants**
+Calculez le nombre de séances par unité de surface pour chaque gymnase.
 
-Affichez le sport et la moyenne d'âge.
+**7. Les "Sports Orphelins" : Sports avec joueurs mais sans séances**
+
+Quels sports ont des pratiquants inscrits (table `Jouer`) mais n'ont aucune séance programmée dans aucun gymnase ?
+
+**8. L' "Exclusivité" : Les sports gérés par un seul entraîneur**
+
+Trouvez les sports pour lesquels il n'y a qu'un seul entraîneur distinct qui anime des séances (sur l'ensemble de tous les gymnases).
+

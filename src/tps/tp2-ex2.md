@@ -1,93 +1,46 @@
 ---
 layout: base.njk
-title: "Exercice 1 : Agrégats"
-intitule: "TP 2 - Dates et agrégats"
+title: "Exercice 2 : Choix multiple (CASE)"
+intitule: "TP 2 - Agrégats et Choix multiple"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 2
-titre: "Exercice 1 : Agrégats"
+titre: "Exercice 2 : Choix multiple (CASE)"
 permalink: "/tp2/exercice2/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 1 : Agrégats
+# Exercice 2 : Choix multiple (CASE)
 
 ## Questions
 
-**1. Compter le nombre total de commandes**
+**1. Classer les produits par gamme de prix**
 
-Affichez le nombre de commandes passées.
+Affichez tous les produits avec une colonne "Gamme" affichant "Économique" (< 50), "Standard" (50-200), ou "Premium" (> 200).
 
-**2. Calculer le montant total de toutes les commandes avec remise appliquée**
+**2. Ajouter une colonne "Statut" pour les produits (disponible/indisponible)**
 
-Calculez le chiffre d'affaires total en tenant compte des remises.
+Affichez tous les produits avec leur nom et un statut "Disponible" ou "Indispo" selon le champ Indisponible.
 
-**3. Afficher le nombre de clients par pays**
+**3. Catégoriser les commandes par montant total**
 
-Affichez le pays et le nombre de clients pour chaque pays, trié par nombre décroissant.
-
-**4. Calculer le prix moyen des produits par catégorie**
-
-Affichez le nom de la catégorie et le prix moyen des produits.
-
-**5. Trouver les catégories dont le prix moyen est supérieur à 100**
-
-Utilisez une clause de filtrage après agrégation.
-
-**6. Afficher pour chaque employé le nombre de commandes qu'il a gérées**
-
-Affichez le nom, prénom et le nombre de commandes traitées.
-
-**7. Calculer le nombre minimum et maximum d'unités commandées dans une seule ligne de commande**
-
-Trouvez les quantités extrêmes dans la table DetailCommande.
-
-**8. Afficher les produits avec leur quantité totale vendue, en excluant les ventes inférieures à 10 unités**
-
-Filtrez les produits peu vendus.
+Pour chaque NoCom calculer le prix total et classer en 'Petit' (< 100), 'Moyen' (100-500), 'Gros' (> 500).
 
 ## Rappel de cours
 
-### Fonctions d'agrégation
+### Expression CASE
 
-Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
-
-```sql
--- Compter le nombre de lignes
-SELECT COUNT(*) FROM Client;
-
--- Calculer la somme
-SELECT SUM(PrixUnit) FROM Produit;
-
--- Calculer la moyenne
-SELECT AVG(PrixUnit) FROM Produit;
-
--- Trouver le minimum et le maximum
-SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
-```
-
-### Regroupement (GROUP BY)
-
-Permet de grouper les résultats selon une ou plusieurs colonnes.
+L'expression `CASE` permet d'ajouter de la logique conditionnelle dans vos requêtes (comme un IF/ELSE).
 
 ```sql
--- Compter le nombre de produits par fournisseur
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour;
+-- Créer une colonne personnalisée selon une condition
+SELECT NomProd, PrixUnit,
+    CASE
+        WHEN PrixUnit < 10 THEN 'Pas cher'
+        WHEN PrixUnit BETWEEN 10 AND 50 THEN 'Moyen'
+        ELSE 'Cher'
+    END AS CategoriePrix
+FROM Produit;
 ```
-
-### Filtrage sur les groupes (HAVING)
-
-`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
-
-```sql
--- Fournisseurs ayant plus de 5 produits
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour 
-HAVING COUNT(*) > 5;
-```
-

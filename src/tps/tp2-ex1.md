@@ -1,65 +1,93 @@
 ---
 layout: base.njk
-title: "TP 2 : Agrégats, Choix multiple et Dates"
+title: "Exercice 1 : Agrégats"
 intitule: "TP 2 - Dates et agrégats"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 1
-titre: "TP 2 : Agrégats, Choix multiple et Dates"
+titre: "Exercice 1 : Agrégats"
 permalink: "/tp2/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# TP 2 : Agrégats, Choix multiple et Dates
+# Exercice 1 : Agrégats
 
-## Description
+## Questions
 
-Ce TP poursuit l'apprentissage SQL sur la base **`Comptoir2000`** en se concentrant sur :
+**1. Compter le nombre total de commandes**
 
-1. **Agrégats** : Fonctions d'agrégation (COUNT, SUM, AVG, MIN, MAX), GROUP BY, HAVING
-2. **Choix multiple** : Instructions CASE pour du SQL conditionnel
-3. **Dates** : Manipulation et extraction de dates avec STRFTIME
+Affichez le nombre de commandes passées.
 
-## Schéma de la base de données
+**2. Calculer le montant total de toutes les commandes avec remise appliquée**
 
-La base `Comptoir2000` contient les tables principales :
+Calculez le chiffre d'affaires total en tenant compte des remises.
 
-Categorie (🔑 CodeCateg, NomCateg, Description)
-Client (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
-Commande (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
-DetailCommande (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
-Employe (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
-Fournisseur (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
-Messager (🔑 NoMess, NomMess, Tel)
-Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
+**3. Afficher le nombre de clients par pays**
 
-## Conseils pour bien démarrer
+Affichez le pays et le nombre de clients pour chaque pays, trié par nombre décroissant.
 
-- Testez vos requêtes progressivement en commençant simple, puis ajoutez complexité
-- Pour les agrégats : n'oubliez pas que `WHERE` filtre par lignes AVANT l'agrégation, `HAVING` qui filtre par groupe APRÈS
-- Pour les dates : `STRFTIME` permet d'extraire année, mois, jour (`'%Y'`, `'%m'`, `'%d'`)
-- Utilisez les indices pour vérifier votre compréhension du concept, pas pour vous éviter de vous tromper, c'est comme ça que l'on apprend.
+**4. Calculer le prix moyen des produits par catégorie**
 
-## Exemples de requêtes SQL de manipulation de dates
+Affichez le nom de la catégorie et le prix moyen des produits.
+
+**5. Trouver les catégories dont le prix moyen est supérieur à 100**
+
+Utilisez une clause de filtrage après agrégation.
+
+**6. Afficher pour chaque employé le nombre de commandes qu'il a gérées**
+
+Affichez le nom, prénom et le nombre de commandes traitées.
+
+**7. Calculer le nombre minimum et maximum d'unités commandées dans une seule ligne de commande**
+
+Trouvez les quantités extrêmes dans la table DetailCommande.
+
+**8. Afficher les produits avec leur quantité totale vendue, en excluant les ventes inférieures à 10 unités**
+
+Filtrez les produits peu vendus.
+
+## Rappel de cours
+
+### Fonctions d'agrégation
+
+Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
+
 ```sql
--- Extraire l'année d'une date
-SELECT STRFTIME('%Y', DateCom) AS AnneeCommande FROM Commande;
+-- Compter le nombre de lignes
+SELECT COUNT(*) FROM Client;
+
+-- Calculer la somme
+SELECT SUM(PrixUnit) FROM Produit;
+
+-- Calculer la moyenne
+SELECT AVG(PrixUnit) FROM Produit;
+
+-- Trouver le minimum et le maximum
+SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
 ```
 
+### Regroupement (GROUP BY)
+
+Permet de grouper les résultats selon une ou plusieurs colonnes.
+
 ```sql
--- Compter les commandes par année
-SELECT STRFTIME('%Y', DateCom) AS Annee, COUNT(*) AS NombreCommandes
-FROM Commande
-GROUP BY Annee;
+-- Compter le nombre de produits par fournisseur
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour;
 ```
 
-## Exemples de requêtes SQL utilisant Having
+### Filtrage sur les groupes (HAVING)
+
+`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
+
 ```sql
--- Compter les produits par catégorie et ne garder que celles avec plus de 10 produits
-SELECT Categorie, COUNT(*) AS NombreProduits
-FROM Produit
-GROUP BY Categorie
-HAVING NombreProduits > 10;
+-- Fournisseurs ayant plus de 5 produits
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour 
+HAVING COUNT(*) > 5;
 ```
+

@@ -1,63 +1,75 @@
 ---
 layout: base.njk
-title: "Exercice 2 : Partie II - Requêtes intermédiaires"
+title: "Exercice 3 : Partie III - Requêtes très avancées"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"
 tpNum: 4
 exerciceNum: 3
-titre: "Exercice 2 : Partie II - Requêtes intermédiaires"
+titre: "Exercice 3 : Partie III - Requêtes très avancées"
 permalink: "/tp4/exercice3/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 2 : Partie II - Requêtes intermédiaires
+# Exercice 3 : Partie III - Requêtes très avancées
 
-## Questions (9 questions)
+## Questions (12 questions)
 
-**1. Calculer le nombre de sports pratiqués par chaque sportif**
+**1. Créer un classement des sportifs par polyvalence (nombre total de rôles/activités)**
 
-Affichez le nom du sportif et le nombre de sports.
+Affichez le nom du sportif et le nombre total d'activités (joueur + entraîneur + arbitre, avec les doublons).
 
-**2. Afficher le nom des sportifs et le nom de leur conseiller**
+**2. Trouver les sportifs qui jouent un sport arbitré par leur propre conseiller**
 
-Affichez le nom du sportif et le nom de son conseiller.
+Combinez les informations de jeu, de conseil et d'arbitrage.
 
-<details>
-<summary>💡 Indice</summary>
-Utilisez une auto-jointure sur la table Sportifs.
-</details>
+**3. Quel est le gymnase le plus occupé ? (Somme des durées des séances la plus élevée)**
 
-**3. Calculer le nombre d'entraîneurs par sport**
-
-Comptez les entraîneurs disponibles pour chaque discipline.
-
-**4. Lister les gymnases avec le nombre total de séances et le nombre de sports distincts offerts**
-
-Analysez le gymnase, le nombre de séances programmées et le nombre de sports différents proposés.
-
-**5. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "10")**
-
-Basez-vous sur les sports de la séance et les sports que le sportif pratique.
-
-**6. Calculer la durée moyenne des séances par sport**
-
-Affichez le sport et la durée moyenne en minutes.
-
-**7. Trouver les sportifs qui ne pratiquent aucun sport**
-
-Identifiez les sportifs absents de la table Jouer.
-
-**8. Pour chaque gymnase, compter le nombre de séances par jour de la semaine**
-
-Affichez le nom du gymnase, le jour, et le nombre de séances.
-
-**9. Lister les sportifs en indiquant s'ils sont majeurs ou mineurs (Age >= 18)**
-
-Affichez le nom, l'âge et une colonne "Statut" ("Majeur" ou "Mineur").
+Affichez le nom du gymnase et la durée totale.
 
 <details>
 <summary>💡 Indice</summary>
-Utilisez une structure conditionnelle (CASE) pour créer une nouvelle colonne "Statut".
+Utilisez un tri et une limite pour trouver le maximum.
 </details>
+
+**4. Identifier les "Super-Sportifs" : à la fois Joueur, Arbitre et Entraîneur**
+
+Peu importe le sport, ils doivent avoir les trois rôles.
+
+**5. Identifier les sports "fantômes" : pas de joueurs, pas d'arbitres, pas de séances**
+
+Trouvez les sports qui existent dans la base mais ne sont utilisés nulle part.
+
+**6. Trouver les sportifs ayant le même nom de famille mais des prénoms différents**
+
+Détectez les potentielles familles de sportifs.
+
+**7. Trouver les gymnases qui ont des séances le Lundi et le Mercredi, mais PAS le Mardi**
+
+Analysez les "trous" dans l'emploi du temps des gymnases.
+
+**8. Trouver les paires de sportifs du même âge**
+
+Affichez les deux noms et l'âge.
+
+<details>
+<summary>💡 Indice</summary>
+Utilisez une auto-jointure avec une condition d'inégalité sur les IDs pour éviter les doublons (A-B et B-A).
+</details>
+
+**9. Le sport le plus pratiqué (en nombre de joueurs) pour chaque gymnase**
+
+Affichez le gymnase, le sport et le nombre de joueurs.
+
+**10. Les sportifs qui ont un conseiller, mais qui ne pratiquent aucun des sports de ce conseiller**
+
+Affichez le nom du sportif et le nom du conseiller.
+
+**11. Les gymnases qui accueillent au moins 3 sports différents le même jour**
+
+Affichez le gymnase et le jour concerné.
+
+**12. Moyenne d'âge des sportifs par sport, uniquement pour les sports ayant plus de 5 pratiquants**
+
+Affichez le sport et la moyenne d'âge.

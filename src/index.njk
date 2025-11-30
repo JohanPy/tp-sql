@@ -1,0 +1,328 @@
+---
+layout: base.njk
+title: "Accueil - SQL TP"
+intitule: "SQL TP - Travaux Pratiques"
+permalink: "/"
+---
+
+<div class="home-container">
+  <div class="hero-compact">
+    <div class="hero-content">
+      <h1>🎓 Plateforme SQL</h1>
+      <p>Entraînement interactif sur bases de données réelles.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-value">{{ collections.allTPs.length }}</span>
+        <span class="stat-label">Exercices</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">2</span>
+        <span class="stat-label">Bases</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tp-list-container">
+    {% for tpNumber, tpExercices in collections.tpsByNumber %}
+    <details class="tp-details">
+      <summary class="tp-summary">
+        <div class="tp-header-info">
+          <span class="tp-badge">TP {{ tpNumber }}</span>
+          <h3 class="tp-title">{{ tpExercices[0].data.intitule | replace("TP " + tpNumber + " - ", "") }}</h3>
+        </div>
+        <div class="tp-header-meta">
+          <span class="db-tag">🗄️ {{ tpExercices[0].data.base | replace(".sqlite", "") }}</span>
+          <span class="chevron">▼</span>
+        </div>
+      </summary>
+      
+      <div class="tp-content">
+        <div class="exercise-grid">
+          {% for exercise in tpExercices %}
+          <a href="{{ exercise.url | absUrl }}" class="exercise-card-mini">
+            <div class="ex-mini-header">
+              <span class="ex-number">{% if exercise.data.exerciceNum == 0 %}Intro{% else %}{{ exercise.data.exerciceNum }}{% endif %}</span>
+              <span class="ex-status"></span>
+            </div>
+            <span class="ex-title-mini">{{ exercise.data.titre | replace("TP" + tpNumber + " - ", "") | replace("Exercice " + exercise.data.exerciceNum + " : ", "") }}</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </details>
+    {% endfor %}
+  </div>
+
+  <div class="quick-help">
+    <h3>💡 Aide rapide</h3>
+    <div class="help-steps">
+      <span>1. Choisir un TP</span>
+      <span>→</span>
+      <span>2. Lire la consigne</span>
+      <span>→</span>
+      <span>3. Écrire la requête</span>
+      <span>→</span>
+      <span>4. <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+    </div>
+  </div>
+</div>
+
+<style>
+.home-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Compact Hero */
+.hero-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(79, 190, 255, 0.1) 0%, rgba(79, 190, 255, 0.05) 100%);
+  border: 1px solid rgba(79, 190, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px 30px;
+  margin-bottom: 30px;
+}
+
+.hero-content h1 {
+  font-size: 1.8rem;
+  margin: 0 0 5px 0;
+  background: linear-gradient(90deg, #fff, #4fbeff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--accent-blue);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Collapsible TP List */
+.tp-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.tp-details {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.tp-details[open] {
+  border-color: var(--accent-blue);
+  box-shadow: var(--shadow-subtle);
+}
+
+.tp-summary {
+  padding: 15px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.2s;
+}
+
+.tp-summary:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tp-summary::-webkit-details-marker {
+  display: none;
+}
+
+.tp-header-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.tp-badge {
+  background: var(--accent-blue);
+  color: #000;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.tp-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.tp-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: var(--text-secondary);
+}
+
+.db-tag {
+  font-size: 0.85rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.chevron {
+  transition: transform 0.3s;
+  font-size: 0.8rem;
+  opacity: 0.5;
+}
+
+.tp-details[open] .chevron {
+  transform: rotate(180deg);
+}
+
+.tp-content {
+  padding: 20px;
+  border-top: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Exercise Grid */
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.exercise-card-mini {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel-lighter);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  text-decoration: none;
+  transition: all 0.2s;
+  height: 100%;
+}
+
+.exercise-card-mini:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-blue);
+  background: rgba(79, 190, 255, 0.05);
+}
+
+.ex-mini-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.ex-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-blue);
+  font-weight: bold;
+}
+
+.ex-title-mini {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.exercise-card-mini:hover .ex-title-mini {
+  color: var(--text-primary);
+}
+
+/* Quick Help */
+.quick-help {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  border: 1px dashed var(--border-subtle);
+}
+
+.quick-help h3 {
+  margin: 0 0 15px 0;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.help-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+kbd {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 600px) {
+  .hero-compact {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .tp-header-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .tp-header-meta {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+  
+  .db-tag {
+    display: none;
+  }
+}
+</style>

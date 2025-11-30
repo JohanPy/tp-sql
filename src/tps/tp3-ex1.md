@@ -1,87 +1,106 @@
 ---
 layout: base.njk
-title: "TP 3 : Jointures et Sous-requêtes"
+title: "Exercice 1 : Jointures"
 intitule: "TP 3 - Jointures et sous-requêtes"
 base: "Comptoir2000.sqlite"
 tpNum: 3
 exerciceNum: 1
-titre: "TP 3 : Jointures et Sous-requêtes"
+titre: "Exercice 1 : Jointures"
 permalink: "/tp3/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# TP 3 : Jointures et Sous-requêtes
+# Exercice 1 : Jointures
 
-## Description
+## Questions
 
-Ce TP approfondit les concepts avancés sur la base **`Comptoir2000`** :
+**1. Afficher toutes les commandes avec les informations du client et de l'employé**
 
-1. **Jointures** : INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN, auto-jointures
-2. **Sous-requêtes** : Sous-requêtes, IN/EXISTS, requêtes corrélées
-3. **Combinaison** : Mixte de jointures et sous-requêtes pour résoudre des problèmes complexes
+Pour chaque commande, affichez le numéro, la date, le nom du client et le nom de l'employé qui l'a traitée.
 
-## Schéma de la base de données
+**2. Lister tous les produits avec leur catégorie et leur fournisseur**
 
-La base `Comptoir2000` contient les tables principales :
+Affichez le nom du produit, le nom de la catégorie et le nom du fournisseur.
 
-**Categorie** (🔑 CodeCateg, NomCateg, Description)
-**Client** (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
-**Commande** (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
-**DetailCommande** (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
-**Employe** (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
-**Fournisseur** (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
-**Messager** (🔑 NoMess, NomMess, Tel)
-Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
+**3. Afficher les détails de toutes les commandes avec les noms des produits**
 
+Pour chaque ligne de commande, affichez le numéro de commande, la référence du produit et son nom.
 
-## Conseils pour bien démarrer
+**4. Trouver les clients qui n'ont jamais commandé (LEFT JOIN)**
 
-- Vérifiez toujours les clés de liaison (clés étrangères) avant de joindre
-- Les LEFT JOIN conservent tous les enregistrements de la table de gauche
-- Les sous-requêtes IN() et EXISTS() offrent des alternatives aux jointures
-- Testez vos jointures étape par étape pour vérifier les résultats intermédiaires
-- Les performances diffèrent : préférez les jointures pour les requêtes simples, les sous-requêtes pour la complexité
+Affichez les clients (societe) de la base qui n'ont aucune commande enregistrée.
 
-## Quelques requêtes d'exemple
+<details>
+<summary>💡 Indice</summary>
+
+Pensez au LEFT JOIN qui conserve toutes les lignes de la table de gauche, même sans correspondance.
+</details>
+
+**5. Afficher tous les produits, qu'ils aient été commandés ou non**
+
+Affichez le nom du produit et le nombre de fois qu'il a été commandé et 0 si le produit n'a jamais été commandé (ne confondez pas avec le champs uniteCom).
+
+**6. Lister les employés et leurs responsables**
+
+Pour chaque employé, affichez son nom et le nom de son responsable.
+Regardez bien le schéma de la table Employe pour comprendre comment les employés sont liés à leurs responsables.
+
+<details>
+<summary>💡 Indice</summary>
+Les responsables sont aussi des employés.
+Joignez la table Employe avec elle-même en utilisant deux alias différents. 
+</details>
+
+**7. Afficher les commandes groupées avec client, employé, et informations complètes**
+
+Pour chaque commande : client, employé, nombre de produits et montant total (avec remise).
+
+**8. Trouver les clients et les fournisseurs du même pays**
+
+Affichez les paires client-fournisseur pour chaque pays.
+
+**9. Afficher les commandes avec délai de livraison**
+
+Affichez le numéro de commande, la date de commande, la date de livraison et le délai en jours.
+
+**10. Créer un résumé complet : client → commandes → produits avec tous les détails**
+
+Affichez pour chaque commande : Societe, DateCom, NoCom, Nomprod, Qte, Remise, montant ligne.
+
+## Rappel de cours
+
+### Jointure Interne (INNER JOIN)
+
+Ne retourne que les lignes qui ont une correspondance dans les deux tables.
 
 ```sql
--- 1. Lister tous les clients avec leurs commandes (LEFT JOIN)
-SELECT C.Societe, O.NoCom, O.DateCom
-FROM Client C
-LEFT JOIN Commande O ON C.CodeCli = O.CodeCli;
+-- Clients ayant passé au moins une commande
+SELECT Client.Societe, Commande.DateCom
+FROM Client
+INNER JOIN Commande ON Client.CodeCli = Commande.CodeCli;
 ```
+
+### Jointure Externe (LEFT JOIN)
+
+Retourne toutes les lignes de la table de gauche, même s'il n'y a pas de correspondance à droite (les colonnes de droite seront NULL).
+
 ```sql
--- 2. Trouver les produits jamais commandés (LEFT JOIN + IS NULL)
-SELECT P.Nomprod
-FROM Produit P
-LEFT JOIN DetailCommande D ON P.Refprod = D.Refprod
-WHERE D.Refprod IS NULL;
+-- Tous les clients, avec leurs commandes s'ils en ont
+SELECT Client.Societe, Commande.NoCom
+FROM Client
+LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli;
 ```
+
+### Auto-jointure (Self-Join)
+
+Joindre une table avec elle-même. Utile pour les hiérarchies (Employé -> Chef).
+
 ```sql
--- 3. Lister les employés avec le nombre de commandes traitées (sous-requête)
-SELECT E.Nom, E.Prenom,
-       (SELECT COUNT(*)
-        FROM Commande O
-        WHERE O.NoEmp = E.NoEmp) AS NbCommandes
-FROM Employe E;
+-- Employés et leur responsable
+SELECT E.Nom AS Employe, Chef.Nom AS Responsable
+FROM Employe E
+LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
 ```
-```sql
--- 4. Trouver les clients ayant passé plus de 5 commandes (sous-requête IN)
-SELECT C.Societe
-FROM Client C
-WHERE C.CodeCli IN (
-    SELECT O.CodeCli
-    FROM Commande O
-    GROUP BY O.CodeCli
-    HAVING COUNT(*) > 5
-);
-```
-```sql
--- 5. Lister les produits avec leur fournisseur et catégorie (INNER JOIN)
-SELECT P.Nomprod, F.NomFournisseur, Cat.NomCategorie
-FROM Produit P
-INNER JOIN Fournisseur F ON P.Fournisseur = F.CodeFournisseur
-INNER JOIN Categorie Cat ON P.Categorie = Cat.CodeCategorie;
-```
+

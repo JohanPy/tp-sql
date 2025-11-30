@@ -1,46 +1,69 @@
 ---
 layout: base.njk
-title: "Exercice 2 : Choix multiple (CASE)"
+title: "Exercice 3 : Dates et Formats"
 intitule: "TP 2 - Agrégats et Choix multiple"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 3
-titre: "Exercice 2 : Choix multiple (CASE)"
+titre: "Exercice 3 : Dates et Formats"
 permalink: "/tp2/exercice3/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 2 : Choix multiple (CASE)
+# Exercice 3 : Dates et Formats
 
 ## Questions
 
-**1. Classer les produits par gamme de prix**
+**1. Afficher l'année et le mois pour toutes les commandes**
 
-Affichez tous les produits avec une colonne "Gamme" affichant "Économique" (< 50), "Standard" (50-200), ou "Premium" (> 200).
+Pour chaque commande, montrez la date sous le format "2024-03" (année-mois).
 
-**2. Ajouter une colonne "Statut" pour les produits (disponible/indisponible)**
+**2. Calculer le délai de livraison en jours**
 
-Affichez tous les produits avec leur nom et un statut "Disponible" ou "Indispo" selon le champ Indisponible.
+Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivraison.
 
-**3. Catégoriser les commandes par montant total**
+<details>
+<summary>💡 Indice</summary>
 
-Pour chaque NoCom calculer le prix total et classer en 'Petit' (< 100), 'Moyen' (100-500), 'Gros' (> 500).
+La fonction `JULIANDAY()` convertit une date en nombre de jours depuis une date de référence.
+</details>
+
+**3. Lister les commandes passées au cours du mois de décembre 2014**
+
+Affichez toutes les commandes dont la date est en décembre 2014.
 
 ## Rappel de cours
 
-### Expression CASE
+### Manipulation de dates (SQLite)
 
-L'expression `CASE` permet d'ajouter de la logique conditionnelle dans vos requêtes (comme un IF/ELSE).
+SQLite stocke les dates sous forme de chaînes de caractères (TEXT), de nombres réels (REAL) ou d'entiers (INTEGER).
+
+### Extraction de parties de date (STRFTIME)
+
+La fonction `STRFTIME` permet de formater une date.
+Formats courants : `%Y` (Année), `%m` (Mois), `%d` (Jour).
 
 ```sql
--- Créer une colonne personnalisée selon une condition
-SELECT NomProd, PrixUnit,
-    CASE
-        WHEN PrixUnit < 10 THEN 'Pas cher'
-        WHEN PrixUnit BETWEEN 10 AND 50 THEN 'Moyen'
-        ELSE 'Cher'
-    END AS CategoriePrix
-FROM Produit;
+-- Extraire l'année d'une date
+SELECT STRFTIME('%Y', DateCom) FROM Commande;
+
+-- Extraire le mois
+SELECT STRFTIME('%m', DateCom) FROM Commande;
 ```
+
+### Calculs sur les dates (JULIANDAY)
+
+Pour calculer une différence entre deux dates, on les convertit en "Jour Julien" (nombre de jours).
+
+```sql
+-- Nombre de jours entre deux dates
+SELECT JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS DelaiLivraison
+FROM Commande;
+
+-- Ajouter des jours à une date
+SELECT DATE('now', '+7 days');
+```
+
+

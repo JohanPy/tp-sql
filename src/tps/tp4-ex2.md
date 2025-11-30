@@ -1,83 +1,63 @@
 ---
 layout: base.njk
-title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
+title: "Exercice 2 : Partie II - Requêtes intermédiaires"
 intitule: "TP 4 - Récapitulatif"
 base: "Gymnase2000.sqlite"
 tpNum: 4
 exerciceNum: 2
-titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
+titre: "Exercice 2 : Partie II - Requêtes intermédiaires"
 permalink: "/tp4/exercice2/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 1 : Partie I - Requêtes de base et jointures simples
+# Exercice 2 : Partie II - Requêtes intermédiaires
 
-## Questions (15 questions)
+## Questions (9 questions)
 
-**1. Afficher tous les sportifs du gymnase**
+**1. Calculer le nombre de sports pratiqués par chaque sportif**
 
-Affichez la liste complète des sportifs : numéro de licence (idsportif), nom et prénom.
+Affichez le nom du sportif et le nombre de sports.
 
-**2. Lister tous les sports disponibles**
+**2. Afficher le nom des sportifs et le nom de leur conseiller**
 
-Affichez le numéro et le nom de tous les sports proposés.
-
-**3. Afficher les sports pratiqués par un sportif donné (ex: id 1)**
-
-Trouvez tous les sports qu'un sportif particulier pratique.
-
-**4. Lister les séances d'entraînement programmées**
-
-Affichez le sport, le gymnase, et l'horaire pour chaque séance programmée.
-
-**5. Afficher les entraîneurs (sportifs qui entraînent) et les sports qu'ils enseignent**
-
-Identifiez les sportifs ayant un rôle d'entraîneur.
-
-**6. Trouver les arbitres et les sports qu'ils arbitrent**
-
-Listez les sportifs arbitres et leurs sports.
-
-**7. Afficher toutes les séances du gymnase numéro 1**
-
-Affichez le sport et l'horaire.
-
-**8. Lister les sportifs et les séances auxquelles ils peuvent participer (basé sur les sports qu'ils jouent)**
-
-Affichez le nom du sportif, le sport, et l'horaire de la séance.
-
-**9. Afficher le nombre de sportifs par sport**
-
-Comptez combien de sportifs pratiquent chaque sport.
-
-**10. Trouver les sportifs qui pratiquent plus d'un sport**
-
-Identifiez les sportifs polyvalents.
-
-**11. Afficher les gymnases et le nombre de séances programmées dans chaque**
-
-Comptez les activités par gymnase.
-
-**12. Lister les sportifs qui entraînent un sport qu'ils pratiquent eux-mêmes**
-
-Trouvez les entraîneurs-pratiquants.
+Affichez le nom du sportif et le nom de son conseiller.
 
 <details>
 <summary>💡 Indice</summary>
-les id_sportif_entraineur sont des id_sportifs qui ont un rôle d'entraîneur. 
+Utilisez une auto-jointure sur la table Sportifs.
 </details>
 
-**13. Afficher les sportifs âgés de 20 à 30 ans**
+**3. Calculer le nombre d'entraîneurs par sport**
 
-Filtrez les sportifs sur leur âge.
+Comptez les entraîneurs disponibles pour chaque discipline.
 
-**14. Trouver les paires (entraîneur, sportif) où l'entraîneur entraîne un sport que le sportif pratique**
+**4. Lister les gymnases avec le nombre total de séances et le nombre de sports distincts offerts**
 
-Identifiez les relations entraîneur-apprenant potentielles.
+Analysez le gymnase, le nombre de séances programmées et le nombre de sports différents proposés.
 
+**5. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "10")**
 
-**15. Afficher les sports sans séances programmées**
+Basez-vous sur les sports de la séance et les sports que le sportif pratique.
 
-Quel sport n'a aucune séance d'entraînement ?
+**6. Calculer la durée moyenne des séances par sport**
+
+Affichez le sport et la durée moyenne en minutes.
+
+**7. Trouver les sportifs qui ne pratiquent aucun sport**
+
+Identifiez les sportifs absents de la table Jouer.
+
+**8. Pour chaque gymnase, compter le nombre de séances par jour de la semaine**
+
+Affichez le nom du gymnase, le jour, et le nombre de séances.
+
+**9. Lister les sportifs en indiquant s'ils sont majeurs ou mineurs (Age >= 18)**
+
+Affichez le nom, l'âge et une colonne "Statut" ("Majeur" ou "Mineur").
+
+<details>
+<summary>💡 Indice</summary>
+Utilisez une structure conditionnelle (CASE) pour créer une nouvelle colonne "Statut".
+</details>

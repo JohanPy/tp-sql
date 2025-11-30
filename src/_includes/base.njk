@@ -21,6 +21,12 @@
   data-show-save-db="{{ show_save_db or false }}"
 >
   <header>
+    <a href="{{ '/' | absUrl }}" class="header-home-link" title="Retour à l'accueil" style="margin-right: 15px; display: flex; align-items: center; color: var(--text-primary); text-decoration: none;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </a>
     <h1>{{ intitule or "SQL TP - Travaux Pratiques" }}</h1>
     <div class="toolbar">
       <button id="execute" class="button button-primary">
@@ -57,41 +63,41 @@
   </header>
 
   <div class="main-layout">
-    <!-- Navigation Panel -->
-    <nav class="nav-panel" id="navPanel">
-      <div class="nav-header">
-        <div class="nav-header-content">
-          <a href="{{ '/' | absUrl }}" class="home-link">🏠 Accueil</a>
-          <button id="toggleNav" class="toggle-nav-btn" title="Plier/Dépiler la navigation">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="nav-content">
-        {% for tpNumber, tpExercices in collections.tpsByNumber %}
-        <div class="tp-group">
-          <h3 class="tp-title">TP {{ tpNumber }}</h3>
-          <ul class="exercise-list">
-            {% for exercise in tpExercices %}
-            <li>
-              <a href="{{ exercise.url | absUrl }}" 
-                 class="exercise-link {% if page.url == exercise.url %}active{% endif %}">
-                {{ exercise.data.titre or ("Exercice " + exercise.data.exerciceNum) }}
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endfor %}
-      </div>
-    </nav>
+
 
     <!-- Content Panel -->
     <main class="content-panel">
       <article class="exercise-content">
         {{ content | safe }}
+
+        {% set previousPost = collections.allTPs | getPreviousCollectionItem(page) %}
+        {% set nextPost = collections.allTPs | getNextCollectionItem(page) %}
+
+        {% if previousPost or nextPost %}
+        <div class="exercise-navigation">
+          {% if previousPost %}
+            <a href="{{ previousPost.url | absUrl }}" class="nav-btn prev-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <div class="nav-text">
+                <span class="nav-label">Précédent</span>
+                <span class="nav-title">{{ previousPost.data.titre or ("Exercice " + previousPost.data.exerciceNum) }}</span>
+              </div>
+            </a>
+          {% else %}
+            <div class="nav-placeholder"></div>
+          {% endif %}
+
+          {% if nextPost %}
+            <a href="{{ nextPost.url | absUrl }}" class="nav-btn next-btn">
+              <div class="nav-text">
+                <span class="nav-label">Suivant</span>
+                <span class="nav-title">{{ nextPost.data.titre or ("Exercice " + nextPost.data.exerciceNum) }}</span>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          {% endif %}
+        </div>
+        {% endif %}
       </article>
     </main>
 

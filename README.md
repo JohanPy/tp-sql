@@ -43,8 +43,8 @@ tp-sql/
 │   ├── _includes/           # Layouts Nunjucks
 │   │   └── base.njk        # Layout principal 3 panneaux
 │   ├── tps/                # Fichiers markdown des TPs
+│   │   ├── tp1-00-intro.md
 │   │   ├── tp1-ex1.md
-│   │   ├── tp1-ex2.md
 │   │   └── ...
 │   ├── assets/             # Assets statiques
 │   │   ├── css/

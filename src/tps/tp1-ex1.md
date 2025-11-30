@@ -81,10 +81,14 @@ Attention à la priorité des opérateurs ! Utilisez des parenthèses pour group
 ```sql
 -- Sélectionner toutes les colonnes
 SELECT * FROM Table;
+```
 
+```sql
 -- Sélectionner des colonnes spécifiques
 SELECT Colonne1, Colonne2 FROM Table;
+```
 
+```sql
 -- Trier les résultats (ASC pour croissant, DESC pour décroissant)
 SELECT * FROM Table ORDER BY Colonne1 ASC;
 ```
@@ -94,14 +98,20 @@ SELECT * FROM Table ORDER BY Colonne1 ASC;
 ```sql
 -- Filtrer avec une condition simple
 SELECT * FROM Table WHERE Colonne1 = 'Valeur';
+```
 
+```sql
 -- Filtrer avec plusieurs valeurs (IN)
 SELECT * FROM Table WHERE Colonne1 IN ('Val1', 'Val2');
+```
 
+```sql
 -- Recherche partielle (LIKE)
 -- % remplace n'importe quelle suite de caractères
 SELECT * FROM Table WHERE Colonne1 LIKE '%texte%';
+```
 
+```sql
 -- Conditions multiples (AND / OR)
 SELECT * FROM Table WHERE Colonne1 = 'A' AND Colonne2 > 10;
 ```
@@ -111,10 +121,14 @@ SELECT * FROM Table WHERE Colonne1 = 'A' AND Colonne2 > 10;
 ```sql
 -- Supprimer les doublons
 SELECT DISTINCT Colonne1 FROM Table;
+```
 
+```sql
 -- Limiter le nombre de résultats
 SELECT * FROM Table LIMIT 5;
+```
 
+```sql
 -- Convertir en majuscules
 SELECT UPPER(Colonne1) FROM Table;
 ```

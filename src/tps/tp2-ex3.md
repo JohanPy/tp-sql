@@ -48,7 +48,9 @@ Formats courants : `%Y` (Année), `%m` (Mois), `%d` (Jour).
 ```sql
 -- Extraire l'année d'une date
 SELECT STRFTIME('%Y', DateCom) FROM Commande;
+```
 
+```sql
 -- Extraire le mois
 SELECT STRFTIME('%m', DateCom) FROM Commande;
 ```
@@ -61,7 +63,9 @@ Pour calculer une différence entre deux dates, on les convertit en "Jour Julien
 -- Nombre de jours entre deux dates
 SELECT JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS DelaiLivraison
 FROM Commande;
+```
 
+```sql
 -- Ajouter des jours à une date
 SELECT DATE('now', '+7 days');
 ```

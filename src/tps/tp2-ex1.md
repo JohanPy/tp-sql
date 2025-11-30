@@ -57,13 +57,19 @@ Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
 ```sql
 -- Compter le nombre de lignes
 SELECT COUNT(*) FROM Client;
+```
 
+```sql
 -- Calculer la somme
 SELECT SUM(PrixUnit) FROM Produit;
+```
 
+```sql
 -- Calculer la moyenne
 SELECT AVG(PrixUnit) FROM Produit;
+```
 
+```sql  
 -- Trouver le minimum et le maximum
 SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
 ```

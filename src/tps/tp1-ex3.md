@@ -57,14 +57,17 @@ SELECT Nom || ' ' || Prenom AS NomComplet FROM Employe;
 -- Extraire une partie de la chaîne (SUBSTR)
 -- SUBSTR(chaine, debut, longueur)
 SELECT SUBSTR(Nom, 1, 3) FROM Client; -- 3 premiers caractères
+```
+```sql
 SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères
-
+```
+```sql
 -- Remplacer du texte (REPLACE)
 -- REPLACE(chaine, ancien, nouveau)
 SELECT REPLACE(Fonction, 'Manager', 'Directeur') FROM Employe;
-
+```
+```sql
 -- Minuscules / Majuscules
 SELECT LOWER(Nom) FROM Client;
 SELECT UPPER(Nom) FROM Client;
 ```
-

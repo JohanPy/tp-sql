@@ -37,9 +37,9 @@ Comptez les entraîneurs disponibles pour chaque discipline.
 
 Analysez le gymnase, le nombre de séances programmées et le nombre de sports différents proposés.
 
-**5. Afficher les sportifs qui peuvent jouer dans une séance donnée (ex: NumSeance = "10")**
+**5. Afficher les sportifs pouvant participer à une séance donnée (ex: idGymnase = 1, Jour = "Lundi", Horaire = 9)**
 
-Basez-vous sur les sports de la séance et les sports que le sportif pratique.
+Affichez les noms, les prénoms des sportifs et l'`IdSport` correspondant au sport de la séance.
 
 **6. Calculer la durée moyenne des séances par sport**
 

@@ -28,17 +28,33 @@ Le format doit être : `Adresse, CodePostal Ville, Pays`
 Utilisez l'opérateur de concaténation `||` pour joindre des chaînes.
 </details>
 
+<!-- expected-query: Q1
+SELECT (Adresse || ', ' || CodePostal || ' ' || Ville || ', ' || Pays) AS AdresseComplete FROM Client;
+-->
+
 **2. Extraire les deux derniers caractères des codes clients**
 
 Créez une colonne affichant les 2 derniers caractères de `CodeCli`.
+
+<!-- expected-query: Q2
+SELECT CodeCli, SUBSTR(CodeCli, -2) AS DeuxDerniers FROM Client;
+-->
 
 **3. Mettre en minuscule le nom des sociétés**
 
 Affichez le nom de chaque société en minuscule.
 
+<!-- expected-query: Q3
+SELECT LOWER(Societe) AS SocieteMinuscule FROM Client;
+-->
+
 **4. Affichez le nom des clients et leur fonction en remplaçant le terme "marketing" par "mercatique"**
 
 Remplacez tous les "marketing" dans le champ `Fonction` par "mercatique".
+
+<!-- expected-query: Q4
+SELECT Contact, REPLACE(Fonction, 'Marketing', 'mercatique') AS Fonction FROM Client;
+-->
 
 ## Rappel de cours
 

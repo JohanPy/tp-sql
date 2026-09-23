@@ -20,6 +20,10 @@ show_save_db: false
 
 Pour chaque commande, montrez la date sous le format "2024-03" (année-mois).
 
+<!-- expected-query: Q1
+SELECT NoCom, STRFTIME('%Y-%m', DateCom) AS AnneeMois FROM Commande;
+-->
+
 **2. Calculer le délai de livraison en jours**
 
 Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivraison.
@@ -30,9 +34,17 @@ Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivra
 La fonction `JULIANDAY()` convertit une date en nombre de jours depuis une date de référence.
 </details>
 
+<!-- expected-query: Q2
+SELECT NoCom, CAST(JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS INT) AS DelaiLivraisonJours FROM Commande WHERE DateEnv IS NOT NULL;
+-->
+
 **3. Lister les commandes passées au cours du mois de décembre 2014**
 
 Affichez toutes les commandes dont la date est en décembre 2014.
+
+<!-- expected-query: Q3
+SELECT * FROM Commande WHERE STRFTIME('%Y-%m', DateCom) = '2014-12';
+-->
 
 ## Rappel de cours
 

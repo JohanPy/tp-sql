@@ -254,8 +254,8 @@
 
   <!-- Métadonnées pour le JavaScript -->
   <script>
-    // Déterminer le basePath (vide en local, "/tp-sql" en production)
-    const basePath = window.location.pathname.includes('/tp-sql/') ? '/tp-sql' : '';
+    // Déterminer le basePath (vide en local, "/tp-sql" en production GitHub Pages)
+    const basePath = window.location.pathname.startsWith('/tp-sql') ? '/tp-sql' : '';
     
     window.TP_CONFIG = {
       base: "{{ base or '' }}",

@@ -135,6 +135,7 @@ initTabs();
 initKeyboardShortcuts();
 initHistoryModal();
 initNavToggle();
+initExpectedResultButtons();
 
 // Initialize navigation toggle
 function initNavToggle() {
@@ -1147,6 +1148,120 @@ function closeTab(tabId) {
 			setActiveTab(firstTab.dataset.tab);
 		}
 	}
+}
+
+// ===========================
+// EXPECTED RESULTS MANAGEMENT
+// ===========================
+
+function initExpectedResultButtons() {
+	document.addEventListener('click', function(e) {
+		const btn = e.target.closest('.btn-expected-result');
+		if (!btn) return;
+		
+		const qid = btn.dataset.qid || 'Solution';
+		const obfuscated = btn.dataset.query;
+		if (!obfuscated) return;
+		
+		addButtonClickFeedback(btn);
+		executeExpectedResult(qid, obfuscated);
+	});
+}
+
+function deobfuscateQuery(b64) {
+	const key = "IUT-BDR-SQL-SECRET";
+	try {
+		const raw = atob(b64);
+		let decoded = "";
+		for (let i = 0; i < raw.length; i++) {
+			decoded += String.fromCharCode(raw.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+		}
+		return decoded;
+	} catch (err) {
+		console.error("Erreur de déchiffrement de la requête attendue:", err);
+		return "";
+	}
+}
+
+function executeExpectedResult(qid, obfuscatedQuery) {
+	const sql = deobfuscateQuery(obfuscatedQuery);
+	if (!sql) return;
+
+	const tabId = `expected-tab-${qid.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+	let tabBtn = document.querySelector(`.tab[data-tab="${tabId}"]`);
+	let panel = document.getElementById(tabId);
+
+	if (!tabBtn) {
+		// Create tab button
+		const tabTemplate = document.getElementById('tab-template');
+		const tabClone = tabTemplate.content.cloneNode(true);
+		tabBtn = tabClone.querySelector('.tab');
+		tabBtn.dataset.tab = tabId;
+		tabBtn.classList.add('tab-expected');
+		tabBtn.innerHTML = '';
+		tabBtn.textContent = `🎯 Attendu (${qid})`;
+		
+		const closeBtn = document.createElement('span');
+		closeBtn.className = 'tab-close';
+		closeBtn.textContent = '×';
+		tabBtn.appendChild(closeBtn);
+		
+		elements.resultsTabs.insertBefore(tabBtn, elements.newTabBtn);
+
+		// Create tab panel
+		const panelTemplate = document.getElementById('tab-panel-template');
+		const panelClone = panelTemplate.content.cloneNode(true);
+		panel = panelClone.querySelector('.tab-panel');
+		panel.id = tabId;
+		panel.classList.add('results-content', 'expected-panel');
+		
+		const resultsContainer = document.querySelector('.results-panels');
+		if (resultsContainer) {
+			resultsContainer.appendChild(panel);
+		}
+	}
+
+	setActiveTab(tabId);
+	showLoadingIndicator(panel);
+	updateStatus('executing', `Calcul du résultat attendu pour ${qid}...`);
+	tic();
+
+	worker.onmessage = function (event) {
+		const results = event.data.results;
+		const executionTime = toc("Executing expected SQL");
+
+		if (!results) {
+			handleError({ message: event.data.error || "Erreur lors de l'exécution de la solution" });
+			return;
+		}
+
+		panel.innerHTML = "";
+
+		const banner = document.createElement('div');
+		banner.className = 'expected-result-banner';
+		banner.innerHTML = `
+			<div class="expected-banner-content">
+				<span class="expected-badge">🎯 RÉSULTAT ATTENDU</span>
+				<span class="expected-title">Question ${qid}</span>
+				<span class="expected-hint">— Comparez vos colonnes, l'ordre et le nombre de lignes avec ce tableau</span>
+			</div>
+		`;
+		panel.appendChild(banner);
+
+		if (results.length === 0) {
+			displayNoResults(panel);
+			return;
+		}
+
+		displayResultSets(results, panel);
+
+		const displayTime = toc("Displaying expected results");
+		updateQueryTime(executionTime + displayTime);
+		updateStatus('success', `Résultat attendu pour ${qid} affiché (${results[0].values.length} lignes)`);
+	};
+
+	worker.postMessage({ action: 'exec', sql: sql });
+	worker.onerror = handleError;
 }
 
 // Query history functions

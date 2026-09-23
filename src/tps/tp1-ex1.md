@@ -20,9 +20,17 @@ show_save_db: false
 
 Ordonnez les produits du moins cher au plus cher.
 
+<!-- expected-query: Q1
+SELECT * FROM Produit ORDER BY PrixUnit ASC;
+-->
+
 **2. Lister les trois produits les plus chers**
 
 Affichez les 3 produits avec les prix les plus élevés.
+
+<!-- expected-query: Q2
+SELECT * FROM Produit ORDER BY PrixUnit DESC LIMIT 3;
+-->
 
 **3. Lister les clients suisses, allemands et belges**
 
@@ -34,21 +42,41 @@ Filtrez les clients selon leur pays (Suisse, Allemagne, Belgique).
 Utilisez l'opérateur `IN` pour filtrer sur plusieurs valeurs.
 </details>
 
+<!-- expected-query: Q3
+SELECT * FROM Client WHERE Pays IN ('Suisse', 'Allemagne', 'Belgique');
+-->
+
 **4. Lister les noms des Sociétés dont le nom contient "restaurant"**
 
 Recherchez les sociétés clients ayant "restaurant" dans leur nom.
+
+<!-- expected-query: Q4
+SELECT Societe FROM Client WHERE Societe LIKE '%restaurant%';
+-->
 
 **5. Lister les différents pays des clients (sans doublons)**
 
 Affichez la liste unique des pays où se trouvent les clients.
 
+<!-- expected-query: Q5
+SELECT DISTINCT Pays FROM Client;
+-->
+
 **6. Idem en ajoutant les villes, le tout trié par ordre alphabétique du pays et de la ville**
 
 Affichez les couples (Pays, Ville) sans doublon, triés par pays puis par ville.
 
+<!-- expected-query: Q6
+SELECT DISTINCT Pays, Ville FROM Client ORDER BY Pays, Ville;
+-->
+
 **7. Lister tous les produits vendus en bouteilles ou en canettes**
 
 Recherchez les produits dont l'unité de vente (QteParUnit) contient "bouteille" ou "canette".
+
+<!-- expected-query: Q7
+SELECT * FROM Produit WHERE QteParUnit LIKE '%bouteille%' OR QteParUnit LIKE '%canette%';
+-->
 
 **8. Lister les produits du fournisseur n° 8 dont le prix unitaire est entre 10 et 100€**
 
@@ -60,9 +88,17 @@ Affichez le nom et la référence du produit en majuscule.
 Pour convertir en majuscule, utilisez la fonction `UPPER()`.
 </details>
 
+<!-- expected-query: Q8
+SELECT UPPER(Nomprod), UPPER(Refprod) FROM Produit WHERE NoFour = 8 AND PrixUnit BETWEEN 10 AND 100;
+-->
+
 **9. Lister les numéros d'employés ayant réalisé une commande à livrer à Lille, Lyon ou Nantes**
 
 Récupérez les `NoEmp` des employés pour des commandes destinées à ces villes.
+
+<!-- expected-query: Q9
+SELECT DISTINCT NoEmp FROM Commande WHERE VilleLiv IN ('Lille', 'Lyon', 'Nantes');
+-->
 
 **10. Lister les produits dont le nom contient "tofu" ou "choco", dont le prix est inférieur à 100€**
 
@@ -73,6 +109,10 @@ Affichez le nom et le prix de ces produits.
 
 Attention à la priorité des opérateurs ! Utilisez des parenthèses pour grouper les conditions OR.
 </details>
+
+<!-- expected-query: Q10
+SELECT Nomprod, PrixUnit FROM Produit WHERE (Nomprod LIKE '%tofu%' OR Nomprod LIKE '%choco%') AND PrixUnit < 100;
+-->
 
 ## Rappel de cours
 

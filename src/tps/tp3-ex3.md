@@ -26,6 +26,10 @@ Affichez le nom de l'employé et le nombre de clients distincts qu'il a traités
 Groupez par NoEmp et comptez DISTINCT CodeCli via COUNT(DISTINCT CodeCli) ; triez ensuite sur ce compteur pour repérer ceux qui ont peu de clients.
 </details>
 
+<!-- expected-query: Q1
+SELECT Employe.Nom, Employe.Prenom, COUNT(DISTINCT Commande.CodeCli) AS NbClientsDistincts FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom ORDER BY NbClientsDistincts ASC;
+-->
+
 **2. Calculer le "coefficient de fidélité" : (nombre de commandes) / (délai entre première et dernière commande en jours + 1)**
 
 Affichez le client et son coefficient de fidélité (plus élevé = plus fidèle).
@@ -33,6 +37,10 @@ Affichez le client et son coefficient de fidélité (plus élevé = plus fidèle
 <summary>💡 Indice</summary>
 Calculez pour chaque client la date min/max des commandes et le nombre total ; utilisez julianday() pour obtenir les jours entre deux dates avant de former le ratio.
 </details>
+
+<!-- expected-query: Q2
+SELECT CodeCli, ROUND(CAST(COUNT(NoCom) AS FLOAT) / (JULIANDAY(MAX(DateCom)) - JULIANDAY(MIN(DateCom)) + 1), 4) AS CoeffFidelite FROM Commande GROUP BY CodeCli ORDER BY CoeffFidelite DESC;
+-->
 
 **3. Calculer l'impact de chaque catégorie sur le CA total par mois**
 
@@ -42,6 +50,10 @@ Affichez le mois, la catégorie, le CA mensuel catégorique et le % du CA total.
 Regroupez par strftime('%Y-%m', DateCom) et CodeCateg ; calculez SUM(PrixUnit * Qte * (1-Remise)) pour le CA, puis calculez le pourcentage par rapport au CA total du mois (sous-requête ou fenêtre utile).
 </details>
 
+<!-- expected-query: Q3
+SELECT STRFTIME('%Y-%m', Commande.DateCom) AS Mois, Categorie.NomCateg, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS CA_Categorie FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom JOIN Produit ON DetailCommande.Refprod = Produit.Refprod JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Mois, Categorie.CodeCateg, Categorie.NomCateg ORDER BY Mois;
+-->
+
 **4. Analyser les "cycles de réapprovisionnement" : délai moyen entre 2 commandes pour chaque client**
 
 Calculez la fréquence d'achat de chaque client.
@@ -49,6 +61,10 @@ Calculez la fréquence d'achat de chaque client.
 <summary>💡 Indice</summary>
 Ordonnez les dates de commande par client et calculez la différence entre commandes consécutives (julianday). Moyennez ces différences par client. En SQL sans fenêtres, pensez aux sous-requêtes corrélées ou aux fonctions de fenêtre si disponibles.
 </details>
+
+<!-- expected-query: Q4
+SELECT CodeCli, COUNT(NoCom) AS NbCommandes, ROUND((JULIANDAY(MAX(DateCom)) - JULIANDAY(MIN(DateCom))) / NULLIF(COUNT(NoCom) - 1, 0), 1) AS DelaiMoyenReappro FROM Commande GROUP BY CodeCli HAVING COUNT(NoCom) > 1;
+-->
 
 **5. Créer une "chaîne de distribution" : Fournisseur → Produit → Commande → Client**
 
@@ -58,6 +74,10 @@ Affichez le fournisseur, ses produits commandés, le nombre de commandes et le n
 Départ : table Produit pour lier Fournisseur→Produit. Agrégez ensuite les DetailCommande par Refprod pour compter commandes et clients distincts ; regroupez au niveau du fournisseur.
 </details>
 
+<!-- expected-query: Q5
+SELECT Fournisseur.Societe AS Fournisseur, COUNT(DISTINCT Produit.Refprod) AS NbProduits, COUNT(DISTINCT DetailCommande.NoCom) AS NbCommandes, COUNT(DISTINCT Commande.CodeCli) AS NbClientsDistincts FROM Fournisseur JOIN Produit ON Fournisseur.NoFour = Produit.NoFour LEFT JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod LEFT JOIN Commande ON DetailCommande.NoCom = Commande.NoCom GROUP BY Fournisseur.NoFour, Fournisseur.Societe;
+-->
+
 **6. Créer un "ranking 3-niveaux" : pour chaque employé, classe les clients par montant total**
 
 Affichez NoEmp, Nom, CodeCli (client), et rang du client pour cet employé.
@@ -65,6 +85,10 @@ Affichez NoEmp, Nom, CodeCli (client), et rang du client pour cet employé.
 <summary>💡 Indice</summary>
 Calculez le montant total par (NoEmp, CodeCli) via SUM sur DetailCommande joint à Commande (si nécessaire), puis utilisez des comparaisons de seuils ou la fonction ROW_NUMBER() si votre SQL le permet; autrement, simulez le rang par agrégats et conditions.
 </details>
+
+<!-- expected-query: Q6
+SELECT Commande.NoEmp, Employe.Nom AS NomEmploye, Commande.CodeCli, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantTotalClient FROM Commande JOIN Employe ON Commande.NoEmp = Employe.NoEmp JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Commande.NoEmp, Employe.Nom, Commande.CodeCli ORDER BY Commande.NoEmp, MontantTotalClient DESC;
+-->
 
 **7. Trouver les "paires de clients" dans le même pays ayant commandé les mêmes produits**
 
@@ -74,6 +98,10 @@ Identifiez les clients des même pays qui ont acheté la même chose.
 Comptez les produits par client (par produit), regroupez par client et comparez les ensembles — une auto-jointure (client vs client) ou une comparaison d'agrégats/groupes permet d'identifier les paires du même pays.
 </details>
 
+<!-- expected-query: Q7
+SELECT DISTINCT C1.Societe AS Client1, C2.Societe AS Client2, C1.Pays FROM Client C1 JOIN Client C2 ON C1.Pays = C2.Pays AND C1.CodeCli < C2.CodeCli JOIN Commande Com1 ON C1.CodeCli = Com1.CodeCli JOIN DetailCommande D1 ON Com1.NoCom = D1.NoCom JOIN Commande Com2 ON C2.CodeCli = Com2.CodeCli JOIN DetailCommande D2 ON Com2.NoCom = D2.NoCom AND D1.Refprod = D2.Refprod;
+-->
+
 **8. Identifier les "hotspots" : combinaisons client-produit avec anomalies (quantités très élevées vs moyenne)**
 
 Trouvez les achats inhabituels.
@@ -82,6 +110,10 @@ Trouvez les achats inhabituels.
 Pour chaque paire client-produit, comparez la quantité à la moyenne de ce produit (agrégat sur DetailCommande). Repérez les lignes où Qte est beaucoup plus élevée qu'une moyenne ± multiple d'écart-type ou d'un facteur fixé.
 </details>
 
+<!-- expected-query: Q8
+SELECT DetailCommande.NoCom, DetailCommande.Refprod, Produit.Nomprod, DetailCommande.Qte FROM DetailCommande JOIN Produit ON DetailCommande.Refprod = Produit.Refprod WHERE DetailCommande.Qte > (SELECT AVG(Qte) * 2 FROM DetailCommande D2 WHERE D2.Refprod = DetailCommande.Refprod);
+-->
+
 **9. Identifier les produits "substituables" : commandés ensemble dans au moins 50% des commandes**
 
 Trouvez les produits souvent achetés ensemble.
@@ -89,6 +121,10 @@ Trouvez les produits souvent achetés ensemble.
 <summary>💡 Indice</summary>
 Pour chaque paire de produits, comptez le nombre de commandes où les deux apparaissent et divisez par le nombre total de commandes contenant l'un d'eux (ou par total général selon la définition) ; une auto-jointure sur DetailCommande par NoCom et Refprod permet d'obtenir les paires.
 </details>
+
+<!-- expected-query: Q9
+SELECT D1.Refprod AS Prod1, P1.Nomprod AS NomProd1, D2.Refprod AS Prod2, P2.Nomprod AS NomProd2, COUNT(DISTINCT D1.NoCom) AS NbCommandesEnsemble FROM DetailCommande D1 JOIN DetailCommande D2 ON D1.NoCom = D2.NoCom AND D1.Refprod < D2.Refprod JOIN Produit P1 ON D1.Refprod = P1.Refprod JOIN Produit P2 ON D2.Refprod = P2.Refprod GROUP BY D1.Refprod, D2.Refprod, P1.Nomprod, P2.Nomprod HAVING COUNT(DISTINCT D1.NoCom) >= 5 ORDER BY NbCommandesEnsemble DESC;
+-->
 
 ## Rappel de cours
 

@@ -20,9 +20,17 @@ show_save_db: false
 
 Pour chaque produit, calculez le total d'unités disponibles (unités en stock + unités en commande).
 
+<!-- expected-query: Q1
+SELECT Refprod, Nomprod, (UnitesStock + UnitesCom) AS TotalUnites FROM Produit;
+-->
+
 **2. À partir de la table DetailCommande, calculez pour chaque produit de la commande numéro 10251 : le montant de la remise (exprimé en %) et le montant à payer**
 
 Affichez le montant original, la remise en euros et le montant final.
+
+<!-- expected-query: Q2
+SELECT Refprod, (PrixUnit * Qte) AS MontantBrut, (PrixUnit * Qte * Remise) AS MontantRemise, (PrixUnit * Qte * (1 - Remise)) AS MontantNet FROM DetailCommande WHERE Nocom = 10251;
+-->
 
 ## Rappel de cours
 

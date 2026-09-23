@@ -1947,3 +1947,116 @@ code[class*="language-"] {
 	flex: 1;
 }
 
+/* ==========================================================================
+   Boutons et Onglets de Résultats Attendus (Autoévaluation)
+   ========================================================================== */
+
+.expected-action-wrapper {
+	margin: 8px 0 18px 0;
+	display: flex;
+	align-items: center;
+}
+
+.btn-expected-result {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	background: rgba(139, 92, 246, 0.12);
+	color: #c4b5fd;
+	border: 1px solid rgba(139, 92, 246, 0.35);
+	border-radius: 20px;
+	padding: 5px 14px;
+	font-size: 0.82rem;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+	outline: none;
+}
+
+.btn-expected-result:hover {
+	background: rgba(139, 92, 246, 0.22);
+	color: #ffffff;
+	border-color: rgba(167, 139, 250, 0.7);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 10px rgba(139, 92, 246, 0.25);
+}
+
+.btn-expected-result:active {
+	transform: translateY(0);
+	background: rgba(139, 92, 246, 0.3);
+}
+
+.btn-expected-result .expected-icon {
+	stroke: #a78bfa;
+	transition: transform 0.2s ease;
+}
+
+.btn-expected-result:hover .expected-icon {
+	stroke: #ffffff;
+	transform: scale(1.1);
+}
+
+/* Onglet Attendu */
+.tab.tab-expected {
+	background: rgba(139, 92, 246, 0.08);
+	color: #c4b5fd;
+	border-bottom: 2px solid transparent;
+	font-weight: 500;
+}
+
+.tab.tab-expected:hover:not(.active) {
+	background: rgba(139, 92, 246, 0.15);
+	color: #ffffff;
+}
+
+.tab.tab-expected.active {
+	background: rgba(139, 92, 246, 0.2);
+	color: #f5f3ff;
+	border-bottom: 2px solid #a78bfa;
+	box-shadow: inset 0 -2px 0 #a78bfa;
+}
+
+/* Panneau Attendu & Bannière */
+.expected-result-banner {
+	margin-bottom: 12px;
+	padding: 8px 14px;
+	background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, rgba(79, 190, 255, 0.05) 100%);
+	border-left: 3px solid #a78bfa;
+	border-radius: var(--radius-sm);
+	font-size: 0.85rem;
+	color: var(--text-primary);
+	display: flex;
+	align-items: center;
+}
+
+.expected-banner-content {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.expected-badge {
+	background: #7c3aed;
+	color: #ffffff;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.5px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	text-transform: uppercase;
+}
+
+.expected-title {
+	font-weight: 600;
+	color: #ffffff;
+}
+
+.expected-hint {
+	color: var(--text-secondary);
+	font-size: 0.82rem;
+}
+
+

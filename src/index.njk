@@ -123,12 +123,18 @@ permalink: "/"
   <!-- Aide rapide condensée -->
   <div class="quick-help-compact">
     <div class="quick-help-title">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
-      <span>Guide express</span>
+      <div style="display: flex; align-items: center; gap: 5px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Guide express</span>
+      </div>
+      <button type="button" id="homeTourTrigger" class="quick-help-tour-btn" title="Ouvrir le guide didactique et lancer la visite guidée (?)">
+        <span class="tour-btn-mini-icon">?</span>
+        <span>Guide didactique</span>
+      </button>
     </div>
     <div class="help-steps-compact">
       <div class="step-chip"><span class="step-num">1</span> Choisir un exercice</div>
@@ -578,12 +584,49 @@ h2.tp-title {
 .quick-help-title {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 5px;
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex-wrap: wrap;
+}
+
+.quick-help-tour-btn {
+  background: rgba(79, 190, 255, 0.1);
+  border: 1px solid rgba(79, 190, 255, 0.3);
+  color: #4fbeff;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.quick-help-tour-btn:hover {
+  background: rgba(79, 190, 255, 0.2);
+  border-color: rgba(79, 190, 255, 0.6);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.tour-btn-mini-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(79, 190, 255, 0.25);
+  font-size: 10px;
+  font-weight: 700;
 }
 
 .quick-help-title svg {

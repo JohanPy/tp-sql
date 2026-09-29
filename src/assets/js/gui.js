@@ -1856,33 +1856,31 @@ window.addEventListener('resize', function() {
 
 // Add keyboard shortcuts info
 function initKeyboardShortcuts() {
-	document.addEventListener('DOMContentLoaded', function() {
-		const editorHeader = document.querySelector('.editor-header');
-		if (editorHeader) {
-			const shortcuts = document.createElement('div');
-			shortcuts.className = 'shortcuts';
-			
-			addShortcutInfo(shortcuts, 'Execute: Ctrl/Cmd+Enter', 'Ctrl+Enter');
-			addShortcutInfo(shortcuts, 'Save DB: Ctrl/Cmd+S', 'Ctrl+S');
-			addShortcutInfo(shortcuts, 'Toggle History: Ctrl+Space', 'Ctrl+Space');
-			
-			editorHeader.appendChild(shortcuts);
-		}
-	});
+	const editorHeader = document.querySelector('.editor-header');
+	if (editorHeader) {
+		const shortcuts = document.createElement('div');
+		shortcuts.className = 'shortcuts';
+		
+		addShortcutInfo(shortcuts, 'Exécuter : Ctrl/Cmd+Enter', 'Ctrl+Enter');
+		addShortcutInfo(shortcuts, 'Autocomplétion : Ctrl+Espace', 'Ctrl+Space');
+		addShortcutInfo(shortcuts, 'Visite guidée & Astuces : ?', '?');
+		
+		editorHeader.appendChild(shortcuts);
+	}
 }
 
 function addShortcutInfo(container, title, keyText) {
-	const shortcutTemplate = document.getElementById('shortcut-template');
-	const shortcutClone = shortcutTemplate.content.cloneNode(true);
-	const shortcut = shortcutClone.querySelector('span');
-	shortcut.title = title;
+	const span = document.createElement('span');
+	span.title = title;
+	span.className = 'shortcut-item';
+	span.style.cursor = 'help';
 	
-	const keySlot = document.createElement('span');
-	keySlot.slot = 'key';
-	keySlot.textContent = keyText;
-	shortcut.appendChild(keySlot);
+	const key = document.createElement('kbd');
+	key.className = 'shortcut-key';
+	key.textContent = keyText;
 	
-	container.appendChild(shortcut);
+	span.appendChild(key);
+	container.appendChild(span);
 }
 
 // ============================================

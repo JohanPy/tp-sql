@@ -1074,9 +1074,16 @@ body.resizing {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	gap: 12px;
 	margin-bottom: 8px;
 	color: rgba(255, 255, 255, 0.7);
 	font-weight: 500;
+}
+
+.editor-header-left {
+	display: flex;
+	align-items: center;
+	gap: 10px;
 }
 
 /* SQL Snippets Menu */

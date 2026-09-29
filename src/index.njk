@@ -6,46 +6,108 @@ permalink: "/"
 ---
 
 <div class="home-container">
+  <!-- En-tête compact et moderne -->
   <div class="hero-compact">
-    <div class="hero-content">
-      <h1>🎓 Plateforme SQL</h1>
-      <p>Entraînement interactif sur bases de données réelles.</p>
+    <div class="hero-main">
+      <div class="hero-title-row">
+        <span class="hero-icon">🎓</span>
+        <div>
+          <h1>Plateforme SQL</h1>
+          <p class="hero-subtitle">Entraînement interactif sur bases de données relationnelles</p>
+        </div>
+      </div>
     </div>
     <div class="hero-stats">
-      <div class="stat-item">
+      <div class="stat-pill" title="Nombre total d'exercices disponibles">
         <span class="stat-value">{{ collections.allTPs.length }}</span>
-        <span class="stat-label">Exercices</span>
+        <span class="stat-label">exercices</span>
       </div>
-      <div class="stat-item">
+      <div class="stat-pill" title="Bases de données actives (Comptoir2000, Gymnase2000)">
         <span class="stat-value">2</span>
-        <span class="stat-label">Bases</span>
+        <span class="stat-label">bases</span>
       </div>
     </div>
   </div>
 
-  <div class="tp-list-container">
+  <!-- Barre d'outils et de recherche rapide -->
+  <div class="tp-toolbar">
+    <div class="tp-search-box">
+      <svg class="search-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="tpSearchInput" placeholder="Rechercher un TP, un exercice, une notion (ex: JOIN, CASE, date)..." autocomplete="off">
+      <button type="button" id="clearSearchBtn" class="clear-search-btn" title="Effacer la recherche" style="display:none;">&times;</button>
+    </div>
+    <div class="tp-view-actions">
+      <button type="button" id="expandAllBtn" class="tool-btn" title="Tout déplier">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="7 13 12 18 17 13"></polyline>
+          <polyline points="7 6 12 11 17 6"></polyline>
+        </svg>
+        <span>Déplier tout</span>
+      </button>
+      <button type="button" id="collapseAllBtn" class="tool-btn" title="Tout replier">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 11 12 6 7 11"></polyline>
+          <polyline points="17 18 12 13 7 18"></polyline>
+        </svg>
+        <span>Replier</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste des TP en accordéon ultra-compact (repliés par défaut) -->
+  <div class="tp-list-container" id="tpListContainer">
     {% for tpNumber, tpExercices in collections.tpsByNumber %}
-    <details class="tp-details">
+    <details class="tp-details" data-tp="{{ tpNumber }}" open>
       <summary class="tp-summary">
         <div class="tp-header-info">
           <span class="tp-badge">TP {{ tpNumber }}</span>
-          <h3 class="tp-title">{{ tpExercices[0].data.intitule | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " – ", "") | replace("TP " + tpNumber + " - ", "") }}</h3>
+          <h2 class="tp-title">{{ tpExercices[0].data.intitule | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " – ", "") | replace("TP " + tpNumber + " - ", "") }}</h2>
         </div>
+        
         <div class="tp-header-meta">
-          <span class="db-tag">🗄️ {{ tpExercices[0].data.base | replace(".sqlite", "") }}</span>
-          <span class="chevron">▼</span>
+          <!-- Badge BDD avec icône SVG vectorielle propre -->
+          <span class="db-tag" title="Base de données : {{ tpExercices[0].data.base | replace('.sqlite', '') }}">
+            <svg class="db-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+            </svg>
+            <span>{{ tpExercices[0].data.base | replace(".sqlite", "") }}</span>
+          </span>
+          
+          <span class="tp-count-badge">{{ tpExercices.length }} ex.</span>
+
+          <span class="chevron" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </span>
         </div>
       </summary>
       
       <div class="tp-content">
         <div class="exercise-grid">
           {% for exercise in tpExercices %}
-          <a href="{{ exercise.url | absUrl }}" class="exercise-card-mini">
+          {% set rawNum = exercise.data.exerciceNum %}
+          {% set cleanTitle = exercise.data.titre | replace("TP " + tpNumber + " : ", "") | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " - ", "") | replace("TP" + tpNumber + " - ", "") | replace("Exercice " + rawNum + " : ", "") | replace("Exercice " + rawNum + " - ", "") %}
+          <a href="{{ exercise.url | absUrl }}" class="exercise-card-mini" data-title="{{ cleanTitle | lower }}" data-tp="{{ tpNumber }}">
             <div class="ex-mini-header">
-              <span class="ex-number">{% if exercise.data.exerciceNum == 0 %}Intro{% else %}{{ exercise.data.exerciceNum }}{% endif %}</span>
-              <span class="ex-status"></span>
+              <span class="ex-badge {% if rawNum == 0 %}ex-badge-intro{% endif %}">
+                {% if rawNum == 0 %}Intro{% else %}Ex {{ rawNum }}{% endif %}
+              </span>
+              <span class="ex-arrow">
+                <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </span>
             </div>
-            <span class="ex-title-mini">{{ exercise.data.titre | replace("TP " + tpNumber + " : ", "") | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " - ", "") | replace("TP" + tpNumber + " - ", "") | replace("Exercice " + exercise.data.exerciceNum + " : ", "") }}</span>
+            <div class="ex-title-mini" title="{{ cleanTitle }}">
+              {{ cleanTitle }}
+            </div>
           </a>
           {% endfor %}
         </div>
@@ -54,110 +116,266 @@ permalink: "/"
     {% endfor %}
   </div>
 
-  <div class="quick-help">
-    <h3>💡 Aide rapide</h3>
-    <div class="help-steps">
-      <span>1. Choisir un TP</span>
-      <span>→</span>
-      <span>2. Lire la consigne</span>
-      <span>→</span>
-      <span>3. Écrire la requête</span>
-      <span>→</span>
-      <span>4. <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+  <div id="noResultsMessage" class="no-results-box" style="display: none;">
+    <p>🔍 Aucun exercice ne correspond à votre recherche.</p>
+  </div>
+
+  <!-- Aide rapide condensée -->
+  <div class="quick-help-compact">
+    <div class="quick-help-title">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <span>Guide express</span>
+    </div>
+    <div class="help-steps-compact">
+      <div class="step-chip"><span class="step-num">1</span> Choisir un exercice</div>
+      <div class="step-sep">›</div>
+      <div class="step-chip"><span class="step-num">2</span> Rédiger la requête</div>
+      <div class="step-sep">›</div>
+      <div class="step-chip"><span class="step-num">3</span> Exécuter <kbd>Ctrl</kbd>+<kbd>Enter</kbd></div>
+      <div class="step-sep">›</div>
+      <div class="step-chip"><span class="step-num">4</span> Comparer avec le résultat attendu</div>
     </div>
   </div>
 </div>
 
 <style>
-.home-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+/* Utiliser toute la largeur disponible du panneau de gauche */
+.content-panel:has(.home-container) {
+  padding: 15px 18px 40px 18px !important;
 }
 
-/* Compact Hero */
+.exercise-content:has(.home-container) {
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.home-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Hero Compact */
 .hero-compact {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, rgba(79, 190, 255, 0.1) 0%, rgba(79, 190, 255, 0.05) 100%);
-  border: 1px solid rgba(79, 190, 255, 0.2);
-  border-radius: 12px;
-  padding: 20px 30px;
-  margin-bottom: 30px;
+  background: linear-gradient(135deg, rgba(79, 190, 255, 0.08) 0%, rgba(20, 35, 55, 0.4) 100%);
+  border: 1px solid rgba(79, 190, 255, 0.18);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
-.hero-content h1 {
-  font-size: 1.8rem;
-  margin: 0 0 5px 0;
-  background: linear-gradient(90deg, #fff, #4fbeff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.hero-main {
+  display: flex;
+  align-items: center;
 }
 
-.hero-content p {
-  margin: 0;
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hero-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.hero-content h1, .hero-compact h1 {
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  letter-spacing: -0.3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-subtitle {
+  margin: 1px 0 0 0 !important;
   color: var(--text-secondary);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
+  opacity: 0.85;
+  line-height: 1.2;
 }
 
 .hero-stats {
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 6px;
 }
 
-.stat-item {
-  text-align: center;
+.stat-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  background: rgba(15, 25, 35, 0.6);
+  border: 1px solid rgba(79, 190, 255, 0.2);
+  padding: 3px 8px;
+  border-radius: 5px;
 }
 
 .stat-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--accent-blue);
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
-/* Collapsible TP List */
+/* Toolbar de recherche et contrôles */
+.tp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.tp-search-box {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+}
+
+.tp-search-box .search-icon {
+  position: absolute;
+  left: 9px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.tp-search-box input {
+  width: 100%;
+  padding: 5px 26px 5px 30px;
+  background: rgba(15, 25, 35, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.tp-search-box input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  background: rgba(15, 25, 35, 0.85);
+  box-shadow: 0 0 0 2px rgba(79, 190, 255, 0.2);
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.clear-search-btn:hover {
+  color: var(--text-primary);
+}
+
+.tp-view-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.tool-btn:hover {
+  background: rgba(79, 190, 255, 0.1);
+  color: var(--text-primary);
+  border-color: rgba(79, 190, 255, 0.3);
+}
+
+/* Liste des TP */
 .tp-list-container {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-bottom: 40px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
-.tp-details {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: 10px;
+/* Surcharge stricte contre les styles markdown de .exercise-content details */
+.exercise-content details.tp-details,
+details.tp-details {
+  background: var(--bg-panel) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.tp-details[open] {
-  border-color: var(--accent-blue);
-  box-shadow: var(--shadow-subtle);
+.exercise-content details.tp-details[open],
+details.tp-details[open] {
+  border-color: rgba(79, 190, 255, 0.4) !important;
+  border-left: 1px solid rgba(79, 190, 255, 0.4) !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25) !important;
 }
 
-.tp-summary {
-  padding: 15px 20px;
+.exercise-content details.tp-details summary.tp-summary,
+details.tp-details summary.tp-summary {
+  padding: 7px 12px !important;
+  margin: 0 !important;
   cursor: pointer;
-  display: flex;
+  display: flex !important;
   justify-content: space-between;
   align-items: center;
   list-style: none;
-  background: rgba(255, 255, 255, 0.02);
-  transition: background 0.2s;
+  background: rgba(255, 255, 255, 0.015);
+  user-select: none;
+  transition: background 0.15s;
+  min-height: unset !important;
+  border: none !important;
+  color: inherit !important;
 }
 
-.tp-summary:hover {
-  background: rgba(255, 255, 255, 0.05);
+.exercise-content details.tp-details summary.tp-summary:hover,
+details.tp-details summary.tp-summary:hover {
+  background: rgba(79, 190, 255, 0.05);
 }
 
 .tp-summary::-webkit-details-marker {
@@ -167,162 +385,395 @@ permalink: "/"
 .tp-header-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
 }
 
 .tp-badge {
-  background: var(--accent-blue);
-  color: #000;
-  font-weight: bold;
-  padding: 4px 8px;
+  background: linear-gradient(135deg, var(--accent-blue) 0%, #2087cf 100%);
+  color: #06111d;
+  font-weight: 700;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.tp-title {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--text-primary);
+/* Surcharge stricte contre les styles markdown de .exercise-content h2 */
+.exercise-content h2.tp-title,
+h2.tp-title {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-bottom: none !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  word-break: break-word;
 }
 
 .tp-header-meta {
   display: flex;
   align-items: center;
-  gap: 15px;
-  color: var(--text-secondary);
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
+/* Badge BDD modernisé avec icône SVG */
 .db-tag {
-  font-size: 0.85rem;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-family: 'JetBrains Mono', monospace;
+  background: rgba(15, 25, 35, 0.75);
+  color: #92b7db;
+  border: 1px solid rgba(79, 190, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-tag .db-icon {
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.tp-count-badge {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 5px;
   border-radius: 4px;
 }
 
 .chevron {
-  transition: transform 0.3s;
-  font-size: 0.8rem;
-  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+  margin-left: 2px;
 }
 
 .tp-details[open] .chevron {
   transform: rotate(180deg);
+  color: var(--accent-blue);
 }
 
 .tp-content {
-  padding: 20px;
-  border-top: 1px solid var(--border-subtle);
-  background: rgba(0, 0, 0, 0.1);
+  padding: 8px 10px 10px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(10, 18, 26, 0.35);
 }
 
-/* Exercise Grid */
+/* Grille d'exercices ultra-compacte */
 .exercise-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 6px;
 }
 
 .exercise-card-mini {
   display: flex;
   flex-direction: column;
-  background: var(--bg-panel-lighter);
-  border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  padding: 10px;
+  justify-content: space-between;
+  background: rgba(26, 38, 52, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 5px;
+  padding: 6px 8px;
   text-decoration: none;
-  transition: all 0.2s;
-  height: 100%;
+  transition: all 0.15s ease;
+  min-height: 48px;
 }
 
 .exercise-card-mini:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--accent-blue);
-  background: rgba(79, 190, 255, 0.05);
+  background: rgba(30, 48, 68, 0.9);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
 
 .ex-mini-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
+  align-items: center;
+  margin-bottom: 3px;
 }
 
-.ex-number {
+.ex-badge {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 600;
   color: var(--accent-blue);
-  font-weight: bold;
+  background: rgba(79, 190, 255, 0.12);
+  padding: 1px 4px;
+  border-radius: 3px;
+  letter-spacing: 0.2px;
+}
+
+.ex-badge-intro {
+  color: #a8d5ba;
+  background: rgba(168, 213, 186, 0.12);
+}
+
+.ex-arrow {
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+}
+
+.exercise-card-mini:hover .ex-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--accent-blue);
 }
 
 .ex-title-mini {
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
-  line-height: 1.3;
+  line-height: 1.2;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-weight: 500;
 }
 
 .exercise-card-mini:hover .ex-title-mini {
-  color: var(--text-primary);
+  color: #fff;
 }
 
-/* Quick Help */
-.quick-help {
+/* Pas de résultat */
+.no-results-box {
   text-align: center;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 12px;
+  padding: 18px;
+  background: rgba(15, 25, 35, 0.4);
+  border-radius: 6px;
   border: 1px dashed var(--border-subtle);
-}
-
-.quick-help h3 {
-  margin: 0 0 15px 0;
-  font-size: 1rem;
   color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
 }
 
-.help-steps {
+/* Aide rapide condensée */
+.quick-help-compact {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(15, 25, 35, 0.45);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 12px;
+}
+
+.quick-help-title {
+  display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 5px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-help-title svg {
+  color: var(--accent-blue);
+}
+
+.help-steps-compact {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex-wrap: wrap;
-  font-size: 0.9rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
+}
+
+.step-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  background: rgba(79, 190, 255, 0.15);
+  color: var(--accent-blue);
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.step-sep {
+  color: var(--text-muted);
+  font-size: 0.8rem;
 }
 
 kbd {
   background: rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 0.8rem;
+  font-size: 0.68rem;
+  color: var(--accent-blue);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .hero-compact {
     flex-direction: column;
-    text-align: center;
-    gap: 20px;
+    align-items: flex-start;
+    gap: 8px;
   }
   
-  .tp-header-info {
+  .hero-stats {
+    width: 100%;
+  }
+  
+  .tp-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .tp-view-actions {
+    justify-content: flex-end;
+  }
+  
+  .exercise-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .exercise-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tp-summary {
     flex-direction: column;
     align-items: flex-start;
-    gap: 5px;
+    gap: 6px;
   }
   
   .tp-header-meta {
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
-  }
-  
-  .db-tag {
-    display: none;
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
   }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('tpSearchInput');
+  const clearBtn = document.getElementById('clearSearchBtn');
+  const expandAllBtn = document.getElementById('expandAllBtn');
+  const collapseAllBtn = document.getElementById('collapseAllBtn');
+  const tpDetailsList = document.querySelectorAll('.tp-details');
+  const noResultsMsg = document.getElementById('noResultsMessage');
+
+  // Mémorisation de l'état ouvert/fermé des TPs (ouvert par défaut)
+  const STORAGE_KEY = 'sql_tp_details_state_v3';
+  try {
+    const savedState = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    tpDetailsList.forEach(det => {
+      const tpNum = det.getAttribute('data-tp');
+      if (savedState[tpNum] !== undefined) {
+        det.open = savedState[tpNum];
+      } else {
+        det.open = true; // Ouvert par défaut
+      }
+      det.addEventListener('toggle', () => {
+        savedState[tpNum] = det.open;
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState));
+        } catch (e) {}
+      });
+    });
+  } catch (e) {
+    tpDetailsList.forEach(det => det.open = true);
+  }
+
+  // Recherche en temps réel
+  function filterExercises(query) {
+    const q = query.trim().toLowerCase();
+    clearBtn.style.display = q ? 'block' : 'none';
+
+    let totalVisible = 0;
+
+    tpDetailsList.forEach(details => {
+      const tpNum = details.getAttribute('data-tp');
+      const titleEl = details.querySelector('.tp-title');
+      const tpTitle = titleEl ? titleEl.textContent.toLowerCase() : '';
+      const dbEl = details.querySelector('.db-tag span');
+      const dbName = dbEl ? dbEl.textContent.toLowerCase() : '';
+      
+      const cards = details.querySelectorAll('.exercise-card-mini');
+      let visibleInTp = 0;
+
+      cards.forEach(card => {
+        const cardTitle = card.getAttribute('data-title') || card.textContent.toLowerCase();
+        const matches = !q || cardTitle.includes(q) || tpTitle.includes(q) || dbName.includes(q) || (`tp ${tpNum}`).includes(q) || (`tp${tpNum}`).includes(q);
+        
+        card.style.display = matches ? 'flex' : 'none';
+        if (matches) visibleInTp++;
+      });
+
+      if (visibleInTp > 0) {
+        details.style.display = '';
+        if (q) details.open = true;
+        totalVisible += visibleInTp;
+      } else {
+        details.style.display = 'none';
+      }
+    });
+
+    if (noResultsMsg) {
+      noResultsMsg.style.display = totalVisible === 0 ? 'block' : 'none';
+    }
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => filterExercises(e.target.value));
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterExercises('');
+      searchInput.focus();
+    });
+  }
+
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', () => {
+      tpDetailsList.forEach(det => det.open = true);
+    });
+  }
+
+  if (collapseAllBtn) {
+    collapseAllBtn.addEventListener('click', () => {
+      tpDetailsList.forEach(det => det.open = false);
+    });
+  }
+});
+</script>

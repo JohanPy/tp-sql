@@ -1,146 +1,131 @@
 ---
 layout: base.njk
-title: "Exercice 1 : Jointures"
-intitule: "TP 3 - Jointures et sous-requêtes"
+title: "Exercice 1 : Agrégats"
+intitule: "TP 3 — Dates, Agrégats & Choix Multiple (CASE)"
 base: "Comptoir2000.sqlite"
 tpNum: 3
 exerciceNum: 1
-titre: "Exercice 1 : Jointures"
+titre: "Exercice 1 : Agrégats"
 permalink: "/tp3/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 1 : Jointures
+# Exercice 1 : Agrégats
 
 ## Questions
 
-**1. Afficher toutes les commandes avec les informations du client et de l'employé**
+**1. Compter le nombre total de commandes**
 
-Pour chaque commande, affichez le numéro, la date, le nom du client et le nom de l'employé qui l'a traitée.
+Affichez le nombre de commandes passées.
 
 <!-- expected-query: Q1
-SELECT Commande.NoCom, Commande.DateCom, Client.Societe AS Client, (Employe.Nom || ' ' || Employe.Prenom) AS Employe FROM Commande JOIN Client ON Commande.CodeCli = Client.CodeCli JOIN Employe ON Commande.NoEmp = Employe.NoEmp;
+SELECT COUNT(*) AS TotalCommandes FROM Commande;
 -->
 
-**2. Lister tous les produits avec leur catégorie et leur fournisseur**
+**2. Calculer le montant total de toutes les commandes avec remise appliquée**
 
-Affichez le nom du produit, le nom de la catégorie et le nom du fournisseur.
+Calculez le chiffre d'affaires total en tenant compte des remises.
 
 <!-- expected-query: Q2
-SELECT Produit.Nomprod, Categorie.NomCateg, Fournisseur.Societe AS Fournisseur FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg JOIN Fournisseur ON Produit.NoFour = Fournisseur.NoFour;
+SELECT ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffairesTotal FROM DetailCommande;
 -->
 
-**3. Afficher les détails de toutes les commandes avec les noms des produits**
+**3. Afficher le nombre de clients par pays**
 
-Pour chaque ligne de commande, affichez le numéro de commande, la référence du produit et son nom.
+Affichez le pays et le nombre de clients pour chaque pays, trié par nombre décroissant.
 
 <!-- expected-query: Q3
-SELECT DetailCommande.NoCom, DetailCommande.Refprod, Produit.Nomprod FROM DetailCommande JOIN Produit ON DetailCommande.Refprod = Produit.Refprod;
+SELECT Pays, COUNT(*) AS NbClients FROM Client GROUP BY Pays ORDER BY NbClients DESC;
 -->
 
-**4. Trouver les clients qui n'ont jamais commandé (LEFT JOIN)**
+**4. Calculer le prix moyen des produits par catégorie**
 
-Affichez les clients (societe) de la base qui n'ont aucune commande enregistrée.
-
-<details>
-<summary>💡 Indice</summary>
-
-Pensez au LEFT JOIN qui conserve toutes les lignes de la table de gauche, même sans correspondance.
-</details>
+Affichez le nom de la catégorie et le prix moyen des produits.
 
 <!-- expected-query: Q4
-SELECT Client.Societe FROM Client LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli WHERE Commande.NoCom IS NULL;
+SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg;
 -->
 
-**5. Afficher tous les produits, qu'ils aient été commandés ou non**
+**5. Trouver les catégories dont le prix moyen est supérieur à 100**
 
-Affichez le nom du produit et le nombre de fois qu'il a été commandé et 0 si le produit n'a jamais été commandé (ne confondez pas avec le champs uniteCom).
+Utilisez une clause de filtrage après agrégation.
 
 <!-- expected-query: Q5
-SELECT Produit.Nomprod, COUNT(DetailCommande.NoCom) AS NbCommandes FROM Produit LEFT JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod;
+SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg HAVING AVG(Produit.PrixUnit) > 100;
 -->
 
-**6. Lister les employés et leurs responsables**
+**6. Afficher pour chaque employé le nombre de commandes qu'il a gérées**
 
-Pour chaque employé, affichez son nom et le nom de son responsable.
-Regardez bien le schéma de la table Employe pour comprendre comment les employés sont liés à leurs responsables.
-
-<details>
-<summary>💡 Indice</summary>
-Les responsables sont aussi des employés.
-Joignez la table Employe avec elle-même en utilisant deux alias différents. 
-</details>
+Affichez le nom, prénom et le nombre de commandes traitées.
 
 <!-- expected-query: Q6
-SELECT E.Nom AS Employe, Chef.Nom AS Responsable FROM Employe E LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
+SELECT Employe.Nom, Employe.Prenom, COUNT(Commande.NoCom) AS NbCommandes FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom;
 -->
 
-**7. Afficher les commandes groupées avec client, employé, et informations complètes**
+**7. Calculer le nombre minimum et maximum d'unités commandées dans une seule ligne de commande**
 
-Pour chaque commande : client, employé, nombre de produits et montant total (avec remise).
+Trouvez les quantités extrêmes dans la table DetailCommande.
 
 <!-- expected-query: Q7
-SELECT Commande.NoCom, Client.Societe AS Client, Employe.Nom AS Employe, COUNT(DetailCommande.Refprod) AS NbProduits, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantTotal FROM Commande JOIN Client ON Commande.CodeCli = Client.CodeCli JOIN Employe ON Commande.NoEmp = Employe.NoEmp JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Commande.NoCom, Client.Societe, Employe.Nom;
+SELECT MIN(Qte) AS QteMin, MAX(Qte) AS QteMax FROM DetailCommande;
 -->
 
-**8. Trouver les clients et les fournisseurs du même pays**
+**8. Afficher les produits avec leur quantité totale vendue, en excluant les ventes inférieures à 10 unités**
 
-Affichez les paires client-fournisseur pour chaque pays.
+Filtrez les produits peu vendus.
 
 <!-- expected-query: Q8
-SELECT DISTINCT Client.Pays, Client.Societe AS Client, Fournisseur.Societe AS Fournisseur FROM Client JOIN Fournisseur ON Client.Pays = Fournisseur.Pays;
--->
-
-**9. Afficher les commandes avec délai de livraison**
-
-Affichez le numéro de commande, la date de commande, la date de livraison et le délai en jours.
-
-<!-- expected-query: Q9
-SELECT NoCom, DateCom, DateEnv AS DateLivraison, CAST(JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS INT) AS DelaiJours FROM Commande WHERE DateEnv IS NOT NULL;
--->
-
-**10. Créer un résumé complet : client → commandes → produits avec tous les détails**
-
-Affichez pour chaque commande : Societe, DateCom, NoCom, Nomprod, Qte, Remise, montant ligne.
-
-<!-- expected-query: Q10
-SELECT Client.Societe, Commande.DateCom, Commande.NoCom, Produit.Nomprod, DetailCommande.Qte, DetailCommande.Remise, ROUND(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise), 2) AS MontantLigne FROM Client JOIN Commande ON Client.CodeCli = Commande.CodeCli JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom JOIN Produit ON DetailCommande.Refprod = Produit.Refprod;
+SELECT Produit.Nomprod, SUM(DetailCommande.Qte) AS TotalVendu FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod HAVING SUM(DetailCommande.Qte) >= 10;
 -->
 
 ## Rappel de cours
 
-### Jointure Interne (INNER JOIN)
+### Fonctions d'agrégation
 
-Ne retourne que les lignes qui ont une correspondance dans les deux tables.
+Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
 
 ```sql
--- Clients ayant passé au moins une commande
-SELECT Client.Societe, Commande.DateCom
-FROM Client
-INNER JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+-- Compter le nombre de lignes
+SELECT COUNT(*) FROM Client;
 ```
 
-### Jointure Externe (LEFT JOIN)
-
-Retourne toutes les lignes de la table de gauche, même s'il n'y a pas de correspondance à droite (les colonnes de droite seront NULL).
-
 ```sql
--- Tous les clients, avec leurs commandes s'ils en ont
-SELECT Client.Societe, Commande.NoCom
-FROM Client
-LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+-- Calculer la somme
+SELECT SUM(PrixUnit) FROM Produit;
 ```
 
-### Auto-jointure (Self-Join)
+```sql
+-- Calculer la moyenne
+SELECT AVG(PrixUnit) FROM Produit;
+```
 
-Joindre une table avec elle-même. Utile pour les hiérarchies (Employé -> Chef).
+```sql  
+-- Trouver le minimum et le maximum
+SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
+```
+
+### Regroupement (GROUP BY)
+
+Permet de grouper les résultats selon une ou plusieurs colonnes.
 
 ```sql
--- Employés et leur responsable
-SELECT E.Nom AS Employe, Chef.Nom AS Responsable
-FROM Employe E
-LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
+-- Compter le nombre de produits par fournisseur
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour;
+```
+
+### Filtrage sur les groupes (HAVING)
+
+`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
+
+```sql
+-- Fournisseurs ayant plus de 5 produits
+SELECT NoFour, COUNT(*) 
+FROM Produit 
+GROUP BY NoFour 
+HAVING COUNT(*) > 5;
 ```
 

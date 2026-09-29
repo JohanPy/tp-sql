@@ -1,12 +1,12 @@
 ---
 layout: base.njk
 title: "Exercice 4 : Bonus - Défis Gymnase2000"
-intitule: "TP 4 - Récapitulatif"
+intitule: "TP 5 — Grand Cas de Synthèse (Gymnase2000)"
 base: "Gymnase2000.sqlite"
-tpNum: 4
+tpNum: 5
 exerciceNum: 4
 titre: "Exercice 4 : Bonus - Défis Gymnase2000"
-permalink: "/tp4/exercice4/"
+permalink: "/tp5/exercice4/"
 tags: tp
 show_load_db: false
 show_save_db: false

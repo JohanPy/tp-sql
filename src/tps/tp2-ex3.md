@@ -1,85 +1,89 @@
 ---
 layout: base.njk
-title: "Exercice 3 : Dates et Formats"
-intitule: "TP 2 - Agrégats et Choix multiple"
+title: "Exercice 3 : Chaînes de caractères"
+intitule: "TP 2 — Requêtes Simples, Calculs & Manipulation de Chaînes"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 3
-titre: "Exercice 3 : Dates et Formats"
+titre: "Exercice 3 : Chaînes de caractères"
 permalink: "/tp2/exercice3/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 3 : Dates et Formats
+# Exercice 3 : Chaînes de caractères
 
 ## Questions
 
-**1. Afficher l'année et le mois pour toutes les commandes**
+Dans une même requête, sur la table Client, vous devez :
 
-Pour chaque commande, montrez la date sous le format "2024-03" (année-mois).
+**1. Concaténer les champs Adresse, Ville, CodePostal et Pays dans un nouveau champ nommé "AdresseComplete"**
 
-<!-- expected-query: Q1
-SELECT NoCom, STRFTIME('%Y-%m', DateCom) AS AnneeMois FROM Commande;
--->
-
-**2. Calculer le délai de livraison en jours**
-
-Affichez le numéro de commande et le nombre de jours entre DateCom et DateLivraison.
+Le format doit être : `Adresse, CodePostal Ville, Pays`
 
 <details>
 <summary>💡 Indice</summary>
 
-La fonction `JULIANDAY()` convertit une date en nombre de jours depuis une date de référence.
+Utilisez l'opérateur de concaténation `||` pour joindre des chaînes.
 </details>
 
-<!-- expected-query: Q2
-SELECT NoCom, CAST(JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS INT) AS DelaiLivraisonJours FROM Commande WHERE DateEnv IS NOT NULL;
+<!-- expected-query: Q1
+SELECT (Adresse || ', ' || CodePostal || ' ' || Ville || ', ' || Pays) AS AdresseComplete FROM Client;
 -->
 
-**3. Lister les commandes passées au cours du mois de décembre 2014**
+**2. Extraire les deux derniers caractères des codes clients**
 
-Affichez toutes les commandes dont la date est en décembre 2014.
+Créez une colonne affichant les 2 derniers caractères de `CodeCli`.
+
+<!-- expected-query: Q2
+SELECT CodeCli, SUBSTR(CodeCli, -2) AS DeuxDerniers FROM Client;
+-->
+
+**3. Mettre en minuscule le nom des sociétés**
+
+Affichez le nom de chaque société en minuscule.
 
 <!-- expected-query: Q3
-SELECT * FROM Commande WHERE STRFTIME('%Y-%m', DateCom) = '2014-12';
+SELECT LOWER(Societe) AS SocieteMinuscule FROM Client;
+-->
+
+**4. Affichez le nom des clients et leur fonction en remplaçant le terme "marketing" par "mercatique"**
+
+Remplacez tous les "marketing" dans le champ `Fonction` par "mercatique".
+
+<!-- expected-query: Q4
+SELECT Contact, REPLACE(Fonction, 'Marketing', 'mercatique') AS Fonction FROM Client;
 -->
 
 ## Rappel de cours
 
-### Manipulation de dates (SQLite)
+### Concaténation
 
-SQLite stocke les dates sous forme de chaînes de caractères (TEXT), de nombres réels (REAL) ou d'entiers (INTEGER).
-
-### Extraction de parties de date (STRFTIME)
-
-La fonction `STRFTIME` permet de formater une date.
-Formats courants : `%Y` (Année), `%m` (Mois), `%d` (Jour).
+Pour assembler plusieurs chaînes de caractères, utilisez l'opérateur `||`.
 
 ```sql
--- Extraire l'année d'une date
-SELECT STRFTIME('%Y', DateCom) FROM Commande;
+-- Assembler Nom et Prénom
+SELECT Nom || ' ' || Prenom AS NomComplet FROM Employe;
 ```
+
+### Manipulation de chaînes
 
 ```sql
--- Extraire le mois
-SELECT STRFTIME('%m', DateCom) FROM Commande;
+-- Extraire une partie de la chaîne (SUBSTR)
+-- SUBSTR(chaine, debut, longueur)
+SELECT SUBSTR(Nom, 1, 3) FROM Client; -- 3 premiers caractères
 ```
-
-### Calculs sur les dates (JULIANDAY)
-
-Pour calculer une différence entre deux dates, on les convertit en "Jour Julien" (nombre de jours).
-
 ```sql
--- Nombre de jours entre deux dates
-SELECT JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS DelaiLivraison
-FROM Commande;
+SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères
 ```
-
 ```sql
--- Ajouter des jours à une date
-SELECT DATE('now', '+7 days');
+-- Remplacer du texte (REPLACE)
+-- REPLACE(chaine, ancien, nouveau)
+SELECT REPLACE(Fonction, 'Manager', 'Directeur') FROM Employe;
 ```
-
-
+```sql
+-- Minuscules / Majuscules
+SELECT LOWER(Nom) FROM Client;
+SELECT UPPER(Nom) FROM Client;
+```

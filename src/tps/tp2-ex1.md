@@ -1,131 +1,174 @@
 ---
 layout: base.njk
-title: "Exercice 1 : Agrégats"
-intitule: "TP 2 - Dates et agrégats"
+title: "Exercice 1 : Fonctions basiques"
+intitule: "TP 2 — Requêtes Simples, Calculs & Manipulation de Chaînes"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 1
-titre: "Exercice 1 : Agrégats"
+titre: "Exercice 1 : Fonctions basiques"
 permalink: "/tp2/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 1 : Agrégats
+# Exercice 1 : Fonctions basiques
 
 ## Questions
 
-**1. Compter le nombre total de commandes**
+**1. Trier tous les produits par leur prix unitaire**
 
-Affichez le nombre de commandes passées.
+Ordonnez les produits du moins cher au plus cher.
 
 <!-- expected-query: Q1
-SELECT COUNT(*) AS TotalCommandes FROM Commande;
+SELECT * FROM Produit ORDER BY PrixUnit ASC;
 -->
 
-**2. Calculer le montant total de toutes les commandes avec remise appliquée**
+**2. Lister les trois produits les plus chers**
 
-Calculez le chiffre d'affaires total en tenant compte des remises.
+Affichez les 3 produits avec les prix les plus élevés.
 
 <!-- expected-query: Q2
-SELECT ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffairesTotal FROM DetailCommande;
+SELECT * FROM Produit ORDER BY PrixUnit DESC LIMIT 3;
 -->
 
-**3. Afficher le nombre de clients par pays**
+**3. Lister les clients suisses, allemands et belges**
 
-Affichez le pays et le nombre de clients pour chaque pays, trié par nombre décroissant.
+Filtrez les clients selon leur pays (Suisse, Allemagne, Belgique).
+
+<details>
+<summary>💡 Indice</summary>
+
+Utilisez l'opérateur `IN` pour filtrer sur plusieurs valeurs.
+</details>
 
 <!-- expected-query: Q3
-SELECT Pays, COUNT(*) AS NbClients FROM Client GROUP BY Pays ORDER BY NbClients DESC;
+SELECT * FROM Client WHERE Pays IN ('Suisse', 'Allemagne', 'Belgique');
 -->
 
-**4. Calculer le prix moyen des produits par catégorie**
+**4. Lister les noms des Sociétés dont le nom contient "restaurant"**
 
-Affichez le nom de la catégorie et le prix moyen des produits.
+Recherchez les sociétés clients ayant "restaurant" dans leur nom.
 
 <!-- expected-query: Q4
-SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg;
+SELECT Societe FROM Client WHERE Societe LIKE '%restaurant%';
 -->
 
-**5. Trouver les catégories dont le prix moyen est supérieur à 100**
+**5. Lister les différents pays des clients (sans doublons)**
 
-Utilisez une clause de filtrage après agrégation.
+Affichez la liste unique des pays où se trouvent les clients.
 
 <!-- expected-query: Q5
-SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg HAVING AVG(Produit.PrixUnit) > 100;
+SELECT DISTINCT Pays FROM Client;
 -->
 
-**6. Afficher pour chaque employé le nombre de commandes qu'il a gérées**
+**6. Idem en ajoutant les villes, le tout trié par ordre alphabétique du pays et de la ville**
 
-Affichez le nom, prénom et le nombre de commandes traitées.
+Affichez les couples (Pays, Ville) sans doublon, triés par pays puis par ville.
 
 <!-- expected-query: Q6
-SELECT Employe.Nom, Employe.Prenom, COUNT(Commande.NoCom) AS NbCommandes FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom;
+SELECT DISTINCT Pays, Ville FROM Client ORDER BY Pays, Ville;
 -->
 
-**7. Calculer le nombre minimum et maximum d'unités commandées dans une seule ligne de commande**
+**7. Lister tous les produits vendus en bouteilles ou en canettes**
 
-Trouvez les quantités extrêmes dans la table DetailCommande.
+Recherchez les produits dont l'unité de vente (QteParUnit) contient "bouteille" ou "canette".
 
 <!-- expected-query: Q7
-SELECT MIN(Qte) AS QteMin, MAX(Qte) AS QteMax FROM DetailCommande;
+SELECT * FROM Produit WHERE QteParUnit LIKE '%bouteille%' OR QteParUnit LIKE '%canette%';
 -->
 
-**8. Afficher les produits avec leur quantité totale vendue, en excluant les ventes inférieures à 10 unités**
+**8. Lister les produits du fournisseur n° 8 dont le prix unitaire est entre 10 et 100€**
 
-Filtrez les produits peu vendus.
+Affichez le nom et la référence du produit en majuscule.
+
+<details>
+<summary>💡 Indice</summary>
+
+Pour convertir en majuscule, utilisez la fonction `UPPER()`.
+</details>
 
 <!-- expected-query: Q8
-SELECT Produit.Nomprod, SUM(DetailCommande.Qte) AS TotalVendu FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod HAVING SUM(DetailCommande.Qte) >= 10;
+SELECT UPPER(Nomprod), UPPER(Refprod) FROM Produit WHERE NoFour = 8 AND PrixUnit BETWEEN 10 AND 100;
+-->
+
+**9. Lister les numéros d'employés ayant réalisé une commande à livrer à Lille, Lyon ou Nantes**
+
+Récupérez les `NoEmp` des employés pour des commandes destinées à ces villes.
+
+<!-- expected-query: Q9
+SELECT DISTINCT NoEmp FROM Commande WHERE VilleLiv IN ('Lille', 'Lyon', 'Nantes');
+-->
+
+**10. Lister les produits dont le nom contient "tofu" ou "choco", dont le prix est inférieur à 100€**
+
+Affichez le nom et le prix de ces produits.
+
+<details>
+<summary>💡 Indice</summary>
+
+Attention à la priorité des opérateurs ! Utilisez des parenthèses pour grouper les conditions OR.
+</details>
+
+<!-- expected-query: Q10
+SELECT Nomprod, PrixUnit FROM Produit WHERE (Nomprod LIKE '%tofu%' OR Nomprod LIKE '%choco%') AND PrixUnit < 100;
 -->
 
 ## Rappel de cours
 
-### Fonctions d'agrégation
-
-Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
+### Sélection et Tri
 
 ```sql
--- Compter le nombre de lignes
-SELECT COUNT(*) FROM Client;
+-- Sélectionner toutes les colonnes
+SELECT * FROM Table;
 ```
 
 ```sql
--- Calculer la somme
-SELECT SUM(PrixUnit) FROM Produit;
+-- Sélectionner des colonnes spécifiques
+SELECT Colonne1, Colonne2 FROM Table;
 ```
 
 ```sql
--- Calculer la moyenne
-SELECT AVG(PrixUnit) FROM Produit;
+-- Trier les résultats (ASC pour croissant, DESC pour décroissant)
+SELECT * FROM Table ORDER BY Colonne1 ASC;
 ```
 
-```sql  
--- Trouver le minimum et le maximum
-SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
-```
-
-### Regroupement (GROUP BY)
-
-Permet de grouper les résultats selon une ou plusieurs colonnes.
+### Filtrage
 
 ```sql
--- Compter le nombre de produits par fournisseur
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour;
+-- Filtrer avec une condition simple
+SELECT * FROM Table WHERE Colonne1 = 'Valeur';
 ```
-
-### Filtrage sur les groupes (HAVING)
-
-`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
 
 ```sql
--- Fournisseurs ayant plus de 5 produits
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour 
-HAVING COUNT(*) > 5;
+-- Filtrer avec plusieurs valeurs (IN)
+SELECT * FROM Table WHERE Colonne1 IN ('Val1', 'Val2');
 ```
 
+```sql
+-- Recherche partielle (LIKE)
+-- % remplace n'importe quelle suite de caractères
+SELECT * FROM Table WHERE Colonne1 LIKE '%texte%';
+```
+
+```sql
+-- Conditions multiples (AND / OR)
+SELECT * FROM Table WHERE Colonne1 = 'A' AND Colonne2 > 10;
+```
+
+### Autres fonctions
+
+```sql
+-- Supprimer les doublons
+SELECT DISTINCT Colonne1 FROM Table;
+```
+
+```sql
+-- Limiter le nombre de résultats
+SELECT * FROM Table LIMIT 5;
+```
+
+```sql
+-- Convertir en majuscules
+SELECT UPPER(Colonne1) FROM Table;
+```

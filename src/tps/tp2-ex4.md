@@ -1,124 +1,150 @@
 ---
 layout: base.njk
-title: "Exercice 4 : Bonus - Requêtes avancées"
-intitule: "TP 2 - Agrégats et Choix multiple"
+title: "Exercice 4 : Bonus - Requêtes complexes"
+intitule: "TP 2 — Requêtes Simples, Calculs & Manipulation de Chaînes"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 4
-titre: "Exercice 4 : Bonus - Requêtes avancées"
+titre: "Exercice 4 : Bonus - Requêtes complexes"
 permalink: "/tp2/exercice4/"
 tags: tp
+show_load_db: false
+show_save_db: false
 ---
 
-# Exercice 4 : Bonus - Requêtes avancées
+# Exercice 4 : Bonus - Requêtes complexes
 
 ## Questions bonus
 
-Combinez agrégats, CASE et dates pour résoudre des problèmes complexes. À faire uniquement si vous avez le temps !
+Ces questions combinent les notions vues dans les exercices précédents. À faire uniquement si vous avez le temps !
 
-**1. Calculer le montant moyen des commandes par semestre**
+**1. Lister tous les produits non disponibles commandés au moins une fois**
 
-Affichez le semestre, le nombre de commandes et le montant moyen par semestre.
+Affichez les produits marqués comme indisponibles (Indisponible = 1) mais qui ont quand même été commandés.
+
+<!-- expected-query: Q1
+SELECT DISTINCT Produit.Refprod, Produit.Nomprod FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod WHERE Produit.Indisponible = 1;
+-->
+
+**2. Calculer pour chaque client le montant total de ses commandes avec remise appliquée**
+
+Affichez le nom du client et le montant total avec les remises déduites.
+
+<!-- expected-query: Q2
+SELECT Client.CodeCli, Client.Societe, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantTotal FROM Client JOIN Commande ON Client.CodeCli = Commande.CodeCli JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Client.CodeCli, Client.Societe;
+-->
+
+**3. Trouver les fournisseurs dont les prix moyens sont supérieurs à la moyenne générale des prix**
+
+Affichez le nom du fournisseur et le prix moyen de ses produits.
+
+<!-- expected-query: Q3
+SELECT Fournisseur.Societe, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Fournisseur JOIN Produit ON Fournisseur.NoFour = Produit.NoFour GROUP BY Fournisseur.NoFour, Fournisseur.Societe HAVING AVG(Produit.PrixUnit) > (SELECT AVG(PrixUnit) FROM Produit);
+-->
+
+**4. Lister les pays qui ont au moins un client ET un fournisseur**
+
+Affichez les pays où l'entreprise a une présence commerciale complète.
 
 <details>
 <summary>💡 Indice</summary>
 
-Vous devez d'abord extraire le mois, puis convertir en semestre (01-06 = S1, 07-12 = S2).
+Pensez à l'opérateur `INTERSECT` pour trouver les valeurs communes entre deux ensembles.
 </details>
 
-<!-- expected-query: Q1
-SELECT (STRFTIME('%Y', Commande.DateCom) || '-' || CASE WHEN CAST(STRFTIME('%m', Commande.DateCom) AS INT) <= 6 THEN 'S1' ELSE 'S2' END) AS Semestre, COUNT(DISTINCT Commande.NoCom) AS NbCommandes, ROUND(AVG(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantMoyen FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Semestre;
--->
-
-**2. Identifier les produits "saisonniers" : vendus intensivement certains mois seulement**
-
-Un produit est saisonnier s'il a une vente 3x supérieure certains mois vs autres mois.
-
-<!-- expected-query: Q2
-SELECT Produit.Nomprod, STRFTIME('%m', Commande.DateCom) AS Mois, SUM(DetailCommande.Qte) AS TotalQte FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod JOIN Commande ON DetailCommande.NoCom = Commande.NoCom GROUP BY Produit.Refprod, Mois ORDER BY TotalQte DESC;
--->
-
-**3. Afficher les commandes "à risque" : délai de livraison > 30 jours OU remise > 15%**
-
-Listez les commandes avec un problème potentiel.
-
-<!-- expected-query: Q3
-SELECT DISTINCT Commande.NoCom, (JULIANDAY(Commande.DateEnv) - JULIANDAY(Commande.DateCom)) AS DelaiLivraison, DetailCommande.Remise FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom WHERE (JULIANDAY(Commande.DateEnv) - JULIANDAY(Commande.DateCom)) > 30 OR DetailCommande.Remise > 0.15;
--->
-
-**4. Créer un "classement" mensuel des employés par nombre de commande**
-
-Affichez le mois et les employés en fonction de leurs chiffre d'affaires.
-
 <!-- expected-query: Q4
-SELECT STRFTIME('%Y-%m', Commande.DateCom) AS Mois, Employe.Nom, COUNT(Commande.NoCom) AS NbCommandes FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Mois, Employe.NoEmp, Employe.Nom ORDER BY Mois, NbCommandes DESC;
+SELECT Pays FROM Client INTERSECT SELECT Pays FROM Fournisseur;
 -->
 
-**5. Calculer le "cycle de vie" du client : temps écoulé depuis première commande**
+**5. Pour chaque mois de commande, calculer le montant moyen des commandes et le nombre de commandes**
 
-Affichez le client, sa première commande et le nombre de jours depuis.
+Affichez le mois, le nombre de commandes et le montant moyen.
 
 <!-- expected-query: Q5
-SELECT CodeCli, MIN(DateCom) AS PremiereCommande, CAST(JULIANDAY('now') - JULIANDAY(MIN(DateCom)) AS INT) AS JoursEcoules FROM Commande GROUP BY CodeCli;
+SELECT strftime('%Y-%m', Commande.DateCom) AS Mois, COUNT(DISTINCT Commande.NoCom) AS NbCommandes, ROUND(AVG(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantMoyen FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Mois;
 -->
 
-**6. Identifier les produits "à relancer" : peu vendus mais en stock**
+**6. Trouver les produits commandés par tous les clients (ou au moins 90% des clients)**
 
-Produits avec stock > moyenne ET quantité vendue < 10 unités.
+Quel produit a la couverture client la plus large ?
 
 <!-- expected-query: Q6
-SELECT Produit.Refprod, Produit.Nomprod, Produit.UnitesStock, COALESCE(SUM(DetailCommande.Qte), 0) AS TotalVendu FROM Produit LEFT JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod, Produit.UnitesStock HAVING Produit.UnitesStock > (SELECT AVG(UnitesStock) FROM Produit) AND COALESCE(SUM(DetailCommande.Qte), 0) < 10;
+SELECT Produit.Nomprod, COUNT(DISTINCT Commande.CodeCli) AS NbClients FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod JOIN Commande ON DetailCommande.NoCom = Commande.NoCom GROUP BY Produit.Refprod, Produit.Nomprod ORDER BY NbClients DESC;
 -->
 
-**7. Calculer la marge potentielle par catégorie**
+**7. Afficher les clients qui ont commandé au moins une fois tous les produits d'une catégorie donnée**
 
-Affichez la catégorie et le pourcentage de marge moyenne (supposez un coût = 60% du PrixUnit).
+Par exemple, tous les clients ayant commandé au moins une fois TOUS les produits de la catégorie 1.
 
 <!-- expected-query: Q7
-SELECT Categorie.NomCateg, ROUND(AVG((PrixUnit - PrixUnit * 0.60) / PrixUnit * 100), 2) AS MargeMoyennePct FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg;
+SELECT Client.CodeCli, Client.Societe FROM Client WHERE NOT EXISTS (SELECT Refprod FROM Produit WHERE CodeCateg = 1 EXCEPT SELECT DetailCommande.Refprod FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom WHERE Commande.CodeCli = Client.CodeCli);
 -->
 
-**8. Afficher les anomalies : commandes sans livraison (DateLivraison NULL) après 60 jours**
+**8. Calculer pour chaque employé son nombre de commandes, le montant total géré et sa performance par rapport à la moyenne**
 
-Identifiez les commandes potentiellement problématiques.
+Affichez le nom de l'employé, son nombre de commandes et un indicateur "Au-dessus/En-dessous de la moyenne".
 
 <!-- expected-query: Q8
-SELECT NoCom, DateCom, DateEnv FROM Commande WHERE DateEnv IS NULL;
+SELECT Employe.Nom, Employe.Prenom, COUNT(Commande.NoCom) AS NbCommandes FROM Employe LEFT JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom;
 -->
 
-**9. Créer une segmentation client : "VIP" (> 5000€), "Régulier" (1000-5000€), "Occasionnel" (< 1000€)**
+**9. Trouver les paires client-fournisseur : clients ayant commandé au moins un produit d'un fournisseur donné**
 
-Affichez la segmentation avec le nombre de clients par catégorie.
+Affichez pour chaque client tous les fournisseurs dont il a acheté des produits.
 
 <!-- expected-query: Q9
-SELECT Segment, COUNT(*) AS NbClients FROM (SELECT Client.CodeCli, CASE WHEN SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)) > 5000 THEN 'VIP' WHEN SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)) BETWEEN 1000 AND 5000 THEN 'Régulier' ELSE 'Occasionnel' END AS Segment FROM Client JOIN Commande ON Client.CodeCli = Commande.CodeCli JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Client.CodeCli) GROUP BY Segment;
+SELECT DISTINCT Client.Societe AS Client, Fournisseur.Societe AS Fournisseur FROM Client JOIN Commande ON Client.CodeCli = Commande.CodeCli JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom JOIN Produit ON DetailCommande.Refprod = Produit.Refprod JOIN Fournisseur ON Produit.NoFour = Fournisseur.NoFour;
 -->
 
-**10. Analyser la tendance : comparer le CA des 3 premiers mois vs les 3 derniers mois**
+**10. Calculer le Top 5 des meilleures ventes en montant, avec le ratio par rapport au montant total**
 
-Affichez la croissance ou décroissance en %.
+Affichez les 5 produits générant le plus de chiffre d'affaires et leur % du CA total.
 
 <!-- expected-query: Q10
-SELECT STRFTIME('%Y-%m', DateCom) AS Mois, ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffaires FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Mois ORDER BY Mois;
+SELECT Produit.Nomprod, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS ChiffreAffaires FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod ORDER BY ChiffreAffaires DESC LIMIT 5;
 -->
 
 ## Rappel de cours
 
-### Combinaison de concepts
+### Agrégation (GROUP BY)
 
-Pour les requêtes complexes, vous devrez souvent combiner `JOIN`, `GROUP BY`, `HAVING` et `CASE`.
+Permet de regrouper les lignes ayant des valeurs communes.
 
 ```sql
--- Exemple complexe : CA par année avec classification
-SELECT 
-    STRFTIME('%Y', DateCom) AS Annee,
-    SUM(PrixUnit * Qte) AS CA,
-    CASE 
-        WHEN SUM(PrixUnit * Qte) > 100000 THEN 'Excellent'
-        ELSE 'Normal'
-    END AS Performance
-FROM Commande
-JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom
-GROUP BY Annee;
+-- Compter le nombre de produits par catégorie
+SELECT CodeCateg, COUNT(*) 
+FROM Produit 
+GROUP BY CodeCateg;
 ```
 
+### Filtrer sur les groupes (HAVING)
+
+`WHERE` filtre les lignes avant le regroupement, `HAVING` filtre les groupes après.
+
+```sql
+-- Catégories ayant plus de 10 produits
+SELECT CodeCateg, COUNT(*) 
+FROM Produit 
+GROUP BY CodeCateg 
+HAVING COUNT(*) > 10;
+```
+
+### Jointures (JOIN)
+
+Permet de combiner des données de plusieurs tables.
+
+```sql
+-- Récupérer les produits avec le nom de leur catégorie
+SELECT Produit.NomProd, Categorie.NomCateg
+FROM Produit
+JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg;
+```
+
+### Opérateurs ensemblistes
+
+```sql
+-- INTERSECT : Valeurs communes aux deux requêtes
+SELECT Pays FROM Client
+INTERSECT
+SELECT Pays FROM Fournisseur;
+```

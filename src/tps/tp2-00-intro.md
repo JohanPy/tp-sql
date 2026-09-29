@@ -1,65 +1,44 @@
 ---
 layout: base.njk
-title: "TP 2 : Agrégats, Choix multiple et Dates"
-intitule: "TP 2 - Dates et agrégats"
+title: "TP 2 : Descriptif de la base Comptoir2000"
+intitule: "TP 2 — Requêtes Simples, Calculs & Manipulation de Chaînes"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 0
-titre: "TP 2 : Agrégats, Choix multiple et Dates"
+titre: "TP 2 : Descriptif de la base Comptoir2000"
 permalink: "/tp2/intro/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# TP 2 : Agrégats, Choix multiple et Dates
+# TP 2 : Descriptif de la base Comptoir2000
 
-## Description
+La base de données **`Comptoir2000`** est une base de données de gestion commerciale contenant des informations relatives à une entreprise.
 
-Ce TP poursuit l'apprentissage SQL sur la base **`Comptoir2000`** en se concentrant sur :
+La table **`Client`** contient les données des clients professionnels de l'entreprise, tandis que la table **`Produit`** recense les produits commercialisés. La table **`Commande`** contient les informations des commandes passées par les clients.
 
-1. **Agrégats** : Fonctions d'agrégation (COUNT, SUM, AVG, MIN, MAX), GROUP BY, HAVING
-2. **Choix multiple** : Instructions CASE pour du SQL conditionnel
-3. **Dates** : Manipulation et extraction de dates avec STRFTIME
+La table **`DetailCommande`** établit le lien entre les commandes et les produits, en précisant la quantité commandée et le prix unitaire.
 
-## Schéma de la base de données
+Enfin, les tables **`Employe`** et **`Categorie`** complètent ce modèle en fournissant respectivement les informations des employés de l'entreprise et les catégories de produits disponibles.
 
-La base `Comptoir2000` contient les tables principales :
+## Structure complète de la base
 
-Categorie (🔑 CodeCateg, NomCateg, Description)
-Client (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
-Commande (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
-DetailCommande (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
-Employe (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
-Fournisseur (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
-Messager (🔑 NoMess, NomMess, Tel)
-Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
-
-## Conseils pour bien démarrer
-
-- Testez vos requêtes progressivement en commençant simple, puis ajoutez complexité
-- Pour les agrégats : n'oubliez pas que `WHERE` filtre par lignes AVANT l'agrégation, `HAVING` qui filtre par groupe APRÈS
-- Pour les dates : `STRFTIME` permet d'extraire année, mois, jour (`'%Y'`, `'%m'`, `'%d'`)
-- Utilisez les indices pour vérifier votre compréhension du concept, pas pour vous éviter de vous tromper, c'est comme ça que l'on apprend.
-
-## Exemples de requêtes SQL de manipulation de dates
-```sql
--- Extraire l'année d'une date
-SELECT STRFTIME('%Y', DateCom) AS AnneeCommande FROM Commande;
+```
+Client (CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
+Employe (NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, CodePostal, Pays, TelDom, Extension, RendCompteA)
+Commande (NoCom, #CodeCli, #NoEmp, DateCom, ALivAvant, DateEnv, #NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodePostalLiv, PaysLiv)
+Messager (NoMess, NomMess, Tel)
+Produit (Refprod, Nomprod, #NoFour, #CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
+Fournisseur (NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
+DetailCommande (NoCom, Refprod, PrixUnit, Qte, Remise)
+Categorie (CodeCateg, NomCateg, Description)
 ```
 
-```sql
--- Compter les commandes par année
-SELECT STRFTIME('%Y', DateCom) AS Annee, COUNT(*) AS NombreCommandes
-FROM Commande
-GROUP BY Annee;
-```
+## Conseils pour le TP
 
-## Exemples de requêtes SQL utilisant Having
-```sql
--- Compter les produits par catégorie et ne garder que celles avec plus de 10 produits
-SELECT Categorie, COUNT(*) AS NombreProduits
-FROM Produit
-GROUP BY Categorie
-HAVING NombreProduits > 10;
-```
+- Lisez attentivement les énoncés
+- Vous allez utiliser des requêtes SELECT
+- Vérifiez la cohérence de vos résultats
+- Utilisez les spoilers pour les indices si vous êtes bloqué
+- Les bonus ne sont à faire que si vous avez le temps

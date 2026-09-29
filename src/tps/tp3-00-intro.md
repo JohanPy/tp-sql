@@ -1,87 +1,65 @@
 ---
 layout: base.njk
-title: "TP 3 : Jointures et Sous-requêtes"
-intitule: "TP 3 - Jointures et sous-requêtes"
+title: "TP 3 : Dates, Agrégats & Choix Multiple (CASE)"
+intitule: "TP 3 — Dates, Agrégats & Choix Multiple (CASE)"
 base: "Comptoir2000.sqlite"
 tpNum: 3
 exerciceNum: 0
-titre: "TP 3 : Jointures et Sous-requêtes"
+titre: "TP 3 : Dates, Agrégats & Choix Multiple (CASE)"
 permalink: "/tp3/intro/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# TP 3 : Jointures et Sous-requêtes
+# TP 3 : Dates, Agrégats & Choix Multiple (CASE)
 
 ## Description
 
-Ce TP approfondit les concepts avancés sur la base **`Comptoir2000`** :
+Ce TP poursuit l'apprentissage SQL sur la base **`Comptoir2000`** en se concentrant sur :
 
-1. **Jointures** : INNER JOIN, LEFT JOIN, RIGHT JOIN, FULL JOIN, auto-jointures
-2. **Sous-requêtes** : Sous-requêtes, IN/EXISTS, requêtes corrélées
-3. **Combinaison** : Mixte de jointures et sous-requêtes pour résoudre des problèmes complexes
+1. **Agrégats** : Fonctions d'agrégation (COUNT, SUM, AVG, MIN, MAX), GROUP BY, HAVING
+2. **Choix multiple** : Instructions CASE pour du SQL conditionnel
+3. **Dates** : Manipulation et extraction de dates avec STRFTIME
 
 ## Schéma de la base de données
 
 La base `Comptoir2000` contient les tables principales :
 
-**Categorie** (🔑 CodeCateg, NomCateg, Description)
-**Client** (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
-**Commande** (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
-**DetailCommande** (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
-**Employe** (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
-**Fournisseur** (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
-**Messager** (🔑 NoMess, NomMess, Tel)
+Categorie (🔑 CodeCateg, NomCateg, Description)
+Client (🔑 CodeCli, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax)
+Commande (🔑 NoCom, 🔗 CodeCli, 🔗 NoEmp, DateCom, ALivAvant, DateEnv, NoMess, Port, Destinataire, AdrLiv, VilleLiv, RegionLiv, CodepostalLiv, PaysLiv)
+DetailCommande (🔑🔗 Nocom, 🔑🔗 Refprod, PrixUnit, Qte, Remise)
+Employe (🔑 NoEmp, Nom, Prenom, Fonction, TitreCourtoisie, DateNaissance, DateEmbauche, Adresse, Ville, Region, Codepostal, Pays, TelDom, Extension, RendCompteA)
+Fournisseur (🔑 NoFour, Societe, Contact, Fonction, Adresse, Ville, Region, CodePostal, Pays, Tel, Fax, PageAccueil)
+Messager (🔑 NoMess, NomMess, Tel)
 Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUnit, UnitesStock, UnitesCom, NiveauReap, Indisponible)
-
 
 ## Conseils pour bien démarrer
 
-- Vérifiez toujours les clés de liaison (clés étrangères) avant de joindre
-- Les LEFT JOIN conservent tous les enregistrements de la table de gauche
-- Les sous-requêtes IN() et EXISTS() offrent des alternatives aux jointures
-- Testez vos jointures étape par étape pour vérifier les résultats intermédiaires
-- Les performances diffèrent : préférez les jointures pour les requêtes simples, les sous-requêtes pour la complexité
+- Testez vos requêtes progressivement en commençant simple, puis ajoutez complexité
+- Pour les agrégats : n'oubliez pas que `WHERE` filtre par lignes AVANT l'agrégation, `HAVING` qui filtre par groupe APRÈS
+- Pour les dates : `STRFTIME` permet d'extraire année, mois, jour (`'%Y'`, `'%m'`, `'%d'`)
+- Utilisez les indices pour vérifier votre compréhension du concept, pas pour vous éviter de vous tromper, c'est comme ça que l'on apprend.
 
-## Quelques requêtes d'exemple
+## Exemples de requêtes SQL de manipulation de dates
+```sql
+-- Extraire l'année d'une date
+SELECT STRFTIME('%Y', DateCom) AS AnneeCommande FROM Commande;
+```
 
 ```sql
--- 1. Lister tous les clients avec leurs commandes (LEFT JOIN)
-SELECT C.Societe, O.NoCom, O.DateCom
-FROM Client C
-LEFT JOIN Commande O ON C.CodeCli = O.CodeCli;
+-- Compter les commandes par année
+SELECT STRFTIME('%Y', DateCom) AS Annee, COUNT(*) AS NombreCommandes
+FROM Commande
+GROUP BY Annee;
 ```
+
+## Exemples de requêtes SQL utilisant Having
 ```sql
--- 2. Trouver les produits jamais commandés (LEFT JOIN + IS NULL)
-SELECT P.Nomprod
-FROM Produit P
-LEFT JOIN DetailCommande D ON P.Refprod = D.Refprod
-WHERE D.Refprod IS NULL;
-```
-```sql
--- 3. Lister les employés avec le nombre de commandes traitées (sous-requête)
-SELECT E.Nom, E.Prenom,
-       (SELECT COUNT(*)
-        FROM Commande O
-        WHERE O.NoEmp = E.NoEmp) AS NbCommandes
-FROM Employe E;
-```
-```sql
--- 4. Trouver les clients ayant passé plus de 5 commandes (sous-requête IN)
-SELECT C.Societe
-FROM Client C
-WHERE C.CodeCli IN (
-    SELECT O.CodeCli
-    FROM Commande O
-    GROUP BY O.CodeCli
-    HAVING COUNT(*) > 5
-);
-```
-```sql
--- 5. Lister les produits avec leur fournisseur et catégorie (INNER JOIN)
-SELECT P.Nomprod, F.NomFournisseur, Cat.NomCategorie
-FROM Produit P
-INNER JOIN Fournisseur F ON P.Fournisseur = F.CodeFournisseur
-INNER JOIN Categorie Cat ON P.Categorie = Cat.CodeCategorie;
+-- Compter les produits par catégorie et ne garder que celles avec plus de 10 produits
+SELECT Categorie, COUNT(*) AS NombreProduits
+FROM Produit
+GROUP BY Categorie
+HAVING NombreProduits > 10;
 ```

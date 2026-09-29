@@ -1,142 +1,146 @@
 ---
 layout: base.njk
-title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
-intitule: "TP 4 - Récapitulatif"
-base: "Gymnase2000.sqlite"
+title: "Exercice 1 : Jointures"
+intitule: "TP 4 — Jointures Multi-Tables & Sous-Requêtes"
+base: "Comptoir2000.sqlite"
 tpNum: 4
 exerciceNum: 1
-titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
+titre: "Exercice 1 : Jointures"
 permalink: "/tp4/exercice1/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 1 : Partie I - Requêtes de base et jointures simples
+# Exercice 1 : Jointures
 
-## Questions (15 questions)
+## Questions
 
-**1. Afficher tous les sportifs du gymnase**
+**1. Afficher toutes les commandes avec les informations du client et de l'employé**
 
-Affichez la liste complète des sportifs : numéro de licence (idsportif), nom et prénom.
+Pour chaque commande, affichez le numéro, la date, le nom du client et le nom de l'employé qui l'a traitée.
 
 <!-- expected-query: Q1
-SELECT IdSportif, Nom, Prenom FROM Sportifs;
+SELECT Commande.NoCom, Commande.DateCom, Client.Societe AS Client, (Employe.Nom || ' ' || Employe.Prenom) AS Employe FROM Commande JOIN Client ON Commande.CodeCli = Client.CodeCli JOIN Employe ON Commande.NoEmp = Employe.NoEmp;
 -->
 
-**2. Lister tous les sports disponibles**
+**2. Lister tous les produits avec leur catégorie et leur fournisseur**
 
-Affichez le numéro et le nom de tous les sports proposés.
+Affichez le nom du produit, le nom de la catégorie et le nom du fournisseur.
 
 <!-- expected-query: Q2
-SELECT IdSport, Libelle FROM Sports;
+SELECT Produit.Nomprod, Categorie.NomCateg, Fournisseur.Societe AS Fournisseur FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg JOIN Fournisseur ON Produit.NoFour = Fournisseur.NoFour;
 -->
 
-**3. Afficher les sports pratiqués par un sportif donné (ex: id 1)**
+**3. Afficher les détails de toutes les commandes avec les noms des produits**
 
-Trouvez tous les sports qu'un sportif particulier pratique.
+Pour chaque ligne de commande, affichez le numéro de commande, la référence du produit et son nom.
 
 <!-- expected-query: Q3
-SELECT Sports.IdSport, Sports.Libelle FROM Sports JOIN Jouer ON Sports.IdSport = Jouer.IdSport WHERE Jouer.IdSportif = 1;
+SELECT DetailCommande.NoCom, DetailCommande.Refprod, Produit.Nomprod FROM DetailCommande JOIN Produit ON DetailCommande.Refprod = Produit.Refprod;
 -->
 
-**4. Lister les séances d'entraînement programmées**
+**4. Trouver les clients qui n'ont jamais commandé (LEFT JOIN)**
 
-Affichez le sport, le gymnase, et l'horaire pour chaque séance programmée.
-
-<!-- expected-query: Q4
-SELECT Sports.Libelle AS Sport, Gymnases.NomGymnase, Seances.Jour, Seances.Horaire FROM Seances JOIN Sports ON Seances.IdSport = Sports.IdSport JOIN Gymnases ON Seances.IdGymnase = Gymnases.IdGymnase;
--->
-
-**5. Afficher les entraîneurs (sportifs qui entraînent) et les sports qu'ils enseignent**
-
-Identifiez les sportifs ayant un rôle d'entraîneur.
-
-<!-- expected-query: Q5
-SELECT DISTINCT Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS SportEnseigne FROM Sportifs JOIN Entrainer ON Sportifs.IdSportif = Entrainer.IdSportifEntraineur JOIN Sports ON Entrainer.IdSport = Sports.IdSport;
--->
-
-**6. Trouver les arbitres et les sports qu'ils arbitrent**
-
-Listez les sportifs arbitres et leurs sports.
-
-<!-- expected-query: Q6
-SELECT DISTINCT Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS SportArbitre FROM Sportifs JOIN Arbitrer ON Sportifs.IdSportif = Arbitrer.IdSportif JOIN Sports ON Arbitrer.IdSport = Sports.IdSport;
--->
-
-**7. Afficher toutes les séances du gymnase numéro 1**
-
-Affichez le sport et l'horaire.
-
-<!-- expected-query: Q7
-SELECT Sports.Libelle AS Sport, Seances.Jour, Seances.Horaire FROM Seances JOIN Sports ON Seances.IdSport = Sports.IdSport WHERE Seances.IdGymnase = 1;
--->
-
-**8. Lister les sportifs et les séances auxquelles ils peuvent participer (basé sur les sports qu'ils jouent)**
-
-Affichez le nom du sportif, le sport, et l'horaire de la séance.
-
-<!-- expected-query: Q8
-SELECT DISTINCT Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS Sport, Seances.Jour, Seances.Horaire FROM Sportifs JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif JOIN Sports ON Jouer.IdSport = Sports.IdSport JOIN Seances ON Sports.IdSport = Seances.IdSport;
--->
-
-**9. Afficher le nombre de sportifs par sport**
-
-Comptez combien de sportifs pratiquent chaque sport.
-
-<!-- expected-query: Q9
-SELECT Sports.Libelle, COUNT(Jouer.IdSportif) AS NbSportifs FROM Sports LEFT JOIN Jouer ON Sports.IdSport = Jouer.IdSport GROUP BY Sports.IdSport, Sports.Libelle;
--->
-
-**10. Trouver les sportifs qui pratiquent plus d'un sport**
-
-Identifiez les sportifs polyvalents.
-
-<!-- expected-query: Q10
-SELECT Sportifs.Nom, Sportifs.Prenom, COUNT(Jouer.IdSport) AS NbSports FROM Sportifs JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif GROUP BY Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom HAVING COUNT(Jouer.IdSport) > 1;
--->
-
-**11. Afficher les gymnases et le nombre de séances programmées dans chaque**
-
-Comptez les activités par gymnase.
-
-<!-- expected-query: Q11
-SELECT Gymnases.NomGymnase, COUNT(Seances.IdSport) AS NbSeances FROM Gymnases LEFT JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase;
--->
-
-**12. Lister les sportifs qui entraînent un sport qu'ils pratiquent eux-mêmes**
-
-Trouvez les entraîneurs-pratiquants.
+Affichez les clients (societe) de la base qui n'ont aucune commande enregistrée.
 
 <details>
 <summary>💡 Indice</summary>
-les id_sportif_entraineur sont des id_sportifs qui ont un rôle d'entraîneur. 
+
+Pensez au LEFT JOIN qui conserve toutes les lignes de la table de gauche, même sans correspondance.
 </details>
 
-<!-- expected-query: Q12
-SELECT DISTINCT Sportifs.Nom, Sportifs.Prenom, Sports.Libelle FROM Sportifs JOIN Entrainer ON Sportifs.IdSportif = Entrainer.IdSportifEntraineur JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif AND Entrainer.IdSport = Jouer.IdSport JOIN Sports ON Entrainer.IdSport = Sports.IdSport;
+<!-- expected-query: Q4
+SELECT Client.Societe FROM Client LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli WHERE Commande.NoCom IS NULL;
 -->
 
-**13. Afficher les sportifs âgés de 20 à 30 ans**
+**5. Afficher tous les produits, qu'ils aient été commandés ou non**
 
-Filtrez les sportifs sur leur âge.
+Affichez le nom du produit et le nombre de fois qu'il a été commandé et 0 si le produit n'a jamais été commandé (ne confondez pas avec le champs uniteCom).
 
-<!-- expected-query: Q13
-SELECT IdSportif, Nom, Prenom, Age FROM Sportifs WHERE Age BETWEEN 20 AND 30;
+<!-- expected-query: Q5
+SELECT Produit.Nomprod, COUNT(DetailCommande.NoCom) AS NbCommandes FROM Produit LEFT JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod;
 -->
 
-**14. Trouver les paires (entraîneur, sportif) où l'entraîneur entraîne un sport que le sportif pratique**
+**6. Lister les employés et leurs responsables**
 
-Identifiez les relations entraîneur-apprenant potentielles.
+Pour chaque employé, affichez son nom et le nom de son responsable.
+Regardez bien le schéma de la table Employe pour comprendre comment les employés sont liés à leurs responsables.
 
-<!-- expected-query: Q14
-SELECT DISTINCT E.Nom AS EntraineurNom, S.Nom AS SportifNom, Sports.Libelle AS Sport FROM Sportifs E JOIN Entrainer ON E.IdSportif = Entrainer.IdSportifEntraineur JOIN Jouer ON Entrainer.IdSport = Jouer.IdSport JOIN Sportifs S ON Jouer.IdSportif = S.IdSportif JOIN Sports ON Entrainer.IdSport = Sports.IdSport WHERE E.IdSportif <> S.IdSportif;
+<details>
+<summary>💡 Indice</summary>
+Les responsables sont aussi des employés.
+Joignez la table Employe avec elle-même en utilisant deux alias différents. 
+</details>
+
+<!-- expected-query: Q6
+SELECT E.Nom AS Employe, Chef.Nom AS Responsable FROM Employe E LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
 -->
 
-**15. Afficher les sports sans séances programmées**
+**7. Afficher les commandes groupées avec client, employé, et informations complètes**
 
-Quel sport n'a aucune séance d'entraînement ?
+Pour chaque commande : client, employé, nombre de produits et montant total (avec remise).
 
-<!-- expected-query: Q15
-SELECT Sports.IdSport, Sports.Libelle FROM Sports LEFT JOIN Seances ON Sports.IdSport = Seances.IdSport WHERE Seances.IdSport IS NULL;
+<!-- expected-query: Q7
+SELECT Commande.NoCom, Client.Societe AS Client, Employe.Nom AS Employe, COUNT(DetailCommande.Refprod) AS NbProduits, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantTotal FROM Commande JOIN Client ON Commande.CodeCli = Client.CodeCli JOIN Employe ON Commande.NoEmp = Employe.NoEmp JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Commande.NoCom, Client.Societe, Employe.Nom;
 -->
+
+**8. Trouver les clients et les fournisseurs du même pays**
+
+Affichez les paires client-fournisseur pour chaque pays.
+
+<!-- expected-query: Q8
+SELECT DISTINCT Client.Pays, Client.Societe AS Client, Fournisseur.Societe AS Fournisseur FROM Client JOIN Fournisseur ON Client.Pays = Fournisseur.Pays;
+-->
+
+**9. Afficher les commandes avec délai de livraison**
+
+Affichez le numéro de commande, la date de commande, la date de livraison et le délai en jours.
+
+<!-- expected-query: Q9
+SELECT NoCom, DateCom, DateEnv AS DateLivraison, CAST(JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS INT) AS DelaiJours FROM Commande WHERE DateEnv IS NOT NULL;
+-->
+
+**10. Créer un résumé complet : client → commandes → produits avec tous les détails**
+
+Affichez pour chaque commande : Societe, DateCom, NoCom, Nomprod, Qte, Remise, montant ligne.
+
+<!-- expected-query: Q10
+SELECT Client.Societe, Commande.DateCom, Commande.NoCom, Produit.Nomprod, DetailCommande.Qte, DetailCommande.Remise, ROUND(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise), 2) AS MontantLigne FROM Client JOIN Commande ON Client.CodeCli = Commande.CodeCli JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom JOIN Produit ON DetailCommande.Refprod = Produit.Refprod;
+-->
+
+## Rappel de cours
+
+### Jointure Interne (INNER JOIN)
+
+Ne retourne que les lignes qui ont une correspondance dans les deux tables.
+
+```sql
+-- Clients ayant passé au moins une commande
+SELECT Client.Societe, Commande.DateCom
+FROM Client
+INNER JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+```
+
+### Jointure Externe (LEFT JOIN)
+
+Retourne toutes les lignes de la table de gauche, même s'il n'y a pas de correspondance à droite (les colonnes de droite seront NULL).
+
+```sql
+-- Tous les clients, avec leurs commandes s'ils en ont
+SELECT Client.Societe, Commande.NoCom
+FROM Client
+LEFT JOIN Commande ON Client.CodeCli = Commande.CodeCli;
+```
+
+### Auto-jointure (Self-Join)
+
+Joindre une table avec elle-même. Utile pour les hiérarchies (Employé -> Chef).
+
+```sql
+-- Employés et leur responsable
+SELECT E.Nom AS Employe, Chef.Nom AS Responsable
+FROM Employe E
+LEFT JOIN Employe Chef ON E.RendCompteA = Chef.NoEmp;
+```
+

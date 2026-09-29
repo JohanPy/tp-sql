@@ -9,7 +9,7 @@
 
 ### 2. **Conversion des TPs**
 - Script Python `convert_tps.py` créé
-- 19 exercices convertis (TP1-TP4) avec front-matter
+- 19 exercices convertis (TP2-TP5) avec front-matter
 - Fichiers générés dans `src/tps/`
 
 ### 3. **Assets configurés**

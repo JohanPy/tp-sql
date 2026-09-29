@@ -29,7 +29,7 @@ permalink: "/"
       <summary class="tp-summary">
         <div class="tp-header-info">
           <span class="tp-badge">TP {{ tpNumber }}</span>
-          <h3 class="tp-title">{{ tpExercices[0].data.intitule | replace("TP " + tpNumber + " - ", "") }}</h3>
+          <h3 class="tp-title">{{ tpExercices[0].data.intitule | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " – ", "") | replace("TP " + tpNumber + " - ", "") }}</h3>
         </div>
         <div class="tp-header-meta">
           <span class="db-tag">🗄️ {{ tpExercices[0].data.base | replace(".sqlite", "") }}</span>
@@ -45,7 +45,7 @@ permalink: "/"
               <span class="ex-number">{% if exercise.data.exerciceNum == 0 %}Intro{% else %}{{ exercise.data.exerciceNum }}{% endif %}</span>
               <span class="ex-status"></span>
             </div>
-            <span class="ex-title-mini">{{ exercise.data.titre | replace("TP" + tpNumber + " - ", "") | replace("Exercice " + exercise.data.exerciceNum + " : ", "") }}</span>
+            <span class="ex-title-mini">{{ exercise.data.titre | replace("TP " + tpNumber + " : ", "") | replace("TP " + tpNumber + " — ", "") | replace("TP " + tpNumber + " - ", "") | replace("TP" + tpNumber + " - ", "") | replace("Exercice " + exercise.data.exerciceNum + " : ", "") }}</span>
           </a>
           {% endfor %}
         </div>

@@ -27,7 +27,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addCollection("tpsByNumber", function(collectionApi) {
     const tps = {};
     collectionApi.getFilteredByGlob("src/tps/**/*.md").forEach(item => {
-      const tpNum = item.data.tpNum || 1;
+      const tpNum = item.data.tpNum !== undefined ? item.data.tpNum : 2;
       if (!tps[tpNum]) {
         tps[tpNum] = [];
       }

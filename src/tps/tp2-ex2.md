@@ -1,58 +1,60 @@
 ---
 layout: base.njk
-title: "Exercice 2 : Choix multiple (CASE)"
-intitule: "TP 2 - Agrégats et Choix multiple"
+title: "Exercice 2 : Calculs"
+intitule: "TP 2 — Requêtes Simples, Calculs & Manipulation de Chaînes"
 base: "Comptoir2000.sqlite"
 tpNum: 2
 exerciceNum: 2
-titre: "Exercice 2 : Choix multiple (CASE)"
+titre: "Exercice 2 : Calculs"
 permalink: "/tp2/exercice2/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 2 : Choix multiple (CASE)
+# Exercice 2 : Calculs
 
 ## Questions
 
-**1. Classer les produits par gamme de prix**
+**1. Affichez pour chaque produit, le nombre d'unité en ajoutant les unités en stock et celles commandées**
 
-Affichez tous les produits avec une colonne "Gamme" affichant "Économique" (< 50), "Standard" (50-200), ou "Premium" (> 200).
+Pour chaque produit, calculez le total d'unités disponibles (unités en stock + unités en commande).
 
 <!-- expected-query: Q1
-SELECT Refprod, Nomprod, PrixUnit, CASE WHEN PrixUnit < 50 THEN 'Économique' WHEN PrixUnit BETWEEN 50 AND 200 THEN 'Standard' ELSE 'Premium' END AS Gamme FROM Produit;
+SELECT Refprod, Nomprod, (UnitesStock + UnitesCom) AS TotalUnites FROM Produit;
 -->
 
-**2. Ajouter une colonne "Statut" pour les produits (disponible/indisponible)**
+**2. À partir de la table DetailCommande, calculez pour chaque produit de la commande numéro 10251 : le montant de la remise (exprimé en %) et le montant à payer**
 
-Affichez tous les produits avec leur nom et un statut "Disponible" ou "Indispo" selon le champ Indisponible.
+Affichez le montant original, la remise en euros et le montant final.
 
 <!-- expected-query: Q2
-SELECT Refprod, Nomprod, CASE WHEN Indisponible = 1 THEN 'Indispo' ELSE 'Disponible' END AS Statut FROM Produit;
--->
-
-**3. Catégoriser les commandes par montant total**
-
-Pour chaque NoCom calculer le prix total et classer en 'Petit' (< 100), 'Moyen' (100-500), 'Gros' (> 500).
-
-<!-- expected-query: Q3
-SELECT Nocom, ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS MontantTotal, CASE WHEN SUM(PrixUnit * Qte * (1 - Remise)) < 100 THEN 'Petit' WHEN SUM(PrixUnit * Qte * (1 - Remise)) BETWEEN 100 AND 500 THEN 'Moyen' ELSE 'Gros' END AS CategorieCommande FROM DetailCommande GROUP BY Nocom;
+SELECT Refprod, (PrixUnit * Qte) AS MontantBrut, (PrixUnit * Qte * Remise) AS MontantRemise, (PrixUnit * Qte * (1 - Remise)) AS MontantNet FROM DetailCommande WHERE Nocom = 10251;
 -->
 
 ## Rappel de cours
 
-### Expression CASE
+### Opérateurs arithmétiques
 
-L'expression `CASE` permet d'ajouter de la logique conditionnelle dans vos requêtes (comme un IF/ELSE).
+Vous pouvez effectuer des calculs directement dans le SELECT :
+
+- Addition : `+`
+- Soustraction : `-`
+- Multiplication : `*`
+- Division : `/`
 
 ```sql
--- Créer une colonne personnalisée selon une condition
-SELECT NomProd, PrixUnit,
-    CASE
-        WHEN PrixUnit < 10 THEN 'Pas cher'
-        WHEN PrixUnit BETWEEN 10 AND 50 THEN 'Moyen'
-        ELSE 'Cher'
-    END AS CategoriePrix
-FROM Produit;
+-- Calculer un prix total
+SELECT PrixUnit * Qte FROM DetailCommande;
 ```
+
+### Alias de colonnes
+
+Pour renommer une colonne ou le résultat d'un calcul, utilisez `AS`.
+
+```sql
+-- Renommer une colonne dans le résultat
+SELECT PrixUnit * Qte AS MontantTotal FROM DetailCommande;
+```
+
+

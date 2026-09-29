@@ -1,123 +1,151 @@
 ---
 layout: base.njk
-title: "Exercice 3 : Partie III - Requêtes très avancées"
-intitule: "TP 4 - Récapitulatif"
-base: "Gymnase2000.sqlite"
+title: "Exercice 3 : Bonus - Requêtes très complexes"
+intitule: "TP 4 — Jointures Multi-Tables & Sous-Requêtes"
+base: "Comptoir2000.sqlite"
 tpNum: 4
 exerciceNum: 3
-titre: "Exercice 3 : Partie III - Requêtes très avancées"
+titre: "Exercice 3 : Bonus - Requêtes très complexes"
 permalink: "/tp4/exercice3/"
 tags: tp
 show_load_db: false
 show_save_db: false
 ---
 
-# Exercice 3 : Partie III - Requêtes très avancées
+# Exercice 3 : Bonus - Requêtes plus complexes
 
-## Questions (12 questions)
+## Questions bonus
 
-**1. Créer un classement des sportifs par polyvalence (nombre total de rôles/activités)**
+Combinez jointures avancées, sous-requêtes corrélées et agrégations complexes. À faire si vous avez le temps après avoir terminé les exercices précédents.
 
-Affichez le nom du sportif et le nombre total d'activités (joueur + entraîneur + arbitre, avec les doublons).
+**1. Déterminer les employés "spécialisés" : qui gère toujours les mêmes clients (peu de clients différents)**
 
-<!-- expected-query: Q1
-SELECT S.Nom, S.Prenom, (SELECT COUNT(*) FROM Jouer J WHERE J.IdSportif = S.IdSportif) + (SELECT COUNT(*) FROM Entrainer E WHERE E.IdSportifEntraineur = S.IdSportif) + (SELECT COUNT(*) FROM Arbitrer A WHERE A.IdSportif = S.IdSportif) AS TotalActivites FROM Sportifs S ORDER BY TotalActivites DESC;
--->
-
-**2. Trouver les sportifs qui jouent un sport arbitré par leur propre conseiller**
-
-Combinez les informations de jeu, de conseil et d'arbitrage.
-
-<!-- expected-query: Q2
-SELECT DISTINCT S.Nom AS Sportif, Conseiller.Nom AS Conseiller, Sports.Libelle AS Sport FROM Sportifs S JOIN Sportifs Conseiller ON S.IdSportifConseiller = Conseiller.IdSportif JOIN Jouer ON S.IdSportif = Jouer.IdSportif JOIN Arbitrer ON Conseiller.IdSportif = Arbitrer.IdSportif AND Jouer.IdSport = Arbitrer.IdSport JOIN Sports ON Jouer.IdSport = Sports.IdSport;
--->
-
-**3. Quel est le gymnase le plus occupé ? (Somme des durées des séances la plus élevée)**
-
-Affichez le nom du gymnase et la durée totale.
-
+Affichez le nom de l'employé et le nombre de clients distincts qu'il a traités.
 <details>
 <summary>💡 Indice</summary>
-Utilisez un tri et une limite pour trouver le maximum.
+Groupez par NoEmp et comptez DISTINCT CodeCli via COUNT(DISTINCT CodeCli) ; triez ensuite sur ce compteur pour repérer ceux qui ont peu de clients.
+</details>
+
+<!-- expected-query: Q1
+SELECT Employe.Nom, Employe.Prenom, COUNT(DISTINCT Commande.CodeCli) AS NbClientsDistincts FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom ORDER BY NbClientsDistincts ASC;
+-->
+
+**2. Calculer le "coefficient de fidélité" : (nombre de commandes) / (délai entre première et dernière commande en jours + 1)**
+
+Affichez le client et son coefficient de fidélité (plus élevé = plus fidèle).
+<details>
+<summary>💡 Indice</summary>
+Calculez pour chaque client la date min/max des commandes et le nombre total ; utilisez julianday() pour obtenir les jours entre deux dates avant de former le ratio.
+</details>
+
+<!-- expected-query: Q2
+SELECT CodeCli, ROUND(CAST(COUNT(NoCom) AS FLOAT) / (JULIANDAY(MAX(DateCom)) - JULIANDAY(MIN(DateCom)) + 1), 4) AS CoeffFidelite FROM Commande GROUP BY CodeCli ORDER BY CoeffFidelite DESC;
+-->
+
+**3. Calculer l'impact de chaque catégorie sur le CA total par mois**
+
+Affichez le mois, la catégorie, le CA mensuel catégorique et le % du CA total.
+<details>
+<summary>💡 Indice</summary>
+Regroupez par strftime('%Y-%m', DateCom) et CodeCateg ; calculez SUM(PrixUnit * Qte * (1-Remise)) pour le CA, puis calculez le pourcentage par rapport au CA total du mois (sous-requête ou fenêtre utile).
 </details>
 
 <!-- expected-query: Q3
-SELECT Gymnases.NomGymnase, SUM(Seances.Duree) AS DureeTotale FROM Gymnases JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase ORDER BY DureeTotale DESC LIMIT 1;
+SELECT STRFTIME('%Y-%m', Commande.DateCom) AS Mois, Categorie.NomCateg, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS CA_Categorie FROM Commande JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom JOIN Produit ON DetailCommande.Refprod = Produit.Refprod JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Mois, Categorie.CodeCateg, Categorie.NomCateg ORDER BY Mois;
 -->
 
-**4. Identifier les "Super-Sportifs" : à la fois Joueur, Arbitre et Entraîneur**
+**4. Analyser les "cycles de réapprovisionnement" : délai moyen entre 2 commandes pour chaque client**
 
-Peu importe le sport, ils doivent avoir les trois rôles.
-
-<!-- expected-query: Q4
-SELECT DISTINCT S.IdSportif, S.Nom, S.Prenom FROM Sportifs S WHERE EXISTS (SELECT 1 FROM Jouer WHERE IdSportif = S.IdSportif) AND EXISTS (SELECT 1 FROM Entrainer WHERE IdSportifEntraineur = S.IdSportif) AND EXISTS (SELECT 1 FROM Arbitrer WHERE IdSportif = S.IdSportif);
--->
-
-**5. Identifier les sports "fantômes" : pas de joueurs, pas d'arbitres, pas de séances**
-
-Trouvez les sports qui existent dans la base mais ne sont utilisés nulle part.
-
-<!-- expected-query: Q5
-SELECT Sports.IdSport, Sports.Libelle FROM Sports WHERE IdSport NOT IN (SELECT IdSport FROM Jouer) AND IdSport NOT IN (SELECT IdSport FROM Arbitrer) AND IdSport NOT IN (SELECT IdSport FROM Seances);
--->
-
-**6. Trouver les sportifs ayant le même nom de famille mais des prénoms différents**
-
-Détectez les potentielles familles de sportifs.
-
-<!-- expected-query: Q6
-SELECT S1.Nom, S1.Prenom AS Prenom1, S2.Prenom AS Prenom2 FROM Sportifs S1 JOIN Sportifs S2 ON S1.Nom = S2.Nom AND S1.IdSportif < S2.IdSportif;
--->
-
-**7. Trouver les gymnases qui ont des séances le Lundi et le Mercredi, mais PAS le Mardi**
-
-Analysez les "trous" dans l'emploi du temps des gymnases.
-
-<!-- expected-query: Q7
-SELECT DISTINCT G.NomGymnase FROM Gymnases G JOIN Seances S1 ON G.IdGymnase = S1.IdGymnase AND S1.Jour = 'Lundi' JOIN Seances S2 ON G.IdGymnase = S2.IdGymnase AND S2.Jour = 'Mercredi' WHERE G.IdGymnase NOT IN (SELECT IdGymnase FROM Seances WHERE Jour = 'Mardi');
--->
-
-**8. Trouver les paires de sportifs du même âge**
-
-Affichez les deux noms et l'âge.
-
+Calculez la fréquence d'achat de chaque client.
 <details>
 <summary>💡 Indice</summary>
-Utilisez une auto-jointure avec une condition d'inégalité sur les IDs pour éviter les doublons (A-B et B-A).
+Ordonnez les dates de commande par client et calculez la différence entre commandes consécutives (julianday). Moyennez ces différences par client. En SQL sans fenêtres, pensez aux sous-requêtes corrélées ou aux fonctions de fenêtre si disponibles.
+</details>
+
+<!-- expected-query: Q4
+SELECT CodeCli, COUNT(NoCom) AS NbCommandes, ROUND((JULIANDAY(MAX(DateCom)) - JULIANDAY(MIN(DateCom))) / NULLIF(COUNT(NoCom) - 1, 0), 1) AS DelaiMoyenReappro FROM Commande GROUP BY CodeCli HAVING COUNT(NoCom) > 1;
+-->
+
+**5. Créer une "chaîne de distribution" : Fournisseur → Produit → Commande → Client**
+
+Affichez le fournisseur, ses produits commandés, le nombre de commandes et le nombre de clients distincts.
+<details>
+<summary>💡 Indice</summary>
+Départ : table Produit pour lier Fournisseur→Produit. Agrégez ensuite les DetailCommande par Refprod pour compter commandes et clients distincts ; regroupez au niveau du fournisseur.
+</details>
+
+<!-- expected-query: Q5
+SELECT Fournisseur.Societe AS Fournisseur, COUNT(DISTINCT Produit.Refprod) AS NbProduits, COUNT(DISTINCT DetailCommande.NoCom) AS NbCommandes, COUNT(DISTINCT Commande.CodeCli) AS NbClientsDistincts FROM Fournisseur JOIN Produit ON Fournisseur.NoFour = Produit.NoFour LEFT JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod LEFT JOIN Commande ON DetailCommande.NoCom = Commande.NoCom GROUP BY Fournisseur.NoFour, Fournisseur.Societe;
+-->
+
+**6. Créer un "ranking 3-niveaux" : pour chaque employé, classe les clients par montant total**
+
+Affichez NoEmp, Nom, CodeCli (client), et rang du client pour cet employé.
+<details>
+<summary>💡 Indice</summary>
+Calculez le montant total par (NoEmp, CodeCli) via SUM sur DetailCommande joint à Commande (si nécessaire), puis utilisez des comparaisons de seuils ou la fonction ROW_NUMBER() si votre SQL le permet; autrement, simulez le rang par agrégats et conditions.
+</details>
+
+<!-- expected-query: Q6
+SELECT Commande.NoEmp, Employe.Nom AS NomEmploye, Commande.CodeCli, ROUND(SUM(DetailCommande.PrixUnit * DetailCommande.Qte * (1 - DetailCommande.Remise)), 2) AS MontantTotalClient FROM Commande JOIN Employe ON Commande.NoEmp = Employe.NoEmp JOIN DetailCommande ON Commande.NoCom = DetailCommande.NoCom GROUP BY Commande.NoEmp, Employe.Nom, Commande.CodeCli ORDER BY Commande.NoEmp, MontantTotalClient DESC;
+-->
+
+**7. Trouver les "paires de clients" dans le même pays ayant commandé les mêmes produits**
+
+Identifiez les clients des même pays qui ont acheté la même chose.
+<details>
+<summary>💡 Indice</summary>
+Comptez les produits par client (par produit), regroupez par client et comparez les ensembles — une auto-jointure (client vs client) ou une comparaison d'agrégats/groupes permet d'identifier les paires du même pays.
+</details>
+
+<!-- expected-query: Q7
+SELECT DISTINCT C1.Societe AS Client1, C2.Societe AS Client2, C1.Pays FROM Client C1 JOIN Client C2 ON C1.Pays = C2.Pays AND C1.CodeCli < C2.CodeCli JOIN Commande Com1 ON C1.CodeCli = Com1.CodeCli JOIN DetailCommande D1 ON Com1.NoCom = D1.NoCom JOIN Commande Com2 ON C2.CodeCli = Com2.CodeCli JOIN DetailCommande D2 ON Com2.NoCom = D2.NoCom AND D1.Refprod = D2.Refprod;
+-->
+
+**8. Identifier les "hotspots" : combinaisons client-produit avec anomalies (quantités très élevées vs moyenne)**
+
+Trouvez les achats inhabituels.
+<details>
+<summary>💡 Indice</summary>
+Pour chaque paire client-produit, comparez la quantité à la moyenne de ce produit (agrégat sur DetailCommande). Repérez les lignes où Qte est beaucoup plus élevée qu'une moyenne ± multiple d'écart-type ou d'un facteur fixé.
 </details>
 
 <!-- expected-query: Q8
-SELECT S1.Nom AS Sportif1, S2.Nom AS Sportif2, S1.Age FROM Sportifs S1 JOIN Sportifs S2 ON S1.Age = S2.Age AND S1.IdSportif < S2.IdSportif ORDER BY S1.Age;
+SELECT DetailCommande.NoCom, DetailCommande.Refprod, Produit.Nomprod, DetailCommande.Qte FROM DetailCommande JOIN Produit ON DetailCommande.Refprod = Produit.Refprod WHERE DetailCommande.Qte > (SELECT AVG(Qte) * 2 FROM DetailCommande D2 WHERE D2.Refprod = DetailCommande.Refprod);
 -->
 
-**9. Le sport le plus pratiqué (en nombre de joueurs) pour chaque gymnase**
+**9. Identifier les produits "substituables" : commandés ensemble dans au moins 50% des commandes**
 
-Affichez le gymnase, le sport et le nombre de joueurs.
+Trouvez les produits souvent achetés ensemble.
+<details>
+<summary>💡 Indice</summary>
+Pour chaque paire de produits, comptez le nombre de commandes où les deux apparaissent et divisez par le nombre total de commandes contenant l'un d'eux (ou par total général selon la définition) ; une auto-jointure sur DetailCommande par NoCom et Refprod permet d'obtenir les paires.
+</details>
 
 <!-- expected-query: Q9
-SELECT G.NomGymnase, S.Libelle AS Sport, COUNT(DISTINCT J.IdSportif) AS NbJoueurs FROM Gymnases G JOIN Seances Se ON G.IdGymnase = Se.IdGymnase JOIN Sports S ON Se.IdSport = S.IdSport JOIN Jouer J ON S.IdSport = J.IdSport GROUP BY G.IdGymnase, G.NomGymnase, S.IdSport, S.Libelle ORDER BY G.NomGymnase, NbJoueurs DESC;
+SELECT D1.Refprod AS Prod1, P1.Nomprod AS NomProd1, D2.Refprod AS Prod2, P2.Nomprod AS NomProd2, COUNT(DISTINCT D1.NoCom) AS NbCommandesEnsemble FROM DetailCommande D1 JOIN DetailCommande D2 ON D1.NoCom = D2.NoCom AND D1.Refprod < D2.Refprod JOIN Produit P1 ON D1.Refprod = P1.Refprod JOIN Produit P2 ON D2.Refprod = P2.Refprod GROUP BY D1.Refprod, D2.Refprod, P1.Nomprod, P2.Nomprod HAVING COUNT(DISTINCT D1.NoCom) >= 5 ORDER BY NbCommandesEnsemble DESC;
 -->
 
-**10. Les sportifs qui ont un conseiller, mais qui ne pratiquent aucun des sports de ce conseiller**
+## Rappel de cours
 
-Affichez le nom du sportif et le nom du conseiller.
+### Stratégie pour requêtes complexes
 
-<!-- expected-query: Q10
-SELECT S.Nom AS Sportif, Conseiller.Nom AS Conseiller FROM Sportifs S JOIN Sportifs Conseiller ON S.IdSportifConseiller = Conseiller.IdSportif WHERE NOT EXISTS (SELECT 1 FROM Jouer J1 JOIN Jouer J2 ON J1.IdSport = J2.IdSport WHERE J1.IdSportif = S.IdSportif AND J2.IdSportif = Conseiller.IdSportif);
--->
+1. **Décomposer le problème** : Ne cherchez pas à tout écrire d'un coup.
+2. **Commencer par le "FROM"** : Quelles tables contiennent les données ? Comment sont-elles liées ?
+3. **Filtrer (WHERE)** : Quelles lignes garder ?
+4. **Grouper (GROUP BY)** : Quel est le niveau de détail (par client, par mois...) ?
+5. **Filtrer les groupes (HAVING)** : Conditions sur les agrégats ?
+6. **Trier (ORDER BY)** : Ordre final ?
 
-**11. Les gymnases qui accueillent au moins 3 sports différents le même jour**
+### Exemple de structure complexe
 
-Affichez le gymnase et le jour concerné.
+```sql
+SELECT C.Societe, COUNT(O.NoCom) AS NbCommandes
+FROM Client C
+LEFT JOIN Commande O ON C.CodeCli = O.CodeCli
+WHERE C.Pays = 'France'
+GROUP BY C.Societe
+HAVING COUNT(O.NoCom) > 10
+ORDER BY NbCommandes DESC;
+```
 
-<!-- expected-query: Q11
-SELECT Gymnases.NomGymnase, Seances.Jour, COUNT(DISTINCT Seances.IdSport) AS NbSportsDistincts FROM Gymnases JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase, Seances.Jour HAVING COUNT(DISTINCT Seances.IdSport) >= 3;
--->
-
-**12. Moyenne d'âge des sportifs par sport, uniquement pour les sports ayant plus de 5 pratiquants**
-
-Affichez le sport et la moyenne d'âge.
-
-<!-- expected-query: Q12
-SELECT Sports.Libelle, ROUND(AVG(Sportifs.Age), 1) AS AgeMoyen, COUNT(Jouer.IdSportif) AS NbPratiquants FROM Sports JOIN Jouer ON Sports.IdSport = Jouer.IdSport JOIN Sportifs ON Jouer.IdSportif = Sportifs.IdSportif GROUP BY Sports.IdSport, Sports.Libelle HAVING COUNT(Jouer.IdSportif) > 5;
--->

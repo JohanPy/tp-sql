@@ -6,29 +6,6 @@ permalink: "/"
 ---
 
 <div class="home-container">
-  <!-- En-tête compact et moderne -->
-  <div class="hero-compact">
-    <div class="hero-main">
-      <div class="hero-title-row">
-        <span class="hero-icon">🎓</span>
-        <div>
-          <h1>Plateforme SQL</h1>
-          <p class="hero-subtitle">Entraînement interactif sur bases de données relationnelles</p>
-        </div>
-      </div>
-    </div>
-    <div class="hero-stats">
-      <div class="stat-pill" title="Nombre total d'exercices disponibles">
-        <span class="stat-value">{{ collections.allTPs.length }}</span>
-        <span class="stat-label">exercices</span>
-      </div>
-      <div class="stat-pill" title="Bases de données actives (Comptoir2000, Gymnase2000)">
-        <span class="stat-value">2</span>
-        <span class="stat-label">bases</span>
-      </div>
-    </div>
-  </div>
-
   <!-- Barre d'outils et de recherche rapide -->
   <div class="tp-toolbar">
     <div class="tp-search-box">
@@ -166,85 +143,6 @@ permalink: "/"
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-/* Hero Compact */
-.hero-compact {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(135deg, rgba(79, 190, 255, 0.08) 0%, rgba(20, 35, 55, 0.4) 100%);
-  border: 1px solid rgba(79, 190, 255, 0.18);
-  border-radius: 8px;
-  padding: 8px 14px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-}
-
-.hero-main {
-  display: flex;
-  align-items: center;
-}
-
-.hero-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.hero-icon {
-  font-size: 1.5rem;
-  line-height: 1;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.hero-content h1, .hero-compact h1 {
-  font-size: 1.1rem !important;
-  margin: 0 !important;
-  font-weight: 700 !important;
-  color: #fff !important;
-  letter-spacing: -0.3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.hero-subtitle {
-  margin: 1px 0 0 0 !important;
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  opacity: 0.85;
-  line-height: 1.2;
-}
-
-.hero-stats {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.stat-pill {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  background: rgba(15, 25, 35, 0.6);
-  border: 1px solid rgba(79, 190, 255, 0.2);
-  padding: 3px 8px;
-  border-radius: 5px;
-}
-
-.stat-value {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--accent-blue);
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.stat-label {
-  font-size: 0.68rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* Toolbar de recherche et contrôles */
@@ -682,16 +580,6 @@ kbd {
 }
 
 @media (max-width: 768px) {
-  .hero-compact {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .hero-stats {
-    width: 100%;
-  }
-  
   .tp-toolbar {
     flex-direction: column;
     align-items: stretch;

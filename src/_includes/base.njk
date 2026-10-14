@@ -280,6 +280,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" data-manual></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
   <script>
+    // En SQL standard / SQLite, les commentaires sont introduits par -- ou /* */ (pas # ni //)
+    if (window.Prism && Prism.languages.sql) {
+      Prism.languages.sql.comment = {
+        pattern: /(^|[^\\])(?:\/\*[\s\S]*?\*\/|--.*)/,
+        lookbehind: true
+      };
+    }
     // Forcer Prism à colorier après le chargement
     if (window.Prism) {
       document.addEventListener('DOMContentLoaded', function() {

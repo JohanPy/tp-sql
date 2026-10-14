@@ -476,7 +476,7 @@ function toc(msg) {
 
 // Add syntax highlighting to the textarea
 var editor = CodeMirror.fromTextArea(elements.commandsElm, {
-	mode: 'text/x-mysql',
+	mode: 'text/x-sqlite',
 	viewportMargin: Infinity,
 	indentWithTabs: true,
 	smartIndent: true,

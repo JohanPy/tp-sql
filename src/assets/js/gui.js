@@ -443,12 +443,25 @@ function createTableRow(tbody, rowData) {
 	tbody.appendChild(row);
 }
 
+// Normalise une requête SQL en s'assurant qu'elle possède un seul point-virgule final
+function normalizeSqlQuery(query) {
+	if (!query) return '';
+	const trimmed = query.trim();
+	if (!trimmed) return '';
+	return trimmed.replace(/;+\s*$/, '') + ';';
+}
+
 // Execute the commands when the button is clicked
 function execEditorContents() {
 	clearError();
 	
+	const cleanQuery = normalizeSqlQuery(editor.getValue());
+	if (!cleanQuery || cleanQuery === ';') {
+		return;
+	}
+	
 	try {
-		execute(editor.getValue() + ';');
+		execute(cleanQuery);
 	} catch (e) {
 		handleError(e);
 	}
@@ -1270,11 +1283,12 @@ function executeExpectedResult(qid, obfuscatedQuery) {
 // ===========================
 
 function addToHistory(query) {
-	// Ne pas ajouter les requêtes vides ou dupliquées
-	if (!query || !query.trim()) return;
+	// Ne pas ajouter les requêtes vides ou ne contenant que des points-virgules
+	const cleanQuery = normalizeSqlQuery(query);
+	if (!cleanQuery || cleanQuery === ';') return;
 	
 	// Vérifier si la dernière requête est identique
-	if (state.queryHistory.length > 0 && state.queryHistory[0].query === query) {
+	if (state.queryHistory.length > 0 && state.queryHistory[0].query === cleanQuery) {
 		return;
 	}
 	
@@ -1284,7 +1298,7 @@ function addToHistory(query) {
 	}
 	
 	state.queryHistory.unshift({
-		query: query,
+		query: cleanQuery,
 		timestamp: new Date(),
 		executionTime: state.lastExecutionTime,
 		id: Date.now() + Math.random()
@@ -1312,12 +1326,14 @@ function loadHistoryFromStorage() {
 		const stored = localStorage.getItem('sqlQueryHistory');
 		if (stored) {
 			const historyData = JSON.parse(stored);
-			state.queryHistory = historyData.map(item => ({
-				query: item.query,
-				timestamp: new Date(item.timestamp),
-				executionTime: item.executionTime || 0,
-				id: Date.now() + Math.random()
-			}));
+			state.queryHistory = historyData
+				.map(item => ({
+					query: normalizeSqlQuery(item.query),
+					timestamp: new Date(item.timestamp),
+					executionTime: item.executionTime || 0,
+					id: Date.now() + Math.random()
+				}))
+				.filter(item => item.query && item.query !== ';');
 		}
 	} catch (e) {
 		console.warn('Could not load history from localStorage:', e);
@@ -1504,7 +1520,7 @@ function copyAllHistory() {
 	const allQueries = state.queryHistory
 		.map((item, index) => {
 			const timeStr = item.timestamp.toLocaleString('fr-FR');
-			return `-- Requête #${state.queryHistory.length - index} (${timeStr})\n${item.query}`;
+			return `-- Requête #${state.queryHistory.length - index} (${timeStr})\n${normalizeSqlQuery(item.query)}`;
 		})
 		.join('\n\n');
 	
@@ -1521,7 +1537,7 @@ function exportHistory() {
 	const sqlContent = state.queryHistory
 		.map((item, index) => {
 			const timeStr = item.timestamp.toLocaleString('fr-FR');
-			return `-- Requête #${state.queryHistory.length - index}\n-- Date: ${timeStr}\n-- Temps d'exécution: ${item.executionTime || 0}ms\n\n${item.query};`;
+			return `-- Requête #${state.queryHistory.length - index}\n-- Date: ${timeStr}\n-- Temps d'exécution: ${item.executionTime || 0}ms\n\n${normalizeSqlQuery(item.query)}`;
 		})
 		.join('\n\n');
 	

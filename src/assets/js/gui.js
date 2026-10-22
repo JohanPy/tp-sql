@@ -1239,7 +1239,17 @@ function executeExpectedResult(qid, obfuscatedQuery) {
 	updateStatus('executing', `Calcul du résultat attendu pour ${qid}...`);
 	tic();
 
-	worker.onmessage = function (event) {
+	const handleExpectedMessage = function (event) {
+		// Ignore internal schema queries or metadata queries if any
+		if (event.data && event.data.results && event.data.results[0] && event.data.results[0].columns) {
+			const cols = event.data.results[0].columns;
+			if ((cols.length === 2 && cols[0] === 'name' && cols[1] === 'sql') || (cols.length === 1 && cols[0] === 'sql')) {
+				return;
+			}
+		}
+
+		worker.removeEventListener('message', handleExpectedMessage);
+
 		const results = event.data.results;
 		const executionTime = toc("Executing expected SQL");
 
@@ -1273,6 +1283,7 @@ function executeExpectedResult(qid, obfuscatedQuery) {
 		updateStatus('success', `Résultat attendu pour ${qid} affiché (${results[0].values.length} lignes)`);
 	};
 
+	worker.addEventListener('message', handleExpectedMessage);
 	worker.postMessage({ action: 'exec', sql: sql });
 	worker.onerror = handleError;
 }
@@ -1630,99 +1641,43 @@ function loadDatabaseSchema(dbConfig) {
 function loadTableStructure() {
 	console.log('Loading table structure...');
 	
-	// Query to get all tables (exclude sqlite system tables and test tables)
-	const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'test%' ORDER BY name";
+	const query = "SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'test%' ORDER BY name";
 	
-	// Create a one-time handler for this specific query
-	const handleTablesResponse = function(event) {
-		console.log('Tables query response:', event.data);
+	const handleSchemaResponse = function(event) {
+		if (!event.data || !event.data.results || !event.data.results[0]) return;
+		const cols = event.data.results[0].columns;
+		if (!cols || cols[0] !== 'name' || cols[1] !== 'sql') return;
 		
-		if (event.data.results && event.data.results.length > 0) {
-			const tables = event.data.results[0].values.map(row => row[0]);
-			console.log('Found tables:', tables);
-			
-			// Remove this handler
-			worker.removeEventListener('message', handleTablesResponse);
-			
-			// Load details for all tables
-			loadAllTableDetails(tables);
-		} else {
-			console.log('No tables found');
-			worker.removeEventListener('message', handleTablesResponse);
-			const detailsDiv = document.getElementById('schemaDetails');
+		worker.removeEventListener('message', handleSchemaResponse);
+		
+		const rows = event.data.results[0].values || [];
+		const detailsDiv = document.getElementById('schemaDetails');
+		if (rows.length === 0) {
 			if (detailsDiv) {
 				detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
 			}
+			return;
 		}
+		
+		const tables = rows.map(r => r[0]);
+		const tableData = {};
+		
+		rows.forEach(([tableName, createSQL]) => {
+			tableData[tableName] = {
+				columns: [],
+				primaryKeys: new Set(),
+				foreignKeys: new Set()
+			};
+			if (createSQL) {
+				parseTableStructure(tableName, createSQL, tableData);
+			}
+		});
+		
+		displayTableStructure(tables, tableData);
 	};
 	
-	// Add the handler
-	worker.addEventListener('message', handleTablesResponse);
-	
-	// Send the query
-	worker.postMessage({ action: 'exec', sql: tablesQuery });
-}
-
-function loadAllTableDetails(tables) {
-	if (!tables || tables.length === 0) {
-		const detailsDiv = document.getElementById('schemaDetails');
-		if (detailsDiv) {
-			detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
-		}
-		return;
-	}
-	
-	const detailsDiv = document.getElementById('schemaDetails');
-	if (!detailsDiv) return;
-	
-	console.log('Loading details for tables:', tables);
-	
-	// Use the database to get table info directly without PRAGMA
-	const tableData = {};
-	
-	// For each table, query sqlite_master and do simple SELECT to get columns
-	let completedTables = 0;
-	
-	tables.forEach((tableName, index) => {
-		tableData[tableName] = {
-			columns: [],
-			primaryKeys: new Set(),
-			foreignKeys: new Set()
-		};
-		
-		// Get the CREATE TABLE statement to parse structure
-		const query = `SELECT sql FROM sqlite_master WHERE type='table' AND name='${tableName}'`;
-		
-		const handleResponse = function(event) {
-			if (!event.data.results || event.data.results.length === 0) {
-				worker.removeEventListener('message', handleResponse);
-				completedTables++;
-				if (completedTables === tables.length) {
-					displayTableStructure(tables, tableData);
-				}
-				return;
-			}
-			
-			const createSQL = event.data.results[0].values[0][0];
-			console.log(`CREATE TABLE for ${tableName}:`, createSQL);
-			
-			// Parse the CREATE TABLE statement
-			parseTableStructure(tableName, createSQL, tableData);
-			
-			worker.removeEventListener('message', handleResponse);
-			completedTables++;
-			
-			if (completedTables === tables.length) {
-				displayTableStructure(tables, tableData);
-			}
-		};
-		
-		// Add a small delay between queries to avoid conflicts
-		setTimeout(() => {
-			worker.addEventListener('message', handleResponse);
-			worker.postMessage({ action: 'exec', sql: query });
-		}, index * 100);
-	});
+	worker.addEventListener('message', handleSchemaResponse);
+	worker.postMessage({ action: 'exec', sql: query });
 }
 
 function parseTableStructure(tableName, createSQL, tableData) {
@@ -1899,280 +1854,6 @@ function addShortcutInfo(container, title, keyText) {
 	container.appendChild(span);
 }
 
-// ============================================
-// SCHEMA TAB - DATABASE STRUCTURE DISPLAY
-// ============================================
-
-function loadDatabaseSchema(dbConfig) {
-	if (!dbConfig || !dbConfig.base) {
-		console.log('No database config provided for schema');
-		return;
-	}
-
-	console.log('Loading schema for database:', dbConfig.base);
-
-	// Load schema diagram (PNG image)
-	const dbName = dbConfig.base.replace('.sqlite', '').replace('.db', '');
-	const schemaImagePath = assetPath(`/assets/bases/${dbName}.png`);
-
-	console.log('Looking for schema image at:', schemaImagePath);
-
-	const diagramDiv = document.getElementById('schemaDiagram');
-	if (diagramDiv) {
-		// Check if image exists and create a link to open it in new tab
-		const img = new Image();
-		img.onload = function() {
-			console.log('✓ Schema image loaded successfully');
-			diagramDiv.innerHTML = `
-				<a href="${schemaImagePath}" target="_blank" rel="noopener noreferrer" class="schema-link">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-						style="vertical-align: middle; margin-right: 8px;">
-						<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-						<polyline points="15 3 21 3 21 9"></polyline>
-						<line x1="10" y1="14" x2="21" y2="3"></line>
-					</svg>
-					Ouvrir le diagramme de la base <strong>${dbName}</strong> dans un nouvel onglet
-				</a>
-			`;
-		};
-		img.onerror = function() {
-			console.log('✗ No schema image found at:', schemaImagePath);
-			diagramDiv.innerHTML = '<p class="schema-placeholder">Aucun diagramme disponible pour cette base de données.<br>Pour ajouter un diagramme, placez un fichier PNG nommé <strong>' + dbName + '.png</strong> dans le dossier /bases/</p>';
-		};
-		img.src = schemaImagePath;
-	}
-
-	// Load table structure with a delay to ensure database is ready
-	setTimeout(() => {
-		loadTableStructure();
-	}, 1000);
-}
-
-function loadTableStructure() {
-	console.log('Loading table structure...');
-
-	// Query to get all tables (exclude sqlite system tables and test tables)
-	const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'test%' ORDER BY name";
-
-	// Create a one-time handler for this specific query
-	const handleTablesResponse = function(event) {
-		console.log('Tables query response:', event.data);
-
-		if (event.data.results && event.data.results.length > 0) {
-			const tables = event.data.results[0].values.map(row => row[0]);
-			console.log('Found tables:', tables);
-
-			// Remove this handler
-			worker.removeEventListener('message', handleTablesResponse);
-
-			// Load details for all tables
-			loadAllTableDetails(tables);
-		} else {
-			console.log('No tables found');
-			worker.removeEventListener('message', handleTablesResponse);
-			const detailsDiv = document.getElementById('schemaDetails');
-			if (detailsDiv) {
-				detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
-			}
-		}
-	};
-
-	// Add the handler
-	worker.addEventListener('message', handleTablesResponse);
-
-	// Send the query
-	worker.postMessage({ action: 'exec', sql: tablesQuery });
-}
-
-function loadAllTableDetails(tables) {
-	if (!tables || tables.length === 0) {
-		const detailsDiv = document.getElementById('schemaDetails');
-		if (detailsDiv) {
-			detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
-		}
-		return;
-	}
-
-	const detailsDiv = document.getElementById('schemaDetails');
-	if (!detailsDiv) return;
-
-	console.log('Loading details for tables:', tables);
-
-	// Use the database to get table info directly without PRAGMA
-	const tableData = {};
-
-	// For each table, query sqlite_master and do simple SELECT to get columns
-	let completedTables = 0;
-
-	tables.forEach((tableName, index) => {
-		tableData[tableName] = {
-			columns: [],
-			primaryKeys: new Set(),
-			foreignKeys: new Set()
-		};
-
-		// Get the CREATE TABLE statement to parse structure
-		const query = `SELECT sql FROM sqlite_master WHERE type='table' AND name='${tableName}'`;
-
-		const handleResponse = function(event) {
-			if (!event.data.results || event.data.results.length === 0) {
-				worker.removeEventListener('message', handleResponse);
-				completedTables++;
-				if (completedTables === tables.length) {
-					displayTableStructure(tables, tableData);
-				}
-				return;
-			}
-
-			const createSQL = event.data.results[0].values[0][0];
-			console.log(`CREATE TABLE for ${tableName}:`, createSQL);
-
-			// Parse the CREATE TABLE statement
-			parseTableStructure(tableName, createSQL, tableData);
-
-			worker.removeEventListener('message', handleResponse);
-			completedTables++;
-
-			if (completedTables === tables.length) {
-				displayTableStructure(tables, tableData);
-			}
-		};
-
-		// Add a small delay between queries to avoid conflicts
-		setTimeout(() => {
-			worker.addEventListener('message', handleResponse);
-			worker.postMessage({ action: 'exec', sql: query });
-		}, index * 100);
-	});
-}
-
-function parseTableStructure(tableName, createSQL, tableData) {
-	// Extract column definitions from CREATE TABLE statement
-	// Format: CREATE TABLE tableName (col1 type1 constraints, col2 type2, ...)
-
-	const match = createSQL.match(/CREATE TABLE\s+\w+\s*\(([\s\S]+)\)/i);
-	if (!match) return;
-
-	const columnDefs = match[1];
-
-	// Split by comma, but be careful with commas in CHECK constraints, etc.
-	const columns = [];
-	let currentCol = '';
-	let parenDepth = 0;
-
-	for (let i = 0; i < columnDefs.length; i++) {
-		const char = columnDefs[i];
-		if (char === '(') parenDepth++;
-		if (char === ')') parenDepth--;
-
-		if (char === ',' && parenDepth === 0) {
-			columns.push(currentCol.trim());
-			currentCol = '';
-		} else {
-			currentCol += char;
-		}
-	}
-	if (currentCol.trim()) columns.push(currentCol.trim());
-
-	// Parse each column
-	columns.forEach(colDef => {
-		// Skip table-level constraints
-		if (/^(PRIMARY KEY|FOREIGN KEY|UNIQUE|CHECK|CONSTRAINT)/i.test(colDef.trim())) {
-			// Parse table-level PK: PRIMARY KEY (col1, col2, ...)
-			const pkMatch = colDef.match(/PRIMARY KEY\s*\(\s*([^)]+)\s*\)/i);
-			if (pkMatch) {
-				const pkCols = pkMatch[1].split(',').map(c => c.trim());
-				pkCols.forEach(col => tableData[tableName].primaryKeys.add(col));
-			}
-
-			// Parse table-level FK: FOREIGN KEY (col) REFERENCES ...
-			const fkMatch = colDef.match(/FOREIGN KEY\s*\(\s*(\w+)\s*\)/i);
-			if (fkMatch) {
-				tableData[tableName].foreignKeys.add(fkMatch[1]);
-			}
-			return;
-		}
-
-		// Parse column: name type constraints
-		const colMatch = colDef.match(/^(\w+)\s+([^\s,]+)/i);
-		if (!colMatch) return;
-
-		const colName = colMatch[1];
-		const colType = colMatch[2];
-
-		// Check for PRIMARY KEY constraint
-		const isPK = /PRIMARY\s+KEY/i.test(colDef);
-		if (isPK) {
-			tableData[tableName].primaryKeys.add(colName);
-		}
-
-		// Check for REFERENCES (FK)
-		const isFK = /REFERENCES/i.test(colDef);
-		if (isFK) {
-			tableData[tableName].foreignKeys.add(colName);
-
-			// Heuristic: if a column has REFERENCES and NOT NULL, it's likely part of a composite PK
-			// (common pattern in junction tables like DetailCommande)
-			const hasNotNull = /NOT\s+NULL/i.test(colDef);
-			if (hasNotNull && !isPK) {
-				// Check if this table has no explicit PRIMARY KEY yet
-				// If so, columns with REFERENCES + NOT NULL are likely composite PK
-				tableData[tableName].primaryKeys.add(colName);
-			}
-		}
-
-		tableData[tableName].columns.push({
-			name: colName,
-			type: colType,
-			isPrimaryKey: isPK
-		});
-	});
-
-	console.log(`Parsed ${tableName}:`, tableData[tableName]);
-}
-
-function displayTableStructure(tables, tableData) {
-	console.log('Displaying table structure for', tables.length, 'tables');
-
-	const detailsDiv = document.getElementById('schemaDetails');
-	if (!detailsDiv) return;
-
-	// Display each table with improved formatting
-	let html = '';
-	tables.forEach(tableName => {
-		const table = tableData[tableName];
-		if (!table || table.columns.length === 0) {
-			console.log(`Skipping ${tableName} - no columns`);
-			return;
-		}
-
-		console.log(`Displaying ${tableName} with ${table.columns.length} columns, ${table.primaryKeys.size} PKs, ${table.foreignKeys.size} FKs`);
-
-		// Build column list with symbols for keys
-		const columnsList = table.columns.map(col => {
-			let colStr = '';
-			const isPK = table.primaryKeys.has(col.name);
-			const isFK = table.foreignKeys.has(col.name);
-
-			// Show both symbols if column is both PK and FK
-			if (isPK) colStr += '🔑';
-			if (isFK) colStr += '🔗';
-			if (isPK || isFK) colStr += ' ';
-
-			colStr += col.name;
-			return colStr;
-		}).join(', ');
-
-		html += `
-			<div class="table-info">
-				<div class="table-signature">${tableName} (${columnsList})</div>
-			</div>
-		`;
-	});
-
-	detailsDiv.innerHTML = html || '<p class="schema-placeholder">Aucune information disponible</p>';
-	console.log('Table structure displayed');
-}
 
 // End of DOMContentLoaded
 });

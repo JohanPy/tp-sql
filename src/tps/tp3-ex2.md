@@ -18,23 +18,36 @@ show_save_db: false
 
 **1. Classer les produits par gamme de prix**
 
-Affichez tous les produits avec une colonne "Gamme" affichant "Économique" (< 50), "Standard" (50-200), ou "Premium" (> 200).
+À partir de la table `Produit`, affichez la référence (`Refprod`), le nom (`Nomprod`), le prix unitaire (`PrixUnit`) et une colonne sous l'alias `Gamme` indiquant :
+- 'Économique' si le prix unitaire est strictement inférieur à 50 €
+- 'Standard' si le prix unitaire est compris entre 50 et 200 € inclus
+- 'Premium' si le prix unitaire est strictement supérieur à 200 €
+
+<details>
+<summary>💡 Indice</summary>
+
+La structure générale d'un branchement conditionnel s'écrit :
+`CASE WHEN condition1 THEN valeur1 WHEN condition2 THEN valeur2 ELSE valeur_par_defaut END`
+</details>
 
 <!-- expected-query: Q1
 SELECT Refprod, Nomprod, PrixUnit, CASE WHEN PrixUnit < 50 THEN 'Économique' WHEN PrixUnit BETWEEN 50 AND 200 THEN 'Standard' ELSE 'Premium' END AS Gamme FROM Produit;
 -->
 
-**2. Ajouter une colonne "Statut" pour les produits (disponible/indisponible)**
+**2. Attribuer un statut de disponibilité aux produits**
 
-Affichez tous les produits avec leur nom et un statut "Disponible" ou "Indispo" selon le champ Indisponible.
+À partir de la table `Produit`, affichez la référence (`Refprod`), le nom (`Nomprod`) et une colonne sous l'alias `Statut` affichant 'Indispo' lorsque le produit n'est plus commercialisé (champ `Indisponible` à 1), et 'Disponible' dans le cas contraire.
 
 <!-- expected-query: Q2
 SELECT Refprod, Nomprod, CASE WHEN Indisponible = 1 THEN 'Indispo' ELSE 'Disponible' END AS Statut FROM Produit;
 -->
 
-**3. Catégoriser les commandes par montant total**
+**3. Catégoriser les commandes par volume financier**
 
-Pour chaque NoCom calculer le prix total et classer en 'Petit' (< 100), 'Moyen' (100-500), 'Gros' (> 500).
+À partir de la table `DetailCommande`, pour chaque numéro de commande (`Nocom`), calculez le montant total net facturé (avec remises appliquées) arrondi à 2 décimales sous l'alias `MontantTotal`. Ajoutez une colonne sous l'alias `CategorieCommande` classant la commande selon ce montant total :
+- 'Petit' pour un total strictement inférieur à 100 €
+- 'Moyen' pour un total compris entre 100 et 500 € inclus
+- 'Gros' pour un total strictement supérieur à 500 €
 
 <!-- expected-query: Q3
 SELECT Nocom, ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS MontantTotal, CASE WHEN SUM(PrixUnit * Qte * (1 - Remise)) < 100 THEN 'Petit' WHEN SUM(PrixUnit * Qte * (1 - Remise)) BETWEEN 100 AND 500 THEN 'Moyen' ELSE 'Gros' END AS CategorieCommande FROM DetailCommande GROUP BY Nocom;

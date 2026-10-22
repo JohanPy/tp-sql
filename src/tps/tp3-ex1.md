@@ -18,15 +18,15 @@ show_save_db: false
 
 **1. Compter le nombre total de commandes**
 
-Affichez le nombre de commandes passées.
+À partir de la table `Commande`, affichez le nombre total de commandes enregistrées sous l'alias `TotalCommandes`.
 
 <!-- expected-query: Q1
 SELECT COUNT(*) AS TotalCommandes FROM Commande;
 -->
 
-**2. Calculer le montant total de toutes les commandes avec remise appliquée**
+**2. Calculer le chiffre d'affaires total facturé**
 
-Calculez le chiffre d'affaires total en tenant compte des remises.
+À partir de la table `DetailCommande`, calculez le montant total cumulé de l'ensemble des ventes en appliquant les remises accordées. Arrondissez le résultat à 2 décimales sous l'alias `ChiffreAffairesTotal`.
 
 <!-- expected-query: Q2
 SELECT ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffairesTotal FROM DetailCommande;
@@ -34,50 +34,56 @@ SELECT ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffairesTotal FROM
 
 **3. Afficher le nombre de clients par pays**
 
-Affichez le pays et le nombre de clients pour chaque pays, trié par nombre décroissant.
+À partir de la table `Client`, affichez pour chaque pays (colonne `Pays`) le nombre de clients enregistrés, sous l'alias `NbClients`. Triez le résultat par ordre décroissant du nombre de clients.
 
 <!-- expected-query: Q3
 SELECT Pays, COUNT(*) AS NbClients FROM Client GROUP BY Pays ORDER BY NbClients DESC;
 -->
 
-**4. Calculer le prix moyen des produits par catégorie**
+**4. Calculer le prix unitaire moyen des produits par catégorie**
 
-Affichez le nom de la catégorie et le prix moyen des produits.
+À partir de la table `Produit`, affichez pour chaque code de catégorie (`CodeCateg`) le prix unitaire moyen des produits, arrondi à 2 décimales sous l'alias `PrixMoyen`.
 
 <!-- expected-query: Q4
-SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg;
+SELECT CodeCateg, ROUND(AVG(PrixUnit), 2) AS PrixMoyen FROM Produit GROUP BY CodeCateg;
 -->
 
-**5. Trouver les catégories dont le prix moyen est supérieur à 100**
+**5. Identifier les catégories dont le prix unitaire moyen dépasse 100 €**
 
-Utilisez une clause de filtrage après agrégation.
+À partir de la table `Produit`, affichez le code de catégorie (`CodeCateg`) et le prix unitaire moyen arrondi à 2 décimales sous l'alias `PrixMoyen`, en ne conservant que les catégories dont ce prix unitaire moyen est strictement supérieur à 100 €.
+
+<details>
+<summary>💡 Indice</summary>
+
+Attention : la clause `WHERE` filtre les lignes individuelles avant regroupement et ne peut pas porter sur le résultat d'un agrégat. Pour filtrer des groupes après calcul, utilisez la clause `HAVING`.
+</details>
 
 <!-- expected-query: Q5
-SELECT Categorie.NomCateg, ROUND(AVG(Produit.PrixUnit), 2) AS PrixMoyen FROM Produit JOIN Categorie ON Produit.CodeCateg = Categorie.CodeCateg GROUP BY Categorie.CodeCateg, Categorie.NomCateg HAVING AVG(Produit.PrixUnit) > 100;
+SELECT CodeCateg, ROUND(AVG(PrixUnit), 2) AS PrixMoyen FROM Produit GROUP BY CodeCateg HAVING AVG(PrixUnit) > 100;
 -->
 
-**6. Afficher pour chaque employé le nombre de commandes qu'il a gérées**
+**6. Dénombrer les commandes traitées par chaque employé**
 
-Affichez le nom, prénom et le nombre de commandes traitées.
+À partir de la table `Commande`, affichez pour chaque identifiant d'employé (colonne `NoEmp`) le nombre de commandes qu'il a prises en charge, sous l'alias `NbCommandes`.
 
 <!-- expected-query: Q6
-SELECT Employe.Nom, Employe.Prenom, COUNT(Commande.NoCom) AS NbCommandes FROM Employe JOIN Commande ON Employe.NoEmp = Commande.NoEmp GROUP BY Employe.NoEmp, Employe.Nom, Employe.Prenom;
+SELECT NoEmp, COUNT(*) AS NbCommandes FROM Commande GROUP BY NoEmp;
 -->
 
-**7. Calculer le nombre minimum et maximum d'unités commandées dans une seule ligne de commande**
+**7. Déterminer les quantités extrêmes commandées sur une ligne**
 
-Trouvez les quantités extrêmes dans la table DetailCommande.
+À partir de la table `DetailCommande`, identifiez sur l'ensemble des lignes de commande la quantité minimale commandée sous l'alias `QteMin` et la quantité maximale commandée sous l'alias `QteMax`.
 
 <!-- expected-query: Q7
 SELECT MIN(Qte) AS QteMin, MAX(Qte) AS QteMax FROM DetailCommande;
 -->
 
-**8. Afficher les produits avec leur quantité totale vendue, en excluant les ventes inférieures à 10 unités**
+**8. Filtrer les volumes de vente cumulés par produit**
 
-Filtrez les produits peu vendus.
+À partir de la table `DetailCommande`, affichez pour chaque référence de produit (`Refprod`) la somme totale des quantités commandées sous l'alias `TotalVendu`. Ne retenez que les produits dont le cumul vendu est supérieur ou égal à 10 unités.
 
 <!-- expected-query: Q8
-SELECT Produit.Nomprod, SUM(DetailCommande.Qte) AS TotalVendu FROM Produit JOIN DetailCommande ON Produit.Refprod = DetailCommande.Refprod GROUP BY Produit.Refprod, Produit.Nomprod HAVING SUM(DetailCommande.Qte) >= 10;
+SELECT Refprod, SUM(Qte) AS TotalVendu FROM DetailCommande GROUP BY Refprod HAVING SUM(Qte) >= 10;
 -->
 
 ## Rappel de cours

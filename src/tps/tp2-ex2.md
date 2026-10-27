@@ -16,17 +16,21 @@ show_save_db: false
 
 ## Questions
 
-**1. Affichez pour chaque produit, le nombre d'unité en ajoutant les unités en stock et celles commandées**
+**1. Calculer pour chaque produit le volume total d'unités**
 
-Pour chaque produit, calculez le total d'unités disponibles (unités en stock + unités en commande).
+À partir de la table `Produit`, affichez la référence (colonne `Refprod`), le nom (colonne `Nomprod`) et le volume total d'unités (somme des unités en stock et des unités commandées) sous l'alias `TotalUnites`.
 
 <!-- expected-query: Q1
 SELECT Refprod, Nomprod, (UnitesStock + UnitesCom) AS TotalUnites FROM Produit;
 -->
 
-**2. À partir de la table DetailCommande, calculez pour chaque produit de la commande numéro 10251 : le montant de la remise (exprimé en %) et le montant à payer**
+**2. Décomposer la facturation pour les articles de la commande 10251**
 
-Affichez le montant original, la remise en euros et le montant final.
+À partir de la table `DetailCommande`, pour chaque article de la commande numéro 10251 (colonne `Nocom`), affichez :
+- La référence du produit (colonne `Refprod`)
+- Le montant brut avant remise, sous l'alias `MontantBrut`
+- Le montant de la remise déduite en euros, sous l'alias `MontantRemise`
+- Le montant net final à payer, sous l'alias `MontantNet`
 
 <!-- expected-query: Q2
 SELECT Refprod, (PrixUnit * Qte) AS MontantBrut, (PrixUnit * Qte * Remise) AS MontantRemise, (PrixUnit * Qte * (1 - Remise)) AS MontantNet FROM DetailCommande WHERE Nocom = 10251;

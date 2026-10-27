@@ -16,98 +16,86 @@ show_save_db: false
 
 ## Questions
 
-**1. Trier tous les produits par leur prix unitaire**
+**1. Trier tous les produits par leur prix unitaire croissant**
 
-Ordonnez les produits du moins cher au plus cher.
+À partir de la table `Produit`, affichez toutes les colonnes (`*`) triées du prix le moins cher au plus cher (colonne `PrixUnit`).
 
 <!-- expected-query: Q1
 SELECT * FROM Produit ORDER BY PrixUnit ASC;
 -->
 
-**2. Lister les trois produits les plus chers**
+**2. Afficher toutes les informations des trois produits les plus chers**
 
-Affichez les 3 produits avec les prix les plus élevés.
+À partir de la table `Produit`, affichez toutes les colonnes (`*`) pour les 3 produits ayant les prix unitaires les plus élevés (colonne `PrixUnit`).
 
 <!-- expected-query: Q2
 SELECT * FROM Produit ORDER BY PrixUnit DESC LIMIT 3;
 -->
 
-**3. Lister les clients suisses, allemands et belges**
+**3. Lister les informations des clients suisses, allemands et belges**
 
-Filtrez les clients selon leur pays (Suisse, Allemagne, Belgique).
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez l'opérateur `IN` pour filtrer sur plusieurs valeurs.
-</details>
+À partir de la table `Client`, affichez toutes les colonnes (`*`) pour les clients dont le pays (colonne `Pays`) est la Suisse, l'Allemagne ou la Belgique.
 
 <!-- expected-query: Q3
 SELECT * FROM Client WHERE Pays IN ('Suisse', 'Allemagne', 'Belgique');
 -->
 
-**4. Lister les noms des Sociétés dont le nom contient "restaurant"**
+**4. Rechercher les sociétés clientes dont la raison sociale contient "restaurant"**
 
-Recherchez les sociétés clients ayant "restaurant" dans leur nom.
+À partir de la table `Client`, affichez uniquement le nom de la société (colonne `Societe`) pour les clients dont la raison sociale contient le mot "restaurant".
 
 <!-- expected-query: Q4
 SELECT Societe FROM Client WHERE Societe LIKE '%restaurant%';
 -->
 
-**5. Lister les différents pays des clients (sans doublons)**
+**5. Lister sans doublon les pays d'implantation des clients**
 
-Affichez la liste unique des pays où se trouvent les clients.
+À partir de la table `Client`, affichez la liste des pays (colonne `Pays`) sans aucun doublon.
 
 <!-- expected-query: Q5
 SELECT DISTINCT Pays FROM Client;
 -->
 
-**6. Idem en ajoutant les villes, le tout trié par ordre alphabétique du pays et de la ville**
+**6. Lister sans doublon les couples pays et villes avec un double tri alphabétique**
 
-Affichez les couples (Pays, Ville) sans doublon, triés par pays puis par ville.
+À partir de la table `Client`, affichez les colonnes `Pays` et `Ville` sans doublon, triées par ordre alphabétique sur le pays, puis sur la ville.
 
 <!-- expected-query: Q6
 SELECT DISTINCT Pays, Ville FROM Client ORDER BY Pays, Ville;
 -->
 
-**7. Lister tous les produits vendus en bouteilles ou en canettes**
+**7. Rechercher les produits vendus en bouteilles ou en canettes**
 
-Recherchez les produits dont l'unité de vente (QteParUnit) contient "bouteille" ou "canette".
+À partir de la table `Produit`, sélectionnez toutes les colonnes (`*`) pour les produits dont l'unité de vente (colonne `QteParUnit`) contient le mot "bouteille" ou le mot "canette".
 
 <!-- expected-query: Q7
 SELECT * FROM Produit WHERE QteParUnit LIKE '%bouteille%' OR QteParUnit LIKE '%canette%';
 -->
 
-**8. Lister les produits du fournisseur n° 8 dont le prix unitaire est entre 10 et 100€**
+**8. Afficher en majuscules le nom et la référence des produits du fournisseur n° 8 de prix modéré**
 
-Affichez le nom et la référence du produit en majuscule.
-
-<details>
-<summary>💡 Indice</summary>
-
-Pour convertir en majuscule, utilisez la fonction `UPPER()`.
-</details>
+À partir de la table `Produit`, affichez le nom du produit (colonne `Nomprod`) et sa référence (colonne `Refprod`) tous deux convertis en majuscules, pour les produits du fournisseur n° 8 (colonne `NoFour`) dont le prix unitaire (colonne `PrixUnit`) est compris entre 10 et 100 € inclus.
 
 <!-- expected-query: Q8
 SELECT UPPER(Nomprod), UPPER(Refprod) FROM Produit WHERE NoFour = 8 AND PrixUnit BETWEEN 10 AND 100;
 -->
 
-**9. Lister les numéros d'employés ayant réalisé une commande à livrer à Lille, Lyon ou Nantes**
+**9. Lister sans doublon les employés ayant traité des commandes livrées à Lille, Lyon ou Nantes**
 
-Récupérez les `NoEmp` des employés pour des commandes destinées à ces villes.
+À partir de la table `Commande`, affichez la liste sans doublon des identifiants d'employés (colonne `NoEmp`) ayant enregistré au moins une commande à destination de Lille, Lyon ou Nantes (colonne `VilleLiv`).
 
 <!-- expected-query: Q9
 SELECT DISTINCT NoEmp FROM Commande WHERE VilleLiv IN ('Lille', 'Lyon', 'Nantes');
 -->
 
-**10. Lister les produits dont le nom contient "tofu" ou "choco", dont le prix est inférieur à 100€**
+**10. Filtrer les produits par mot-clé et par prix**
 
-Affichez le nom et le prix de ces produits.
+À partir de la table `Produit`, affichez le nom (colonne `Nomprod`) et le prix unitaire (colonne `PrixUnit`) des produits dont le nom contient "tofu" ou "choco", et dont le prix unitaire est strictement inférieur à 100 €.
 
 <details>
 <summary>💡 Indice</summary>
 
-Attention à la priorité des opérateurs ! Utilisez des parenthèses pour grouper les conditions OR.
+Attention à la priorité des opérateurs ! Pensez à utiliser des parenthèses pour regrouper vos conditions logiques.
 </details>
 
 <!-- expected-query: Q10

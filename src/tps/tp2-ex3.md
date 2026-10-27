@@ -16,44 +16,50 @@ show_save_db: false
 
 ## Questions
 
-Dans une même requête, sur la table Client, vous devez :
+Les questions suivantes portent toutes sur la table **`Client`** et permettent de pratiquer les fonctions de manipulation de chaînes de caractères :
 
-**1. Concaténer les champs Adresse, Ville, CodePostal et Pays dans un nouveau champ nommé "AdresseComplete"**
+**1. Concaténer l'adresse postale complète dans un champ unique**
 
-Le format doit être : `Adresse, CodePostal Ville, Pays`
-
-<details>
-<summary>💡 Indice</summary>
-
-Utilisez l'opérateur de concaténation `||` pour joindre des chaînes.
-</details>
+À partir de la table `Client`, concaténez les colonnes `Adresse`, `CodePostal`, `Ville` et `Pays` pour former une seule colonne nommée `AdresseComplete` au format exact : `Adresse, CodePostal Ville, Pays`.
 
 <!-- expected-query: Q1
 SELECT (Adresse || ', ' || CodePostal || ' ' || Ville || ', ' || Pays) AS AdresseComplete FROM Client;
 -->
 
-**2. Extraire les deux derniers caractères des codes clients**
+**2. Extraire les deux derniers caractères du code client**
 
-Créez une colonne affichant les 2 derniers caractères de `CodeCli`.
+À partir de la table `Client`, affichez le code client (colonne `CodeCli`), ainsi que ses 2 derniers caractères sous l'alias `DeuxDerniers`.
+
+<details>
+<summary>💡 Indice</summary>
+
+La fonction `SUBSTR()` accepte une position de départ négative pour compter les caractères en partant de la fin de la chaîne.
+</details>
 
 <!-- expected-query: Q2
 SELECT CodeCli, SUBSTR(CodeCli, -2) AS DeuxDerniers FROM Client;
 -->
 
-**3. Mettre en minuscule le nom des sociétés**
+**3. Convertir en minuscules la raison sociale des sociétés clientes**
 
-Affichez le nom de chaque société en minuscule.
+À partir de la table `Client`, affichez la raison sociale de chaque société (colonne `Societe`) convertie en minuscules, sous l'alias `SocieteMinuscule`.
 
 <!-- expected-query: Q3
 SELECT LOWER(Societe) AS SocieteMinuscule FROM Client;
 -->
 
-**4. Affichez le nom des clients et leur fonction en remplaçant le terme "marketing" par "mercatique"**
+**4. Harmoniser la fonction des contacts en remplaçant "marketing" par "mercatique"**
 
-Remplacez tous les "marketing" dans le champ `Fonction` par "mercatique".
+À partir de la table `Client`, affichez le nom de la personne de contact (colonne `Contact`), ainsi que son intitulé de poste (colonne `Fonction`) dans lequel le terme 'marketing' est remplacé par 'mercatique', sous l'alias `Fonction`.
+
+<details>
+<summary>💡 Précision</summary>
+
+Dans la base de données, l'intitulé 'marketing' est saisi en lettres minuscules.
+</details>
 
 <!-- expected-query: Q4
-SELECT Contact, REPLACE(Fonction, 'Marketing', 'mercatique') AS Fonction FROM Client;
+SELECT Contact, REPLACE(Fonction, 'marketing', 'mercatique') AS Fonction FROM Client;
 -->
 
 ## Rappel de cours

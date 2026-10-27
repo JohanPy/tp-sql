@@ -61,8 +61,8 @@ const state = {
 	lastExecutionTime: 0
 };
 
-// Start the worker in which sql.js will run
-const worker = new Worker(assetPath("/assets/sql.js/worker.sql-wasm.js"));
+// Start the worker in which sql.js will run (with MariaDB emulation)
+const worker = new Worker(assetPath("/assets/js/db-worker.js"));
 worker.onerror = handleError;
 
 // Open a database - check if we need to load a specific database

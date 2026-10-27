@@ -5,6 +5,7 @@
   "scripts": {
     "start": "eleventy --serve",
     "build": "ELEVENTY_ENV=production eleventy",
+    "test": "node test/test-mariadb-emulation.js",
     "debug": "DEBUG=Eleventy* eleventy"
   },
   "keywords": ["sql", "education", "eleventy"],

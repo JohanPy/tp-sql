@@ -1,8 +1,8 @@
 ---
 layout: base.njk
 title: "Exercice 3 : Partie III - Requêtes très avancées"
-intitule: "TP 5 — Grand Cas de Synthèse (Gymnase2000)"
-base: "Gymnase2000.sqlite"
+intitule: "TP 5 — Grand Cas de Synthèse (NetflixStream)"
+base: "NetflixStream.sqlite"
 tpNum: 5
 exerciceNum: 3
 titre: "Exercice 3 : Partie III - Requêtes très avancées"
@@ -16,122 +16,122 @@ show_save_db: false
 
 ## Questions (12 questions)
 
-**1. Évaluer la polyvalence globale des sportifs**
+**1. Évaluer l'engagement global d'un abonné**
 
-Pour chaque sportif, affichez son nom (`Nom`), son prénom (`Prenom`) et le total cumulé de ses engagements (somme de ses participations comme joueur, comme entraîneur et comme arbitre) sous l'alias `TotalActivites`. Triez par polyvalence décroissante.
+Pour chaque abonné, affichez son nom (`nom`), son prénom (`prenom`) et le cumul de son engagement (somme de ses visionnages, de ses favoris et de ses avis notés) sous l'alias `ScoreEngagement`. Triez par score décroissant.
 
 <details>
 <summary>💡 Indice</summary>
 
-Vous pouvez additionner directement plusieurs sous-requêtes scalaires `(SELECT COUNT(*) FROM ...)` au sein de la clause `SELECT`.
+Vous pouvez additionner directement des sous-requêtes scalaires `(SELECT COUNT(*) FROM ...)` dans la clause `SELECT`.
 </details>
 
 <!-- expected-query: Q1
-SELECT S.Nom, S.Prenom, (SELECT COUNT(*) FROM Jouer J WHERE J.IdSportif = S.IdSportif) + (SELECT COUNT(*) FROM Entrainer E WHERE E.IdSportifEntraineur = S.IdSportif) + (SELECT COUNT(*) FROM Arbitrer A WHERE A.IdSportif = S.IdSportif) AS TotalActivites FROM Sportifs S ORDER BY TotalActivites DESC;
+SELECT A.nom, A.prenom, (SELECT COUNT(*) FROM VISIONNAGES V WHERE V.id_abonne = A.id_abonne) + (SELECT COUNT(*) FROM FAVORIS F WHERE F.id_abonne = A.id_abonne) + (SELECT COUNT(*) FROM VISIONNAGES V2 WHERE V2.id_abonne = A.id_abonne AND V2.note_avis IS NOT NULL) AS ScoreEngagement FROM ABONNES A ORDER BY ScoreEngagement DESC;
 -->
 
-**2. Trouver les sportifs qui jouent un sport arbitré par leur propre conseiller**
+**2. Abonnés ayant noté une œuvre réalisée par leur propre parrain**
 
-Identifiez les situations croisées : affichez sans doublon le nom de l'adhérent sous l'alias `Sportif`, le nom de son conseiller sous l'alias `Conseiller` et le sport concerné sous l'alias `Sport`, pour chaque cas où le conseiller est arbitre officiel d'une discipline pratiquée par son protégé.
+Identifiez les situations croisées : affichez sans doublon le nom du filleul sous l'alias `Filleul`, le nom de son parrain sous l'alias `Parrain` et le titre du contenu (`titre`), pour chaque cas où l'abonné a noté une œuvre dirigée par son parrain.
 
 <!-- expected-query: Q2
-SELECT DISTINCT S.Nom AS Sportif, Conseiller.Nom AS Conseiller, Sports.Libelle AS Sport FROM Sportifs S JOIN Sportifs Conseiller ON S.IdSportifConseiller = Conseiller.IdSportif JOIN Jouer ON S.IdSportif = Jouer.IdSportif JOIN Arbitrer ON Conseiller.IdSportif = Arbitrer.IdSportif AND Jouer.IdSport = Arbitrer.IdSport JOIN Sports ON Jouer.IdSport = Sports.IdSport;
+SELECT DISTINCT A.nom AS Filleul, P.nom AS Parrain, C.titre FROM ABONNES A JOIN ABONNES P ON A.id_parrain = P.id_abonne JOIN VISIONNAGES V ON A.id_abonne = V.id_abonne JOIN CONTENUS C ON V.id_contenu = C.id_contenu JOIN PARTICIPATIONS Part ON C.id_contenu = Part.id_contenu AND Part.role = 'Realisateur' WHERE Part.id_personne = P.id_abonne AND V.note_avis IS NOT NULL;
 -->
 
-**3. Identifier le gymnase au volume d'occupation le plus élevé**
+**3. Identifier le contenu au temps total de visionnage le plus élevé**
 
-Affichez le nom (`NomGymnase`) et le volume horaire total cumulé des séances sous l'alias `DureeTotale` pour le gymnase qui totalise le plus grand temps d'occupation (somme des durées des séances).
+Affichez le titre du contenu (`titre`) et le volume cumulé des minutes regardées sous l'alias `TotalMinutes` pour l'œuvre qui totalise le plus grand temps de lecture sur la plateforme.
 
 <!-- expected-query: Q3
-SELECT Gymnases.NomGymnase, SUM(Seances.Duree) AS DureeTotale FROM Gymnases JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase ORDER BY DureeTotale DESC LIMIT 1;
+SELECT C.titre, SUM(V.duree_regardee_min) AS TotalMinutes FROM CONTENUS C JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu GROUP BY C.id_contenu, C.titre ORDER BY TotalMinutes DESC LIMIT 1;
 -->
 
-**4. Identifier les sportifs cumulant les rôles de joueur, arbitre et entraîneur**
+**4. Identifier les artistes cumulant les 3 rôles clés**
 
-Affichez sans doublon l'identifiant (`IdSportif`), le nom (`Nom`) et le prénom (`Prenom`) des sportifs complets qui exercent simultanément les trois rôles dans le complexe : pratiquer au moins un sport, en entraîner au moins un et en arbitrer au moins un (pas nécessairement les mêmes disciplines).
+Affichez sans doublon l'identifiant (`id_personne`), le nom (`nom`) et le prénom (`prenom`) des artistes polyvalents qui interviennent dans les trois rôles sur la plateforme : réalisateur, acteur principal et scénariste.
 
 <details>
 <summary>💡 Indice</summary>
 
-Le prédicat `WHERE EXISTS (SELECT 1 FROM ... WHERE ...)` permet de vérifier la présence dans chacune des trois tables d'activité sans risquer de démultiplier les lignes par des jointures.
+Combinez trois clauses `WHERE EXISTS (SELECT 1 FROM PARTICIPATIONS WHERE ...)` pour éviter de démultiplier les lignes par jointures.
 </details>
 
 <!-- expected-query: Q4
-SELECT DISTINCT S.IdSportif, S.Nom, S.Prenom FROM Sportifs S WHERE EXISTS (SELECT 1 FROM Jouer WHERE IdSportif = S.IdSportif) AND EXISTS (SELECT 1 FROM Entrainer WHERE IdSportifEntraineur = S.IdSportif) AND EXISTS (SELECT 1 FROM Arbitrer WHERE IdSportif = S.IdSportif);
+SELECT P.id_personne, P.nom, P.prenom FROM PERSONNES P WHERE EXISTS (SELECT 1 FROM PARTICIPATIONS WHERE id_personne = P.id_personne AND role = 'Realisateur') AND EXISTS (SELECT 1 FROM PARTICIPATIONS WHERE id_personne = P.id_personne AND role = 'Acteur principal') AND EXISTS (SELECT 1 FROM PARTICIPATIONS WHERE id_personne = P.id_personne AND role = 'Scenariste');
 -->
 
-**5. Détecter les disciplines sportives totalement inactives**
+**5. Détecter les genres totalement inactifs**
 
-Affichez le numéro (`IdSport`) et le libellé (`Libelle`) des sports qui n'ont aucun pratiquant enregistré, aucun arbitre habilité et aucune séance d'entraînement programmée.
+Affichez l'identifiant (`id_genre`) et l'intitulé (`nom`) des genres qui n'ont aucun contenu au catalogue ou dont aucun contenu n'a fait l'objet d'un visionnage.
 
 <!-- expected-query: Q5
-SELECT Sports.IdSport, Sports.Libelle FROM Sports WHERE IdSport NOT IN (SELECT IdSport FROM Jouer) AND IdSport NOT IN (SELECT IdSport FROM Arbitrer) AND IdSport NOT IN (SELECT IdSport FROM Seances);
+SELECT G.id_genre, G.nom FROM GENRES G WHERE G.id_genre NOT IN (SELECT id_genre FROM CONTENUS WHERE id_genre IS NOT NULL) OR G.id_genre NOT IN (SELECT DISTINCT C.id_genre FROM CONTENUS C JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu WHERE C.id_genre IS NOT NULL);
 -->
 
-**6. Détecter les homonymes parmi les sportifs**
+**6. Détecter les homonymes parmi les abonnés**
 
-Trouvez les sportifs partageant le même nom de famille : affichez le nom de famille (`Nom`), le prénom du premier sportif sous l'alias `Prenom1` et le prénom du second sous l'alias `Prenom2`. Veillez à ne pas associer un sportif avec lui-même et à éliminer les paires symétriques en imposant que l'identifiant du premier soit strictement inférieur à celui du second.
+Trouvez les abonnés partageant le même nom de famille : affichez le nom commun (`nom`), le prénom du premier sous l'alias `Prenom1` et le prénom du second sous l'alias `Prenom2`. Éliminez les auto-associations et doublons symétriques avec `A1.id_abonne < A2.id_abonne`.
 
 <!-- expected-query: Q6
-SELECT S1.Nom, S1.Prenom AS Prenom1, S2.Prenom AS Prenom2 FROM Sportifs S1 JOIN Sportifs S2 ON S1.Nom = S2.Nom AND S1.IdSportif < S2.IdSportif;
+SELECT A1.nom, A1.prenom AS Prenom1, A2.prenom AS Prenom2 FROM ABONNES A1 JOIN ABONNES A2 ON A1.nom = A2.nom AND A1.id_abonne < A2.id_abonne;
 -->
 
-**7. Rechercher les gymnases ouverts le lundi et le mercredi mais fermés le mardi**
+**7. Contenus visionnés en semaine mais jamais le week-end**
 
-Affichez sans doublon le nom des gymnases (`NomGymnase`) qui accueillent au moins une séance le lundi ET au moins une séance le mercredi, mais aucune séance le mardi.
-
-<details>
-<summary>💡 Indice</summary>
-
-Combinez deux jointures sur `Seances` pour exiger la présence simultanée de créneaux le lundi et le mercredi, puis une condition `WHERE ... NOT IN (SELECT IdGymnase FROM Seances WHERE Jour = 'Mardi')`.
-</details>
+Affichez sans doublon le titre des contenus (`titre`) qui ont été visionnés du lundi au vendredi (`strftime('%w', ...) BETWEEN '1' AND '5'`) mais dont aucune séance n'a été enregistrée le samedi ou le dimanche (`'0'` ou `'6'`).
 
 <!-- expected-query: Q7
-SELECT DISTINCT G.NomGymnase FROM Gymnases G JOIN Seances S1 ON G.IdGymnase = S1.IdGymnase AND S1.Jour = 'Lundi' JOIN Seances S2 ON G.IdGymnase = S2.IdGymnase AND S2.Jour = 'Mercredi' WHERE G.IdGymnase NOT IN (SELECT IdGymnase FROM Seances WHERE Jour = 'Mardi');
+SELECT DISTINCT C.titre FROM CONTENUS C JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu WHERE strftime('%w', V.date_visionnage) BETWEEN '1' AND '5' AND C.id_contenu NOT IN (SELECT id_contenu FROM VISIONNAGES WHERE strftime('%w', date_visionnage) IN ('0', '6'));
 -->
 
-**8. Associer les sportifs ayant exactement le même âge**
+**8. Associer les abonnés inscrits exactement le même jour**
 
-Affichez les binômes de sportifs du même âge : le nom du premier sous l'alias `Sportif1`, le nom du second sous l'alias `Sportif2` et leur âge commun (`Age`). Évitez les auto-associations et doublons symétriques en imposant que l'identifiant du premier soit strictement inférieur à celui du second, puis triez par âge croissant.
+Affichez les binômes d'abonnés s'étant inscrits à la même date : le nom du premier sous l'alias `Abonne1`, le nom du second sous l'alias `Abonne2` et la date commune (`date_inscription`). Évitez les doublons symétriques et triez par date croissante.
 
 <!-- expected-query: Q8
-SELECT S1.Nom AS Sportif1, S2.Nom AS Sportif2, S1.Age FROM Sportifs S1 JOIN Sportifs S2 ON S1.Age = S2.Age AND S1.IdSportif < S2.IdSportif ORDER BY S1.Age;
+SELECT A1.nom AS Abonne1, A2.nom AS Abonne2, A1.date_inscription FROM ABONNES A1 JOIN ABONNES A2 ON A1.date_inscription = A2.date_inscription AND A1.id_abonne < A2.id_abonne ORDER BY A1.date_inscription;
 -->
 
-**9. Mesurer le nombre de pratiquants potentiels par gymnase et par sport**
+**9. Mesurer l'audimat par genre et par formule d'abonnement**
 
-Pour chaque gymnase et chaque sport programmé dans ce gymnase, affichez le nom du gymnase (`NomGymnase`), le nom du sport sous l'alias `Sport` ainsi que le nombre d'adhérents distincts pratiquant ce sport sous l'alias `NbJoueurs`. Triez par nom de gymnase puis par nombre de joueurs décroissant.
+Pour chaque genre et chaque formule d'abonnement, affichez le libellé du genre (`nom`), la formule (`formule`) et le nombre total de visionnages sous l'alias `TotalVues`. Triez par genre puis par volume de vues décroissant.
 
 <!-- expected-query: Q9
-SELECT G.NomGymnase, S.Libelle AS Sport, COUNT(DISTINCT J.IdSportif) AS NbJoueurs FROM Gymnases G JOIN Seances Se ON G.IdGymnase = Se.IdGymnase JOIN Sports S ON Se.IdSport = S.IdSport JOIN Jouer J ON S.IdSport = J.IdSport GROUP BY G.IdGymnase, G.NomGymnase, S.IdSport, S.Libelle ORDER BY G.NomGymnase, NbJoueurs DESC;
+SELECT G.nom AS Genre, A.formule, COUNT(V.id_visionnage) AS TotalVues FROM GENRES G JOIN CONTENUS C ON G.id_genre = C.id_genre JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu JOIN ABONNES A ON V.id_abonne = A.id_abonne GROUP BY G.id_genre, G.nom, A.formule ORDER BY Genre, TotalVues DESC;
 -->
 
-**10. Identifier les sportifs ne partageant aucun sport avec leur conseiller**
+**10. Abonnés n'ayant aucun genre favori en commun avec leur parrain**
 
-Pour tous les adhérents ayant un conseiller officiel, affichez le nom de l'adhérent sous l'alias `Sportif` et le nom de son conseiller sous l'alias `Conseiller`, pour les seuls cas où l'adhérent et son conseiller n'ont absolument aucun sport pratiqué en commun.
+Pour tous les abonnés ayant un parrain, affichez le nom du filleul sous l'alias `Filleul` et celui de son parrain sous l'alias `Parrain`, pour les seuls cas où le filleul et son parrain n'ont aucun genre d'œuvres en commun dans leurs listes de favoris.
 
 <details>
 <summary>💡 Indice</summary>
 
-Utilisez `WHERE NOT EXISTS` en liant la table `Jouer` de l'adhérent à la table `Jouer` du conseiller sur le même `IdSport`.
+Utilisez `WHERE NOT EXISTS` en reliant les favoris du filleul à ceux du parrain sur la table `CONTENUS` via `id_genre`.
 </details>
 
 <!-- expected-query: Q10
-SELECT S.Nom AS Sportif, Conseiller.Nom AS Conseiller FROM Sportifs S JOIN Sportifs Conseiller ON S.IdSportifConseiller = Conseiller.IdSportif WHERE NOT EXISTS (SELECT 1 FROM Jouer J1 JOIN Jouer J2 ON J1.IdSport = J2.IdSport WHERE J1.IdSportif = S.IdSportif AND J2.IdSportif = Conseiller.IdSportif);
+SELECT A.nom AS Filleul, P.nom AS Parrain FROM ABONNES A JOIN ABONNES P ON A.id_parrain = P.id_abonne WHERE NOT EXISTS (SELECT 1 FROM FAVORIS F1 JOIN CONTENUS C1 ON F1.id_contenu = C1.id_contenu JOIN FAVORIS F2 ON F2.id_abonne = P.id_abonne JOIN CONTENUS C2 ON F2.id_contenu = C2.id_contenu WHERE F1.id_abonne = A.id_abonne AND C1.id_genre = C2.id_genre);
 -->
 
-**11. Détecter les journées multi-sports par gymnase**
+**11. Jours à forte diversité de visionnage**
 
-Affichez le nom du gymnase (`NomGymnase`), le jour (`Jour`) et le nombre de sports différents programmés sous l'alias `NbSportsDistincts`, pour tous les créneaux journaliers où un gymnase accueille au moins 3 disciplines distinctes.
+Affichez la date de visionnage (`date_visionnage`) et le nombre de genres différents consultés sous l'alias `NbGenresVus`, pour toutes les journées où les abonnés ont regardé au moins 4 genres distincts.
 
 <!-- expected-query: Q11
-SELECT Gymnases.NomGymnase, Seances.Jour, COUNT(DISTINCT Seances.IdSport) AS NbSportsDistincts FROM Gymnases JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase, Seances.Jour HAVING COUNT(DISTINCT Seances.IdSport) >= 3;
+SELECT V.date_visionnage, COUNT(DISTINCT C.id_genre) AS NbGenresVus FROM VISIONNAGES V JOIN CONTENUS C ON V.id_contenu = C.id_contenu GROUP BY V.date_visionnage HAVING COUNT(DISTINCT C.id_genre) >= 4;
 -->
 
-**12. Profil d'âge des disciplines à forte pratique**
+**12. Division relationnelle : Abonnés ayant vu tous les films d'un genre donné**
 
-Pour les sports comptant strictement plus de 5 pratiquants, affichez le libellé du sport (`Libelle`), la moyenne d'âge des pratiquants arrondie à 1 décimale sous l'alias `AgeMoyen`, ainsi que le nombre total de pratiquants sous l'alias `NbPratiquants`.
+Problème de division relationnelle : affichez l'identifiant (`id_abonne`), le nom (`nom`) et le prénom (`prenom`) des abonnés qui ont visionné l'intégralité de tous les films du genre d'identifiant 1 (`id_genre = 1`).
+
+<details>
+<summary>💡 Indice</summary>
+
+Dans la clause `HAVING`, comparez le nombre de contenus distincts visionnés par l'abonné au nombre total de films du genre via `(SELECT COUNT(*) FROM CONTENUS WHERE id_genre = 1 AND type_format = 'Film')`.
+</details>
 
 <!-- expected-query: Q12
-SELECT Sports.Libelle, ROUND(AVG(Sportifs.Age), 1) AS AgeMoyen, COUNT(Jouer.IdSportif) AS NbPratiquants FROM Sports JOIN Jouer ON Sports.IdSport = Jouer.IdSport JOIN Sportifs ON Jouer.IdSportif = Sportifs.IdSportif GROUP BY Sports.IdSport, Sports.Libelle HAVING COUNT(Jouer.IdSportif) > 5;
+SELECT A.id_abonne, A.nom, A.prenom FROM ABONNES A JOIN VISIONNAGES V ON A.id_abonne = V.id_abonne JOIN CONTENUS C ON V.id_contenu = C.id_contenu WHERE C.id_genre = 1 AND C.type_format = 'Film' GROUP BY A.id_abonne, A.nom, A.prenom HAVING COUNT(DISTINCT C.id_contenu) = (SELECT COUNT(*) FROM CONTENUS WHERE id_genre = 1 AND type_format = 'Film');
 -->

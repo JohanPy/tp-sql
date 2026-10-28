@@ -1,8 +1,8 @@
 ---
 layout: base.njk
 title: "Exercice 2 : Partie II - Requêtes intermédiaires"
-intitule: "TP 5 — Grand Cas de Synthèse (Gymnase2000)"
-base: "Gymnase2000.sqlite"
+intitule: "TP 5 — Grand Cas de Synthèse (NetflixStream)"
+base: "NetflixStream.sqlite"
 tpNum: 5
 exerciceNum: 2
 titre: "Exercice 2 : Partie II - Requêtes intermédiaires"
@@ -16,92 +16,86 @@ show_save_db: false
 
 ## Questions (9 questions)
 
-**1. Calculer le nombre de sports pratiqués par chaque sportif**
+**1. Calculer le nombre total de favoris par abonné**
 
-Pour chaque adhérent du complexe, affichez son nom (`Nom`), son prénom (`Prenom`) et le nombre de sports qu'il pratique sous l'alias `NbSports` (en affichant 0 pour les sportifs ne pratiquant aucun sport).
+Pour chaque abonné de la plateforme, affichez son nom (`nom`), son prénom (`prenom`) et le nombre total de contenus en favoris sous l'alias `NbFavoris` (en affichant 0 pour les abonnés sans aucun favori).
 
 <details>
 <summary>💡 Indice</summary>
 
-Avec une jointure externe `LEFT JOIN`, `COUNT(*)` compte la ligne jointe même si tous ses champs sont `NULL` (renvoyant 1 au lieu de 0). Comptez plutôt un champ spécifique de la table jointe (ex: `COUNT(Jouer.IdSport)`).
+Utilisez `LEFT JOIN` et comptez un attribut de la table de droite (ex: `COUNT(FAVORIS.id_contenu)`) pour éviter que `COUNT(*)` ne compte 1 ligne pour les nuls.
 </details>
 
 <!-- expected-query: Q1
-SELECT Sportifs.Nom, Sportifs.Prenom, COUNT(Jouer.IdSport) AS NbSports FROM Sportifs LEFT JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif GROUP BY Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom;
+SELECT ABONNES.nom, ABONNES.prenom, COUNT(FAVORIS.id_contenu) AS NbFavoris FROM ABONNES LEFT JOIN FAVORIS ON ABONNES.id_abonne = FAVORIS.id_abonne GROUP BY ABONNES.id_abonne, ABONNES.nom, ABONNES.prenom;
 -->
 
-**2. Afficher les sportifs accompagnés du nom de leur conseiller**
+**2. Afficher les abonnés accompagnés du nom de leur parrain**
 
-Pour tous les sportifs disposant d'un conseiller officiel, affichez le nom du sportif sous l'alias `Sportif` ainsi que le nom de famille de son conseiller sous l'alias `Conseiller`.
+Pour tous les abonnés disposant d'un parrain officiel, affichez le nom du filleul sous l'alias `Abonne` ainsi que le nom de famille de son parrain sous l'alias `Parrain`.
 
 <!-- expected-query: Q2
-SELECT S.Nom AS Sportif, Conseiller.Nom AS Conseiller FROM Sportifs S LEFT JOIN Sportifs Conseiller ON S.IdSportifConseiller = Conseiller.IdSportif WHERE S.IdSportifConseiller IS NOT NULL;
+SELECT Filleul.nom AS Abonne, Parrain.nom AS Parrain FROM ABONNES Filleul JOIN ABONNES Parrain ON Filleul.id_parrain = Parrain.id_abonne;
 -->
 
-**3. Dénombrer les entraîneurs habilités pour chaque discipline**
+**3. Dénombrer les réalisateurs distincts ayant officié par genre**
 
-Pour chaque discipline sportive, affichez son libellé (`Libelle`) ainsi que le nombre d'entraîneurs distincts habilités à l'enseigner sous l'alias `NbEntraineurs` (en incluant les sports sans aucun entraîneur avec la valeur 0).
+Pour chaque genre du catalogue, affichez son intitulé (`nom`) ainsi que le nombre de réalisateurs distincts ayant dirigé au moins une œuvre dans ce genre, sous l'alias `NbRealisateurs` (en incluant les genres sans réalisateur avec la valeur 0).
 
 <!-- expected-query: Q3
-SELECT Sports.Libelle, COUNT(DISTINCT Entrainer.IdSportifEntraineur) AS NbEntraineurs FROM Sports LEFT JOIN Entrainer ON Sports.IdSport = Entrainer.IdSport GROUP BY Sports.IdSport, Sports.Libelle;
+SELECT G.nom, COUNT(DISTINCT Part.id_personne) AS NbRealisateurs FROM GENRES G LEFT JOIN CONTENUS C ON G.id_genre = C.id_genre LEFT JOIN PARTICIPATIONS Part ON C.id_contenu = Part.id_contenu AND Part.role = 'Realisateur' GROUP BY G.id_genre, G.nom;
 -->
 
-**4. Synthèse d'activité par gymnase : séances et disciplines**
+**4. Synthèse d'activité par genre : volume de contenus et note moyenne**
 
-Pour chaque gymnase du complexe, affichez son nom (`NomGymnase`), le nombre total de séances qui y sont programmées sous l'alias `NbSeances`, ainsi que le nombre de sports distincts qui y sont pratiqués sous l'alias `NbSports`.
+Pour chaque genre, affichez son libellé (`nom`), le nombre total d'œuvres sous l'alias `NbContenus`, ainsi que la note moyenne attribuée par les utilisateurs arrondie à 2 décimales sous l'alias `NoteMoyenne`.
 
 <!-- expected-query: Q4
-SELECT Gymnases.NomGymnase, COUNT(Seances.IdSport) AS NbSeances, COUNT(DISTINCT Seances.IdSport) AS NbSports FROM Gymnases LEFT JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase;
+SELECT G.nom, COUNT(DISTINCT C.id_contenu) AS NbContenus, ROUND(AVG(V.note_avis), 2) AS NoteMoyenne FROM GENRES G JOIN CONTENUS C ON G.id_genre = C.id_genre LEFT JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu GROUP BY G.id_genre, G.nom;
 -->
 
-**5. Identifier les sportifs admissibles à un créneau d'entraînement précis**
+**5. Identifier les abonnés ayant visionné le contenu le plus regardé**
 
-Pour la séance se déroulant au gymnase 1 le lundi à 9h, déterminez la discipline concernée et affichez le nom (`Nom`), le prénom (`Prenom`) et l'identifiant du sport (`IdSport`) pour tous les sportifs habilités à y participer car pratiquant cette discipline.
+Déterminez le contenu ayant cumulé le plus grand nombre de sessions de visionnage sur la plateforme, puis affichez sans doublon le nom (`nom`) et le prénom (`prenom`) des abonnés qui l'ont regardé.
 
 <details>
 <summary>💡 Indice</summary>
 
-Déterminez le sport associé à cette séance spécifique à l'aide d'une sous-requête scalaire dans la clause `WHERE`.
+Isolez l'identifiant du contenu le plus populaire à l'aide d'une sous-requête avec `GROUP BY ... ORDER BY COUNT(*) DESC LIMIT 1`.
 </details>
 
 <!-- expected-query: Q5
-SELECT Sportifs.Nom, Sportifs.Prenom, Jouer.IdSport FROM Sportifs JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif WHERE Jouer.IdSport = (SELECT IdSport FROM Seances WHERE IdGymnase = 1 AND Jour = 'Lundi' AND Horaire = 9 LIMIT 1);
+SELECT DISTINCT A.nom, A.prenom FROM ABONNES A JOIN VISIONNAGES V ON A.id_abonne = V.id_abonne WHERE V.id_contenu = (SELECT id_contenu FROM VISIONNAGES GROUP BY id_contenu ORDER BY COUNT(*) DESC LIMIT 1);
 -->
 
-**6. Calculer la durée moyenne des séances par sport**
+**6. Calculer la durée moyenne de visionnage par format**
 
-Pour chaque sport ayant au moins une séance programmée, affichez son intitulé (`Libelle`) et la durée moyenne d'une séance (arrondie à 1 décimale) sous l'alias `DureeMoyenneMinutes`.
+Pour chaque format de contenu (`type_format`), affichez l'intitulé du format et la durée moyenne de visionnage en minutes (arrondie à 1 décimale) sous l'alias `DureeMoyenne`.
 
 <!-- expected-query: Q6
-SELECT Sports.Libelle, ROUND(AVG(Seances.Duree), 1) AS DureeMoyenneMinutes FROM Sports JOIN Seances ON Sports.IdSport = Seances.IdSport GROUP BY Sports.IdSport, Sports.Libelle;
+SELECT C.type_format, ROUND(AVG(V.duree_regardee_min), 1) AS DureeMoyenne FROM CONTENUS C JOIN VISIONNAGES V ON C.id_contenu = V.id_contenu GROUP BY C.type_format;
 -->
 
-**7. Détecter les adhérents n'ayant aucune activité sportive**
+**7. Détecter les abonnés inactifs n'ayant jamais rien regardé**
 
-Affichez l'identifiant (`IdSportif`), le nom (`Nom`) et le prénom (`Prenom`) des sportifs inscrits dans le complexe qui ne pratiquent actuellement aucun sport.
-
-<details>
-<summary>💡 Indice</summary>
-
-Une jointure externe `LEFT JOIN` avec une condition `WHERE ... IS NULL` sur la clé de la table de droite permet d'isoler les lignes orphelines.
-</details>
+Affichez l'identifiant (`id_abonne`), le nom (`nom`) et le prénom (`prenom`) des abonnés inscrits sur la plateforme qui n'ont effectué aucun visionnage.
 
 <!-- expected-query: Q7
-SELECT Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom FROM Sportifs LEFT JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif WHERE Jouer.IdSport IS NULL;
+SELECT ABONNES.id_abonne, ABONNES.nom, ABONNES.prenom FROM ABONNES LEFT JOIN VISIONNAGES ON ABONNES.id_abonne = VISIONNAGES.id_abonne WHERE VISIONNAGES.id_visionnage IS NULL;
 -->
 
-**8. Répartition hebdomadaire des séances par gymnase**
+**8. Répartition des visionnages par mois de l'année**
 
-Pour chaque gymnase et chaque jour de la semaine où des activités ont lieu, affichez le nom du gymnase (`NomGymnase`), le jour (`Jour`) et le nombre de séances programmées sous l'alias `NbSeances`.
+À partir de la date de visionnage (`date_visionnage`), affichez le numéro du mois sur deux chiffres sous l'alias `Mois` et le nombre total de visionnages enregistrés sous l'alias `NbVisionnages`, trié par ordre chronologique.
 
 <!-- expected-query: Q8
-SELECT Gymnases.NomGymnase, Seances.Jour, COUNT(*) AS NbSeances FROM Gymnases JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase, Seances.Jour;
+SELECT strftime('%m', date_visionnage) AS Mois, COUNT(*) AS NbVisionnages FROM VISIONNAGES GROUP BY Mois ORDER BY Mois;
 -->
 
-**9. Classifier les sportifs selon leur majorité légale**
+**9. Classifier les abonnés selon leur formule tarifaire**
 
-À partir de la table `Sportifs`, affichez le nom (`Nom`), le prénom (`Prenom`), l'âge (`Age`) et une colonne sous l'alias `Statut` affichant 'Majeur' si l'adhérent a 18 ans ou plus, et 'Mineur' dans le cas contraire.
+À partir de la table `ABONNES`, affichez le nom (`nom`), le prénom (`prenom`), la formule (`formule`) et une colonne sous l'alias `Segment` affichant 'Haut de gamme' si la formule est 'Premium', 'Intermédiaire' si la formule est 'Standard', et 'Économique' dans le cas contraire.
 
 <!-- expected-query: Q9
-SELECT Nom, Prenom, Age, CASE WHEN Age >= 18 THEN 'Majeur' ELSE 'Mineur' END AS Statut FROM Sportifs;
+SELECT nom, prenom, formule, CASE WHEN formule = 'Premium' THEN 'Haut de gamme' WHEN formule = 'Standard' THEN 'Intermédiaire' ELSE 'Économique' END AS Segment FROM ABONNES;
 -->

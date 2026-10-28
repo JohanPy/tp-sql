@@ -32,6 +32,19 @@ Un pré-traitement syntaxique (`sanitizeSQLForSQLite`) normalise les expressions
 
 ---
 
+## Bases de données et sources de données
+
+Outre la base classique de gestion d'entreprise (`Comptoir2000`), j'ai généré 3 bases de données basées sur des données réelles issues d'APIs et de jeux de données ouverts, conçues pour être plus récentes (données de 2025) et facilement compréhensibles :
+
+* **NetflixStream (`NetflixStream.sqlite`) :** modélise une plateforme de streaming vidéo (800 contenus, 300 abonnés avec réseau hiérarchique de parrainage, 4 500 visionnages et favoris). Les titres, formats, durées et volumes d'écoute proviennent des rapports officiels semestriels d'audience Netflix (*What We Watched: A Netflix Engagement Report*, 2023–2026). Les crédits artistiques officiels (réalisateurs, showrunners, acteurs principaux et scénaristes) ont été extraits et synchronisés via l'API REST de **TMDB (The Movie Database)**.
+* **CineData (`CineData.sqlite`) :** modélise l'exploitation cinématographique en salles et VOD (600 films, 250 cinéphiles, 3 800 séances et avis). Les données économiques réelles (budgets et recettes au box-office mondial), les genres et les castings détaillés (acteurs, réalisateurs, scénaristes, producteurs) proviennent de l'API REST de **TMDB**, avec une priorisation marquée pour les grands succès populaires du cinéma français récent (*Un p'tit truc en plus*, *Kaamelott : Premier Volet*, *Le Comte de Monte-Cristo*, *L'Amour ouf*...).
+* **AniBase (`AniBase.sqlite`) :** modélise l'industrie de l'animation japonaise (600 animes récents, 45 studios, 250 membres, 3 800 interactions de watchlist). Les métadonnées, dates, saisons de diffusion (`WINTER`, `SPRING`...) et équipes techniques réelles proviennent de l'API GraphQL d'**AniList**, complétées par les métadonnées des studios d'animation emblématiques (MAPPA, Ufotable, Wit Studio, CoMix Wave, Toei Animation...).
+
+
+Toutes ces bases partagent une armature didactique commune (12 invariants relationnels stricts : jointures N:N, détection d'orphelins, auto-jointures hiérarchiques et temporelles, calculs arithmétiques) et un gabarit compact (< 1 Mo) garantissant une exécution rapide en WebAssembly dans le navigateur.
+
+---
+
 ## Technologies employées
 
 * **[Eleventy](https://www.11ty.dev/) :** générateur de site statique compilant les gabarits et les sujets Markdown.

@@ -1,8 +1,8 @@
 ---
 layout: base.njk
 title: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
-intitule: "TP 5 — Grand Cas de Synthèse (Gymnase2000)"
-base: "Gymnase2000.sqlite"
+intitule: "TP 5 — Grand Cas de Synthèse (NetflixStream)"
+base: "NetflixStream.sqlite"
 tpNum: 5
 exerciceNum: 1
 titre: "Exercice 1 : Partie I - Requêtes de base et jointures simples"
@@ -16,128 +16,128 @@ show_save_db: false
 
 ## Questions (15 questions)
 
-**1. Afficher tous les sportifs du complexe**
+**1. Afficher tous les abonnés de la plateforme**
 
-À partir de la table `Sportifs`, affichez le numéro de licence (`IdSportif`), le nom (`Nom`) et le prénom (`Prenom`) de tous les adhérents.
+À partir de la table `ABONNES`, affichez l'identifiant (`id_abonne`), le nom (`nom`), le prénom (`prenom`) et le pays (`pays`) de tous les abonnés.
 
 <!-- expected-query: Q1
-SELECT IdSportif, Nom, Prenom FROM Sportifs;
+SELECT id_abonne, nom, prenom, pays FROM ABONNES;
 -->
 
-**2. Lister tous les sports disponibles**
+**2. Lister les genres cinématographiques disponibles**
 
-À partir de la table `Sports`, affichez l'identifiant (`IdSport`) et le nom (`Libelle`) de l'ensemble des disciplines sportives proposées.
+À partir de la table `GENRES`, affichez l'identifiant (`id_genre`) et l'intitulé (`nom`) de l'ensemble des genres disponibles.
 
 <!-- expected-query: Q2
-SELECT IdSport, Libelle FROM Sports;
+SELECT id_genre, nom FROM GENRES;
 -->
 
-**3. Afficher les sports pratiqués par un sportif donné**
+**3. Consulter les contenus d'un genre spécifique**
 
-Pour le sportif ayant l'identifiant 1 (`IdSportif = 1`), affichez le numéro (`IdSport`) et le libellé (`Libelle`) de chaque sport qu'il pratique.
+Pour le genre d'identifiant 3 (`id_genre = 3`), affichez le titre (`titre`), le format (`type_format`) et la durée en minutes (`duree_minutes`).
 
 <!-- expected-query: Q3
-SELECT Sports.IdSport, Sports.Libelle FROM Sports JOIN Jouer ON Sports.IdSport = Jouer.IdSport WHERE Jouer.IdSportif = 1;
+SELECT titre, type_format, duree_minutes FROM CONTENUS WHERE id_genre = 3;
 -->
 
-**4. Lister les séances d'entraînement programmées**
+**4. Croiser les contenus avec leur genre**
 
-Pour chaque séance d'entraînement enregistrée, affichez le libellé du sport sous l'alias `Sport`, le nom du gymnase (`NomGymnase`), le jour (`Jour`) et l'horaire de début (`Horaire`).
+Pour chaque contenu du catalogue, affichez son titre (`titre`), son type (`type_format`) et le nom de son genre sous l'alias `Genre`.
 
 <!-- expected-query: Q4
-SELECT Sports.Libelle AS Sport, Gymnases.NomGymnase, Seances.Jour, Seances.Horaire FROM Seances JOIN Sports ON Seances.IdSport = Sports.IdSport JOIN Gymnases ON Seances.IdGymnase = Gymnases.IdGymnase;
+SELECT CONTENUS.titre, CONTENUS.type_format, GENRES.nom AS Genre FROM CONTENUS JOIN GENRES ON CONTENUS.id_genre = GENRES.id_genre;
 -->
 
-**5. Identifier les entraîneurs et les disciplines qu'ils enseignent**
+**5. Identifier les réalisateurs et les contenus qu'ils ont dirigés**
 
-Affichez sans doublon l'identifiant (`IdSportif`), le nom (`Nom`) et le prénom (`Prenom`) des sportifs ayant un rôle d'entraîneur, ainsi que le sport qu'ils encadrent sous l'alias `SportEnseigne`.
+Affichez sans doublon le nom (`nom`), le prénom (`prenom`) des réalisateurs ainsi que le titre du contenu dirigé sous l'alias `TitreOeuvre` (`role = 'Realisateur'`).
 
 <!-- expected-query: Q5
-SELECT DISTINCT Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS SportEnseigne FROM Sportifs JOIN Entrainer ON Sportifs.IdSportif = Entrainer.IdSportifEntraineur JOIN Sports ON Entrainer.IdSport = Sports.IdSport;
+SELECT DISTINCT PERSONNES.nom, PERSONNES.prenom, CONTENUS.titre AS TitreOeuvre FROM PERSONNES JOIN PARTICIPATIONS ON PERSONNES.id_personne = PARTICIPATIONS.id_personne JOIN CONTENUS ON PARTICIPATIONS.id_contenu = CONTENUS.id_contenu WHERE PARTICIPATIONS.role = 'Realisateur';
 -->
 
-**6. Identifier les arbitres officiels et leurs sports d'arbitrage**
+**6. Identifier les acteurs principaux des films**
 
-Affichez sans doublon l'identifiant (`IdSportif`), le nom (`Nom`) et le prénom (`Prenom`) des sportifs qualifiés pour arbitrer, ainsi que le nom du sport arbitré sous l'alias `SportArbitre`.
+Affichez sans doublon le nom (`nom`) et le prénom (`prenom`) des artistes tenant le rôle d'acteur principal (`role = 'Acteur principal'`) dans des œuvres au format film (`type_format = 'Film'`), ainsi que le titre du film sous l'alias `Film`.
 
 <!-- expected-query: Q6
-SELECT DISTINCT Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS SportArbitre FROM Sportifs JOIN Arbitrer ON Sportifs.IdSportif = Arbitrer.IdSportif JOIN Sports ON Arbitrer.IdSport = Sports.IdSport;
+SELECT DISTINCT PERSONNES.nom, PERSONNES.prenom, CONTENUS.titre AS Film FROM PERSONNES JOIN PARTICIPATIONS ON PERSONNES.id_personne = PARTICIPATIONS.id_personne JOIN CONTENUS ON PARTICIPATIONS.id_contenu = CONTENUS.id_contenu WHERE PARTICIPATIONS.role = 'Acteur principal' AND CONTENUS.type_format = 'Film';
 -->
 
-**7. Afficher le planning des séances du gymnase numéro 1**
+**7. Historique des visionnages d'un abonné donné**
 
-Pour le gymnase numéro 1 (`IdGymnase = 1`), affichez le sport sous l'alias `Sport`, le jour de la séance (`Jour`) et l'horaire (`Horaire`).
+Pour l'abonné ayant l'identifiant 1 (`id_abonne = 1`), affichez le titre du contenu regardé (`titre`), la date de visionnage (`date_visionnage`) et la note attribuée (`note_avis`).
 
 <!-- expected-query: Q7
-SELECT Sports.Libelle AS Sport, Seances.Jour, Seances.Horaire FROM Seances JOIN Sports ON Seances.IdSport = Sports.IdSport WHERE Seances.IdGymnase = 1;
+SELECT CONTENUS.titre, VISIONNAGES.date_visionnage, VISIONNAGES.note_avis FROM VISIONNAGES JOIN CONTENUS ON VISIONNAGES.id_contenu = CONTENUS.id_contenu WHERE VISIONNAGES.id_abonne = 1;
 -->
 
-**8. Croiser les sportifs avec les séances auxquelles ils peuvent participer**
+**8. Croiser les abonnés et leurs favoris**
 
-Pour chaque sportif, affichez sans doublon son nom (`Nom`), son prénom (`Prenom`), le sport pratiqué sous l'alias `Sport`, ainsi que le jour (`Jour`) et l'horaire (`Horaire`) des séances programmées dans ce sport.
+Pour chaque favori enregistré, affichez le nom de l'abonné (`nom`), son prénom (`prenom`), le titre du contenu (`titre`) et le nom du genre sous l'alias `Genre`.
 
 <!-- expected-query: Q8
-SELECT DISTINCT Sportifs.Nom, Sportifs.Prenom, Sports.Libelle AS Sport, Seances.Jour, Seances.Horaire FROM Sportifs JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif JOIN Sports ON Jouer.IdSport = Sports.IdSport JOIN Seances ON Sports.IdSport = Seances.IdSport;
+SELECT DISTINCT ABONNES.nom, ABONNES.prenom, CONTENUS.titre, GENRES.nom AS Genre FROM FAVORIS JOIN ABONNES ON FAVORIS.id_abonne = ABONNES.id_abonne JOIN CONTENUS ON FAVORIS.id_contenu = CONTENUS.id_contenu JOIN GENRES ON CONTENUS.id_genre = GENRES.id_genre;
 -->
 
-**9. Dénombrer les pratiquants par discipline sportive**
+**9. Compter les contenus disponibles par genre**
 
-Pour chaque sport, affichez son intitulé (`Libelle`) ainsi que le nombre de sportifs qui le pratiquent, sous l'alias `NbSportifs`. Tous les sports doivent figurer dans le résultat, y compris ceux sans aucun pratiquant (affichant alors 0).
+Pour chaque genre, affichez son libellé (`nom`) et le nombre total de contenus associés sous l'alias `NbContenus`. Tous les genres doivent figurer dans le résultat (en affichant 0 pour ceux sans aucun contenu).
 
 <!-- expected-query: Q9
-SELECT Sports.Libelle, COUNT(Jouer.IdSportif) AS NbSportifs FROM Sports LEFT JOIN Jouer ON Sports.IdSport = Jouer.IdSport GROUP BY Sports.IdSport, Sports.Libelle;
+SELECT GENRES.nom, COUNT(CONTENUS.id_contenu) AS NbContenus FROM GENRES LEFT JOIN CONTENUS ON GENRES.id_genre = CONTENUS.id_genre GROUP BY GENRES.id_genre, GENRES.nom;
 -->
 
-**10. Identifier les sportifs polyvalents pratiquant plusieurs sports**
+**10. Identifier les abonnés très actifs**
 
-Affichez le nom (`Nom`), le prénom (`Prenom`) et le nombre de sports pratiqués sous l'alias `NbSports` pour les adhérents qui pratiquent strictement plus d'un sport.
+Affichez le nom (`nom`), le prénom (`prenom`) et le nombre de visionnages distincts sous l'alias `NbVisionnages` pour les abonnés ayant visionné strictement plus de 5 contenus.
 
 <!-- expected-query: Q10
-SELECT Sportifs.Nom, Sportifs.Prenom, COUNT(Jouer.IdSport) AS NbSports FROM Sportifs JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif GROUP BY Sportifs.IdSportif, Sportifs.Nom, Sportifs.Prenom HAVING COUNT(Jouer.IdSport) > 1;
+SELECT ABONNES.nom, ABONNES.prenom, COUNT(VISIONNAGES.id_visionnage) AS NbVisionnages FROM ABONNES JOIN VISIONNAGES ON ABONNES.id_abonne = VISIONNAGES.id_abonne GROUP BY ABONNES.id_abonne, ABONNES.nom, ABONNES.prenom HAVING COUNT(VISIONNAGES.id_visionnage) > 5;
 -->
 
-**11. Mesurer la fréquentation des gymnases par le nombre de séances**
+**11. Mesurer la popularité des contenus par le nombre de visionnages**
 
-Pour chaque gymnase du complexe, affichez son nom (`NomGymnase`) et le nombre de séances d'entraînement qui y sont programmées sous l'alias `NbSeances` (en incluant les gymnases sans aucune séance programmée avec un total de 0).
+Pour chaque contenu du catalogue, affichez son titre (`titre`) et son nombre total de visionnages sous l'alias `NbVues` (en incluant les contenus jamais regardés avec la valeur 0).
 
 <!-- expected-query: Q11
-SELECT Gymnases.NomGymnase, COUNT(Seances.IdSport) AS NbSeances FROM Gymnases LEFT JOIN Seances ON Gymnases.IdGymnase = Seances.IdGymnase GROUP BY Gymnases.IdGymnase, Gymnases.NomGymnase;
+SELECT CONTENUS.titre, COUNT(VISIONNAGES.id_visionnage) AS NbVues FROM CONTENUS LEFT JOIN VISIONNAGES ON CONTENUS.id_contenu = VISIONNAGES.id_contenu GROUP BY CONTENUS.id_contenu, CONTENUS.titre;
 -->
 
-**12. Trouver les entraîneurs qui pratiquent eux-mêmes le sport qu'ils enseignent**
+**12. Artistes ayant été à la fois réalisateur et acteur principal sur la même œuvre**
 
-Affichez sans doublon le nom (`Nom`), le prénom (`Prenom`) et le libellé du sport (`Libelle`) pour les sportifs qui entraînent une discipline sportive qu'ils pratiquent également à titre personnel.
+Affichez sans doublon le nom (`nom`), le prénom (`prenom`) et le titre du contenu (`titre`) pour les artistes ayant cumulé les rôles de réalisateur et d'acteur principal sur un même contenu.
 
 <details>
 <summary>💡 Indice</summary>
 
-Rappelez-vous que les entraîneurs sont eux-mêmes des sportifs : la colonne `IdSportifEntraineur` de la table `Entrainer` correspond à l'identifiant `IdSportif` de la table `Jouer`.
+Effectuez deux jointures sur la table `PARTICIPATIONS` avec des alias distincts liés sur le même `id_personne` et le même `id_contenu`.
 </details>
 
 <!-- expected-query: Q12
-SELECT DISTINCT Sportifs.Nom, Sportifs.Prenom, Sports.Libelle FROM Sportifs JOIN Entrainer ON Sportifs.IdSportif = Entrainer.IdSportifEntraineur JOIN Jouer ON Sportifs.IdSportif = Jouer.IdSportif AND Entrainer.IdSport = Jouer.IdSport JOIN Sports ON Entrainer.IdSport = Sports.IdSport;
+SELECT DISTINCT P.nom, P.prenom, C.titre FROM PERSONNES P JOIN PARTICIPATIONS P1 ON P.id_personne = P1.id_personne AND P1.role = 'Realisateur' JOIN PARTICIPATIONS P2 ON P.id_personne = P2.id_personne AND P2.role = 'Acteur principal' AND P1.id_contenu = P2.id_contenu JOIN CONTENUS C ON P1.id_contenu = C.id_contenu;
 -->
 
-**13. Cibler les sportifs dans une tranche d'âge spécifique**
+**13. Filtrer les abonnés d'une tranche d'âge spécifique**
 
-À partir de la table `Sportifs`, affichez le numéro (`IdSportif`), le nom (`Nom`), le prénom (`Prenom`) et l'âge (`Age`) des sportifs âgés de 20 à 30 ans inclus.
+À partir de leur date de naissance (`date_naissance`), affichez l'identifiant (`id_abonne`), le nom (`nom`), le prénom (`prenom`) et la date de naissance des abonnés nés entre 2000 et 2005 inclus.
 
 <!-- expected-query: Q13
-SELECT IdSportif, Nom, Prenom, Age FROM Sportifs WHERE Age BETWEEN 20 AND 30;
+SELECT id_abonne, nom, prenom, date_naissance FROM ABONNES WHERE strftime('%Y', date_naissance) BETWEEN '2000' AND '2005';
 -->
 
-**14. Associer chaque entraîneur aux sportifs qu'il peut potentiellement former**
+**14. Associer chaque réalisateur aux abonnés ayant mis ses films en favoris**
 
-Trouvez les binômes entraîneur-pratiquant : affichez sans doublon le nom de l'entraîneur sous l'alias `EntraineurNom`, le nom de l'adhérent sous l'alias `SportifNom`, et la discipline partagée sous l'alias `Sport`, pour chaque cas où l'entraîneur enseigne un sport que l'adhérent pratique (en excluant les cas où l'entraîneur est comparé à lui-même).
+Affichez sans doublon le nom du réalisateur sous l'alias `Realisateur`, le titre du film (`titre`) et le nom de l'abonné sous l'alias `Abonne` qui a placé cette œuvre dans ses favoris.
 
 <!-- expected-query: Q14
-SELECT DISTINCT E.Nom AS EntraineurNom, S.Nom AS SportifNom, Sports.Libelle AS Sport FROM Sportifs E JOIN Entrainer ON E.IdSportif = Entrainer.IdSportifEntraineur JOIN Jouer ON Entrainer.IdSport = Jouer.IdSport JOIN Sportifs S ON Jouer.IdSportif = S.IdSportif JOIN Sports ON Entrainer.IdSport = Sports.IdSport WHERE E.IdSportif <> S.IdSportif;
+SELECT DISTINCT P.nom AS Realisateur, C.titre, A.nom AS Abonne FROM PERSONNES P JOIN PARTICIPATIONS Part ON P.id_personne = Part.id_personne AND Part.role = 'Realisateur' JOIN CONTENUS C ON Part.id_contenu = C.id_contenu JOIN FAVORIS F ON C.id_contenu = F.id_contenu JOIN ABONNES A ON F.id_abonne = A.id_abonne;
 -->
 
-**15. Détecter les disciplines sportives sans créneau d'entraînement**
+**15. Détecter les contenus orphelins sans aucun visionnage**
 
-Identifiez les sports orphelins : affichez l'identifiant (`IdSport`) et le libellé (`Libelle`) des sports pour lesquels aucune séance d'entraînement n'est programmée dans aucun gymnase.
+Identifiez les contenus orphelins : affichez l'identifiant (`id_contenu`) et le titre (`titre`) des contenus présents au catalogue qui n'ont fait l'objet d'aucun visionnage enregistré.
 
 <!-- expected-query: Q15
-SELECT Sports.IdSport, Sports.Libelle FROM Sports LEFT JOIN Seances ON Sports.IdSport = Seances.IdSport WHERE Seances.IdSport IS NULL;
+SELECT CONTENUS.id_contenu, CONTENUS.titre FROM CONTENUS LEFT JOIN VISIONNAGES ON CONTENUS.id_contenu = VISIONNAGES.id_contenu WHERE VISIONNAGES.id_visionnage IS NULL;
 -->

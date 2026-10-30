@@ -14,72 +14,57 @@ show_save_db: false
 
 # Exercice 3 : Dates et Formats
 
+Cet exercice permet de manipuler les fonctions de formatage temporel (`STRFTIME`) et de calcul d'écarts en jours (`JULIANDAY`).
+
 ## Questions
 
-**1. Extraire l'année et le mois de chaque commande**
+**1. Filtrer les commandes de décembre 2014**
 
-À partir de la table `Commande`, affichez pour chaque commande son numéro (`NoCom`) et sa date de commande formatée sous la forme 'AAAA-MM' (année et mois à deux chiffres) sous l'alias `AnneeMois`.
+À partir de la table `Commande`, sélectionnez uniquement les commandes passées en décembre 2014 et affichez :
+- `NoCom` : Le numéro de commande
+- `CodeCli` : Le code du client
+- `DateCom` : La date de commande
+- `AnneeMois` : L'année et le mois de la commande au format `'AAAA-MM'` (ex. `'2014-12'`)
 
 <!-- expected-query: Q1
-SELECT NoCom, STRFTIME('%Y-%m', DateCom) AS AnneeMois FROM Commande;
+SELECT NoCom, CodeCli, DateCom, STRFTIME('%Y-%m', DateCom) AS AnneeMois FROM Commande WHERE STRFTIME('%Y-%m', DateCom) = '2014-12';
 -->
 
 **2. Calculer le délai d'expédition en jours**
 
-À partir de la table `Commande`, pour les commandes déjà expédiées (colonne `DateEnv` renseignée), affichez le numéro de commande (`NoCom`) ainsi que le délai d'acheminement exprimé en nombre entier de jours (écart entre la date d'envoi et la date de commande) sous l'alias `DelaiLivraisonJours`.
+À partir de la table `Commande`, sélectionnez les commandes déjà expédiées (la date d'envoi `DateEnv` est renseignée, c'est-à-dire non nulle) et affichez :
+- `NoCom` : Le numéro de commande
+- `DelaiLivraisonJours` : Le nombre entier de jours entre la date de commande (`DateCom`) et la date d'envoi (`DateEnv`)
 
 <details>
 <summary>💡 Indice</summary>
 
-Sous SQLite, la soustraction directe de deux dates textuelles ne donne pas le nombre de jours. Utilisez la fonction `JULIANDAY()` pour convertir les dates en jours avant d'en calculer l'écart.
+En SQLite, convertissez chaque date en nombre de jours avec `JULIANDAY()` avant de faire la soustraction, puis convertissez le résultat en nombre entier avec `CAST(... AS INT)`.
 </details>
 
 <!-- expected-query: Q2
 SELECT NoCom, CAST(JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS INT) AS DelaiLivraisonJours FROM Commande WHERE DateEnv IS NOT NULL;
 -->
 
-**3. Cibler les commandes d'une période spécifique**
-
-À partir de la table `Commande`, affichez toutes les colonnes (`*`) pour les commandes passées au cours du mois de décembre 2014.
-
-<!-- expected-query: Q3
-SELECT * FROM Commande WHERE STRFTIME('%Y-%m', DateCom) = '2014-12';
--->
-
 ## Rappel de cours
 
-### Manipulation de dates (SQLite)
+### Extraire ou formater une date (`STRFTIME`)
 
-SQLite stocke les dates sous forme de chaînes de caractères (TEXT), de nombres réels (REAL) ou d'entiers (INTEGER).
-
-### Extraction de parties de date (STRFTIME)
-
-La fonction `STRFTIME` permet de formater une date.
-Formats courants : `%Y` (Année), `%m` (Mois), `%d` (Jour).
+La fonction `STRFTIME(format, date)` extrait une partie d'une date sous forme de texte.
+Codes utiles : `%Y` (année à 4 chiffres), `%m` (mois de `01` à `12`), `%d` (jour de `01` à `31`).
 
 ```sql
--- Extraire l'année d'une date
-SELECT STRFTIME('%Y', DateCom) FROM Commande;
+-- Afficher l'année d'embauche de chaque employé
+SELECT Nom, STRFTIME('%Y', DateEmbauche) AS Annee
+FROM Employe;
 ```
+
+### Calculer un écart en jours entre deux dates (`JULIANDAY`)
+
+La fonction `JULIANDAY(date)` convertit une date en nombre de jours, ce qui permet de soustraire deux dates :
 
 ```sql
--- Extraire le mois
-SELECT STRFTIME('%m', DateCom) FROM Commande;
+-- Nombre entier de jours entre la naissance et l'embauche d'un employé
+SELECT Nom, CAST(JULIANDAY(DateEmbauche) - JULIANDAY(DateNaissance) AS INT) AS NbJours
+FROM Employe;
 ```
-
-### Calculs sur les dates (JULIANDAY)
-
-Pour calculer une différence entre deux dates, on les convertit en "Jour Julien" (nombre de jours).
-
-```sql
--- Nombre de jours entre deux dates
-SELECT JULIANDAY(DateEnv) - JULIANDAY(DateCom) AS DelaiLivraison
-FROM Commande;
-```
-
-```sql
--- Ajouter des jours à une date
-SELECT DATE('now', '+7 days');
-```
-
-

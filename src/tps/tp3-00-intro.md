@@ -37,29 +37,30 @@ Produit (🔑 Refprod, Nomprod, 🔗 NoFour, 🔗 CodeCateg, QteParUnit, PrixUni
 
 ## Conseils pour bien démarrer
 
-- Testez vos requêtes progressivement en commençant simple, puis ajoutez complexité
-- Pour les agrégats : n'oubliez pas que `WHERE` filtre par lignes AVANT l'agrégation, `HAVING` qui filtre par groupe APRÈS
-- Pour les dates : `STRFTIME` permet d'extraire année, mois, jour (`'%Y'`, `'%m'`, `'%d'`)
-- Utilisez les indices pour vérifier votre compréhension du concept, pas pour vous éviter de vous tromper, c'est comme ça que l'on apprend.
+- Construisez vos requêtes étape par étape : testez d'abord une requête simple, puis ajoutez les filtres et les calculs.
+- Pour les agrégats : `WHERE` filtre les lignes **avant** le regroupement (`GROUP BY`), tandis que `HAVING` filtre les groupes **après** le calcul des agrégats.
+- Pour les dates : `STRFTIME` permet d'extraire l'année, le mois ou le jour (`'%Y'`, `'%m'`, `'%d'`).
+- Consultez les indices uniquement si vous êtes bloqué.
 
-## Exemples de requêtes SQL de manipulation de dates
+## Exemples de manipulation de dates
 ```sql
--- Extraire l'année d'une date
-SELECT STRFTIME('%Y', DateCom) AS AnneeCommande FROM Commande;
+-- Extraire l'année d'embauche d'un employé
+SELECT Nom, STRFTIME('%Y', DateEmbauche) AS AnneeEmbauche
+FROM Employe;
 ```
 
 ```sql
--- Compter les commandes par année
-SELECT STRFTIME('%Y', DateCom) AS Annee, COUNT(*) AS NombreCommandes
-FROM Commande
+-- Compter le nombre d'employés embauchés par année
+SELECT STRFTIME('%Y', DateEmbauche) AS Annee, COUNT(*) AS NbEmployes
+FROM Employe
 GROUP BY Annee;
 ```
 
-## Exemples de requêtes SQL utilisant Having
+## Exemple d'utilisation de HAVING
 ```sql
--- Compter les produits par catégorie et ne garder que celles avec plus de 10 produits
-SELECT Categorie, COUNT(*) AS NombreProduits
-FROM Produit
-GROUP BY Categorie
-HAVING NombreProduits > 10;
+-- Compter les fournisseurs par pays et garder les pays ayant plus de 2 fournisseurs
+SELECT Pays, COUNT(*) AS NbFournisseurs
+FROM Fournisseur
+GROUP BY Pays
+HAVING COUNT(*) > 2;
 ```

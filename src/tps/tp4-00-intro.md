@@ -80,8 +80,8 @@ WHERE C.CodeCli IN (
 ```
 ```sql
 -- 5. Lister les produits avec leur fournisseur et catégorie (INNER JOIN)
-SELECT P.Nomprod, F.NomFournisseur, Cat.NomCategorie
+SELECT P.Nomprod, F.Societe AS Fournisseur, Cat.NomCateg
 FROM Produit P
-INNER JOIN Fournisseur F ON P.Fournisseur = F.CodeFournisseur
-INNER JOIN Categorie Cat ON P.Categorie = Cat.CodeCategorie;
+INNER JOIN Fournisseur F ON P.NoFour = F.NoFour
+INNER JOIN Categorie Cat ON P.CodeCateg = Cat.CodeCateg;
 ```

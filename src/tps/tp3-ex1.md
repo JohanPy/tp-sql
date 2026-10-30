@@ -14,124 +14,85 @@ show_save_db: false
 
 # Exercice 1 : Agrégats
 
+Cet exercice permet de réviser rapidement les fonctions d'agrégation (`COUNT`, `MIN`, `MAX`, `SUM`, `AVG`), le regroupement (`GROUP BY`) et le filtrage sur groupes (`HAVING`) vus en CM et TD.
+
 ## Questions
 
-**1. Compter le nombre total de commandes**
+**1. Synthèse globale des lignes de commande**
 
-À partir de la table `Commande`, affichez le nombre total de commandes enregistrées sous l'alias `TotalCommandes`.
+À partir de la table `DetailCommande`, affichez en une seule requête :
+- `NbLignes` : Le nombre total de lignes de commande
+- `QteMin` : La plus petite quantité commandée (`Qte`)
+- `QteMax` : La plus grande quantité commandée (`Qte`)
 
 <!-- expected-query: Q1
-SELECT COUNT(*) AS TotalCommandes FROM Commande;
+SELECT COUNT(*) AS NbLignes, MIN(Qte) AS QteMin, MAX(Qte) AS QteMax FROM DetailCommande;
 -->
 
-**2. Calculer le chiffre d'affaires total facturé**
+**2. Calculer le chiffre d'affaires total net**
 
-À partir de la table `DetailCommande`, calculez le montant total cumulé de l'ensemble des ventes en appliquant les remises accordées. Arrondissez le résultat à 2 décimales sous l'alias `ChiffreAffairesTotal`.
+À partir de la table `DetailCommande`, calculez le montant total de toutes les ventes après application de la remise (à partir du prix unitaire `PrixUnit`, de la quantité `Qte` et du taux de remise `Remise`).
+Affichez ce résultat arrondi à 2 décimales sous l'alias `ChiffreAffairesTotal`.
 
 <!-- expected-query: Q2
 SELECT ROUND(SUM(PrixUnit * Qte * (1 - Remise)), 2) AS ChiffreAffairesTotal FROM DetailCommande;
 -->
 
-**3. Afficher le nombre de clients par pays**
+**3. Compter le nombre de clients par pays**
 
-À partir de la table `Client`, affichez pour chaque pays (colonne `Pays`) le nombre de clients enregistrés, sous l'alias `NbClients`. Triez le résultat par ordre décroissant du nombre de clients.
+À partir de la table `Client`, affichez pour chaque pays :
+- `Pays` : Le nom du pays
+- `NbClients` : Le nombre de clients situés dans ce pays
+
+Triez le résultat par nombre de clients décroissant.
 
 <!-- expected-query: Q3
 SELECT Pays, COUNT(*) AS NbClients FROM Client GROUP BY Pays ORDER BY NbClients DESC;
 -->
 
-**4. Calculer le prix unitaire moyen des produits par catégorie**
+**4. Identifier les catégories dont le prix moyen dépasse 100 €**
 
-À partir de la table `Produit`, affichez pour chaque code de catégorie (`CodeCateg`) le prix unitaire moyen des produits, arrondi à 2 décimales sous l'alias `PrixMoyen`.
+À partir de la table `Produit`, affichez pour chaque catégorie :
+- `CodeCateg` : Le code de la catégorie
+- `NbProduits` : Le nombre de produits dans cette catégorie
+- `PrixMoyen` : Le prix unitaire moyen (`PrixUnit`), arrondi à 2 décimales
 
-<!-- expected-query: Q4
-SELECT CodeCateg, ROUND(AVG(PrixUnit), 2) AS PrixMoyen FROM Produit GROUP BY CodeCateg;
--->
-
-**5. Identifier les catégories dont le prix unitaire moyen dépasse 100 €**
-
-À partir de la table `Produit`, affichez le code de catégorie (`CodeCateg`) et le prix unitaire moyen arrondi à 2 décimales sous l'alias `PrixMoyen`, en ne conservant que les catégories dont ce prix unitaire moyen est strictement supérieur à 100 €.
+Ne gardez que les catégories dont le prix unitaire moyen (avant arrondi) est strictement supérieur à 100 €.
 
 <details>
 <summary>💡 Indice</summary>
 
-Attention : la clause `WHERE` filtre les lignes individuelles avant regroupement et ne peut pas porter sur le résultat d'un agrégat. Pour filtrer des groupes après calcul, utilisez la clause `HAVING`.
+La clause `WHERE` filtre les lignes individuelles avant le regroupement et ne peut pas utiliser de fonction d'agrégation. Utilisez `HAVING` pour filtrer les groupes après le calcul de la moyenne.
 </details>
 
-<!-- expected-query: Q5
-SELECT CodeCateg, ROUND(AVG(PrixUnit), 2) AS PrixMoyen FROM Produit GROUP BY CodeCateg HAVING AVG(PrixUnit) > 100;
--->
-
-**6. Dénombrer les commandes traitées par chaque employé**
-
-À partir de la table `Commande`, affichez pour chaque identifiant d'employé (colonne `NoEmp`) le nombre de commandes qu'il a prises en charge, sous l'alias `NbCommandes`.
-
-<!-- expected-query: Q6
-SELECT NoEmp, COUNT(*) AS NbCommandes FROM Commande GROUP BY NoEmp;
--->
-
-**7. Déterminer les quantités extrêmes commandées sur une ligne**
-
-À partir de la table `DetailCommande`, identifiez sur l'ensemble des lignes de commande la quantité minimale commandée sous l'alias `QteMin` et la quantité maximale commandée sous l'alias `QteMax`.
-
-<!-- expected-query: Q7
-SELECT MIN(Qte) AS QteMin, MAX(Qte) AS QteMax FROM DetailCommande;
--->
-
-**8. Filtrer les volumes de vente cumulés par produit**
-
-À partir de la table `DetailCommande`, affichez pour chaque référence de produit (`Refprod`) la somme totale des quantités commandées sous l'alias `TotalVendu`. Ne retenez que les produits dont le cumul vendu est supérieur ou égal à 10 unités.
-
-<!-- expected-query: Q8
-SELECT Refprod, SUM(Qte) AS TotalVendu FROM DetailCommande GROUP BY Refprod HAVING SUM(Qte) >= 10;
+<!-- expected-query: Q4
+SELECT CodeCateg, COUNT(*) AS NbProduits, ROUND(AVG(PrixUnit), 2) AS PrixMoyen FROM Produit GROUP BY CodeCateg HAVING AVG(PrixUnit) > 100;
 -->
 
 ## Rappel de cours
 
 ### Fonctions d'agrégation
 
-Ces fonctions permettent d'effectuer des calculs sur un ensemble de lignes.
+Ces fonctions permettent d'effectuer des calculs statistiques sur un ensemble de lignes :
 
 ```sql
--- Compter le nombre de lignes
-SELECT COUNT(*) FROM Client;
+-- Compter, trouver les extrêmes, sommer et calculer une moyenne
+SELECT COUNT(*) AS Total,
+       MIN(PrixUnit) AS Minimum,
+       MAX(PrixUnit) AS Maximum,
+       SUM(UnitesStock) AS StockTotal,
+       ROUND(AVG(PrixUnit), 2) AS Moyenne
+FROM Produit;
 ```
+
+### Regroupement (`GROUP BY`) et filtrage sur groupes (`HAVING`)
+
+`GROUP BY` regroupe les lignes partageant la même valeur, et `HAVING` filtre les groupes obtenus après agrégation :
 
 ```sql
--- Calculer la somme
-SELECT SUM(PrixUnit) FROM Produit;
+-- Fournisseurs proposant plus de 3 produits
+SELECT NoFour, COUNT(*) AS NbProduits
+FROM Produit
+GROUP BY NoFour
+HAVING COUNT(*) > 3;
 ```
-
-```sql
--- Calculer la moyenne
-SELECT AVG(PrixUnit) FROM Produit;
-```
-
-```sql  
--- Trouver le minimum et le maximum
-SELECT MIN(PrixUnit), MAX(PrixUnit) FROM Produit;
-```
-
-### Regroupement (GROUP BY)
-
-Permet de grouper les résultats selon une ou plusieurs colonnes.
-
-```sql
--- Compter le nombre de produits par fournisseur
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour;
-```
-
-### Filtrage sur les groupes (HAVING)
-
-`HAVING` s'utilise après `GROUP BY` pour filtrer les résultats agrégés.
-
-```sql
--- Fournisseurs ayant plus de 5 produits
-SELECT NoFour, COUNT(*) 
-FROM Produit 
-GROUP BY NoFour 
-HAVING COUNT(*) > 5;
-```
-

@@ -14,16 +14,16 @@ show_save_db: false
 
 # Exercice 3 : Chaînes de caractères
 
+Les questions suivantes portent sur la table **`Client`** et permettent de pratiquer les fonctions scalaires essentielles de manipulation de chaînes.
+
 ## Questions
 
-Les questions suivantes portent toutes sur la table **`Client`** et permettent de pratiquer les fonctions de manipulation de chaînes de caractères :
+**1. Concaténer l'adresse postale complète avec mise en majuscules du pays**
 
-**1. Concaténer l'adresse postale complète dans un champ unique**
-
-À partir de la table `Client`, concaténez les colonnes `Adresse`, `CodePostal`, `Ville` et `Pays` pour former une seule colonne nommée `AdresseComplete` au format exact : `Adresse, CodePostal Ville, Pays`.
+À partir de la table `Client`, concaténez les colonnes `Adresse`, `CodePostal`, `Ville` et `Pays` (ce dernier converti en majuscules) pour former une seule colonne nommée `AdresseComplete` au format exact : `Adresse, CodePostal Ville, PAYS_EN_MAJUSCULES`.
 
 <!-- expected-query: Q1
-SELECT (Adresse || ', ' || CodePostal || ' ' || Ville || ', ' || Pays) AS AdresseComplete FROM Client;
+SELECT (Adresse || ', ' || CodePostal || ' ' || Ville || ', ' || UPPER(Pays)) AS AdresseComplete FROM Client;
 -->
 
 **2. Extraire les deux derniers caractères du code client**
@@ -40,56 +40,48 @@ La fonction `SUBSTR()` accepte une position de départ négative pour compter le
 SELECT CodeCli, SUBSTR(CodeCli, -2) AS DeuxDerniers FROM Client;
 -->
 
-**3. Convertir en minuscules la raison sociale des sociétés clientes**
-
-À partir de la table `Client`, affichez la raison sociale de chaque société (colonne `Societe`) convertie en minuscules, sous l'alias `SocieteMinuscule`.
-
-<!-- expected-query: Q3
-SELECT LOWER(Societe) AS SocieteMinuscule FROM Client;
--->
-
-**4. Harmoniser la fonction des contacts en remplaçant "marketing" par "mercatique"**
+**3. Harmoniser la fonction des contacts en remplaçant "marketing" par "mercatique"**
 
 À partir de la table `Client`, affichez le nom de la personne de contact (colonne `Contact`), ainsi que son intitulé de poste (colonne `Fonction`) dans lequel le terme 'marketing' est remplacé par 'mercatique', sous l'alias `Fonction`.
 
 <details>
 <summary>💡 Précision</summary>
 
-Dans la base de données, l'intitulé 'marketing' est saisi en lettres minuscules.
+Dans la base de données, l'intitulé 'marketing' est saisi en minuscules.
 </details>
 
-<!-- expected-query: Q4
+<!-- expected-query: Q3
 SELECT Contact, REPLACE(Fonction, 'marketing', 'mercatique') AS Fonction FROM Client;
 -->
 
 ## Rappel de cours
 
-### Concaténation
+### Concaténation (`||`)
 
-Pour assembler plusieurs chaînes de caractères, utilisez l'opérateur `||`.
+Pour assembler plusieurs chaînes de caractères ou colonnes, utilisez l'opérateur `||` :
 
 ```sql
--- Assembler Nom et Prénom
 SELECT Nom || ' ' || Prenom AS NomComplet FROM Employe;
 ```
 
-### Manipulation de chaînes
+### Fonctions de casse (`UPPER`, `LOWER`)
 
 ```sql
--- Extraire une partie de la chaîne (SUBSTR)
+SELECT UPPER(Nom) FROM Client;   -- Convertit en majuscules
+SELECT LOWER(Nom) FROM Client;   -- Convertit en minuscules
+```
+
+### Extraction de sous-chaîne (`SUBSTR`)
+
+```sql
 -- SUBSTR(chaine, debut, longueur)
 SELECT SUBSTR(Nom, 1, 3) FROM Client; -- 3 premiers caractères
+SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères (en partant de la fin)
 ```
+
+### Remplacement de texte (`REPLACE`)
+
 ```sql
-SELECT SUBSTR(Nom, -2) FROM Client;   -- 2 derniers caractères
-```
-```sql
--- Remplacer du texte (REPLACE)
--- REPLACE(chaine, ancien, nouveau)
+-- REPLACE(chaine, ancien_texte, nouveau_texte)
 SELECT REPLACE(Fonction, 'Manager', 'Directeur') FROM Employe;
-```
-```sql
--- Minuscules / Majuscules
-SELECT LOWER(Nom) FROM Client;
-SELECT UPPER(Nom) FROM Client;
 ```

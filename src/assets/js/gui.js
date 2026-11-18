@@ -63,7 +63,63 @@ const state = {
 
 // Start the worker in which sql.js will run (with MariaDB emulation)
 const worker = new Worker(assetPath("/assets/js/db-worker.js"));
-worker.onerror = handleError;
+let workerRequestCounter = 0;
+const pendingWorkerRequests = new Map();
+let panelRequestSeq = 0;
+const latestPanelRequests = new WeakMap();
+
+worker.addEventListener('message', function(event) {
+	const data = event.data || {};
+	const requestId = data.id;
+	if (requestId === undefined || !pendingWorkerRequests.has(requestId)) {
+		return;
+	}
+	const { resolve, reject } = pendingWorkerRequests.get(requestId);
+	pendingWorkerRequests.delete(requestId);
+
+	if (data.error) {
+		reject(new Error(data.error));
+	} else {
+		resolve(data);
+	}
+});
+
+worker.onerror = function(e) {
+	const err = new Error(e && e.message ? e.message : 'Erreur du worker SQL');
+	for (const [, { reject }] of pendingWorkerRequests) {
+		reject(err);
+	}
+	pendingWorkerRequests.clear();
+	handleError(e);
+};
+
+function postWorkerMessage(payload, transferables) {
+	const id = ++workerRequestCounter;
+	const message = Object.assign({}, payload, { id });
+	return new Promise((resolve, reject) => {
+		pendingWorkerRequests.set(id, { resolve, reject });
+		try {
+			if (transferables) {
+				worker.postMessage(message, transferables);
+			} else {
+				worker.postMessage(message);
+			}
+		} catch (err) {
+			if (transferables) {
+				try {
+					worker.postMessage(message);
+					return;
+				} catch (retryErr) {
+					pendingWorkerRequests.delete(id);
+					reject(retryErr);
+					return;
+				}
+			}
+			pendingWorkerRequests.delete(id);
+			reject(err);
+		}
+	});
+}
 
 // Open a database - check if we need to load a specific database
 const dbConfig = window.TP_CONFIG || {};
@@ -77,33 +133,28 @@ if (dbConfig.base && dbConfig.base !== '') {
 			}
 			return response.arrayBuffer();
 		})
-		.then(buffer => {
-			worker.postMessage({ 
-				action: 'open', 
-				buffer: buffer 
-			});
+		.then(buffer => postWorkerMessage({ action: 'open', buffer: buffer }))
+		.then(() => {
 			console.log(`Database ${dbConfig.base} loaded successfully`);
 			updateStatus('ready', `${dbConfig.base.replace(/\.sqlite$/i, '')} chargée`);
 			
-			// Charger le schéma de la base de données
-			setTimeout(() => {
-				loadDatabaseSchema(dbConfig);
-			}, 1000);
-			// Mettre à jour les métadonnées pour l'autocomplétion après un court délai
-			setTimeout(() => {
-				refreshDatabaseMetadata();
-			}, 500);
+			// Charger le schéma de la base de données et les métadonnées pour l'autocomplétion
+			loadDatabaseSchema(dbConfig);
+			refreshDatabaseMetadata();
 		})
 		.catch(error => {
 			console.error('Error loading database:', error);
 			updateStatus('error', `Erreur lors du chargement de la BD: ${error.message}`);
 			// Open empty database as fallback
-			worker.postMessage({ action: 'open' });
+			postWorkerMessage({ action: 'open' }).catch(err => console.error('Fallback open failed:', err));
 		});
 } else {
 	// Open empty database (for Semester 2)
-	worker.postMessage({ action: 'open' });
-	updateStatus('ready', 'Base de données vide prête');
+	postWorkerMessage({ action: 'open' })
+		.then(() => {
+			updateStatus('ready', 'Base de données vide prête');
+		})
+		.catch(err => console.error('Empty DB open failed:', err));
 }
 
 // Normalize possible legacy nested markup: if a .tab-panel contains a child
@@ -162,16 +213,25 @@ function initNavToggle() {
 	}
 }
 
-// Error handling: show errors inside the current results panel
-function handleError(e) {
+// Error handling: show errors inside the target results panel (or current panel by default)
+function handleError(e, targetPanel = null) {
 	console.log(e);
-	updateStatus('error', `Error: ${e.message}`);
-	showErrorInCurrentTab(e.message);
+	const message = e && e.message ? e.message : String(e || 'Erreur inconnue');
+	updateStatus('error', `Error: ${message}`);
+	if (targetPanel) {
+		showErrorInTab(targetPanel, message);
+	} else {
+		showErrorInCurrentTab(message);
+	}
 }
 
 function showErrorInCurrentTab(errorMessage) {
 	// The tab panel itself now has class results-content, so select the panel by id
 	const tabPanel = document.getElementById(state.currentTabId);
+	showErrorInTab(tabPanel, errorMessage);
+}
+
+function showErrorInTab(tabPanel, errorMessage) {
 	if (!tabPanel) return;
 
 	tabPanel.innerHTML = '';
@@ -262,13 +322,19 @@ function execute(commands, tabId = state.currentTabId) {
 	
 	showLoadingIndicator(tabOutputElm);
 	addToHistory(commands);
-	
-	worker.onmessage = function (event) {
-		handleQueryResults(event, tabOutputElm);
-	};
-	
-	worker.postMessage({ action: 'exec', sql: commands });
-	worker.onerror = handleError;
+
+	const reqToken = ++panelRequestSeq;
+	latestPanelRequests.set(tabOutputElm, reqToken);
+
+	postWorkerMessage({ action: 'exec', sql: commands })
+		.then(data => {
+			if (!tabOutputElm.isConnected || latestPanelRequests.get(tabOutputElm) !== reqToken) return;
+			handleQueryResults(data, tabOutputElm, commands);
+		})
+		.catch(err => {
+			if (!tabOutputElm.isConnected || latestPanelRequests.get(tabOutputElm) !== reqToken) return;
+			handleError(err, tabOutputElm);
+		});
 }
 
 function determineTabForResults(tabId) {
@@ -287,12 +353,12 @@ function showLoadingIndicator(outputElement) {
 	outputElement.appendChild(loadingClone);
 }
 
-function handleQueryResults(event, outputElement) {
-	const results = event.data.results;
+function handleQueryResults(data, outputElement, executedSql = '') {
+	const results = data.results;
 	const executionTime = toc("Executing SQL");
 	
 	if (!results) {
-		handleError({message: event.data.error || "Une erreur inconnue s'est produite"});
+		handleError({ message: data.error || "Une erreur inconnue s'est produite" }, outputElement);
 		return;
 	}
 
@@ -311,7 +377,7 @@ function handleQueryResults(event, outputElement) {
 	updateStatus('success', `${results.length} ensemble${results.length !== 1 ? 's' : ''} de résultat${results.length !== 1 ? 's' : ''} retourné${results.length !== 1 ? 's' : ''}`);
 	
 	// Vérifier si la requête modifie la structure (CREATE/DROP/ALTER)
-	const sqlText = editor.getValue().toUpperCase().trim();
+	const sqlText = (executedSql || editor.getValue()).toUpperCase().trim();
 	if (sqlText.match(/^(CREATE|DROP|ALTER)\s+(TABLE|INDEX|VIEW)/m)) {
 		console.log('Schema modification detected, refreshing metadata...');
 		setTimeout(() => {
@@ -593,11 +659,11 @@ let dbMetadataCache = {
 	lastUpdate: null
 };
 
-// Flag pour éviter les conflits avec worker.onmessage
+// Flag pour éviter les mises à jour concurrentes des métadonnées
 let isUpdatingMetadata = false;
 
 // Fonction pour récupérer les métadonnées de la base
-function updateDatabaseMetadata() {
+async function updateDatabaseMetadata() {
 	if (isUpdatingMetadata) {
 		console.log('Metadata update already in progress, skipping...');
 		return;
@@ -605,79 +671,54 @@ function updateDatabaseMetadata() {
 	
 	isUpdatingMetadata = true;
 	
-	// Sauvegarder le handler actuel
-	const originalOnMessage = worker.onmessage;
-	
-	// Phase 1: Récupérer la liste des tables
-	worker.onmessage = function(event) {
-		if (event.data && event.data.results && event.data.results[0]) {
-			const tablesResult = event.data.results[0];
+	try {
+		// Phase 1: Récupérer la liste des tables
+		const tablesData = await postWorkerMessage({
+			action: 'exec',
+			sql: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
+		});
+		
+		const tablesResult = tablesData && tablesData.results && tablesData.results[0];
+		if (tablesResult && tablesResult.values && tablesResult.values.length > 0) {
+			dbMetadataCache.tables = tablesResult.values.map(row => row[0]);
+			dbMetadataCache.columns = {};
 			
-			if (tablesResult.values && tablesResult.values.length > 0) {
-				dbMetadataCache.tables = tablesResult.values.map(row => row[0]);
-				dbMetadataCache.columns = {};
-				
-				// Phase 2: Récupérer toutes les colonnes en une seule requête
-				const allColumnsQuery = dbMetadataCache.tables.map(tableName => 
-					`SELECT '${tableName.replace(/'/g, "''")}' as table_name, name, type FROM pragma_table_info('${tableName.replace(/'/g, "''")}')`
-				).join(' UNION ALL ');
-				
-				if (allColumnsQuery) {
-					// Handler pour les colonnes
-					worker.onmessage = function(colEvent) {
-						if (colEvent.data && colEvent.data.results && colEvent.data.results[0]) {
-							const allColumnsResult = colEvent.data.results[0];
-							if (allColumnsResult.values) {
-								allColumnsResult.values.forEach(row => {
-									const tableName = row[0];
-									const colName = row[1];
-									const colType = row[2];
-									
-									if (!dbMetadataCache.columns[tableName]) {
-										dbMetadataCache.columns[tableName] = [];
-									}
-									
-									dbMetadataCache.columns[tableName].push({
-										name: colName,
-										type: colType
-									});
-								});
-							}
+			// Phase 2: Récupérer toutes les colonnes en une seule requête
+			const allColumnsQuery = dbMetadataCache.tables.map(tableName => 
+				`SELECT '${tableName.replace(/'/g, "''")}' as table_name, name, type FROM pragma_table_info('${tableName.replace(/'/g, "''")}')`
+			).join(' UNION ALL ');
+			
+			if (allColumnsQuery) {
+				const colData = await postWorkerMessage({ action: 'exec', sql: allColumnsQuery });
+				const allColumnsResult = colData && colData.results && colData.results[0];
+				if (allColumnsResult && allColumnsResult.values) {
+					allColumnsResult.values.forEach(row => {
+						const [tableName, colName, colType] = row;
+						if (!dbMetadataCache.columns[tableName]) {
+							dbMetadataCache.columns[tableName] = [];
 						}
-						
-						dbMetadataCache.lastUpdate = Date.now();
-						console.log('✓ Database metadata updated:', dbMetadataCache.tables.length, 'tables,', 
-							Object.keys(dbMetadataCache.columns).length, 'columns mapped');
-						
-						// Restaurer le handler original et libérer le flag
-						worker.onmessage = originalOnMessage;
-						isUpdatingMetadata = false;
-					};
-					
-					// Exécuter la requête pour les colonnes
-					worker.postMessage({ action: 'exec', sql: allColumnsQuery });
-				} else {
-					// Pas de tables, restaurer et libérer
-					worker.onmessage = originalOnMessage;
-					isUpdatingMetadata = false;
-					dbMetadataCache.lastUpdate = Date.now();
-					console.log('✓ Database metadata updated: 0 tables');
+						dbMetadataCache.columns[tableName].push({
+							name: colName,
+							type: colType
+						});
+					});
 				}
-			} else {
-				// Pas de résultats, restaurer et libérer
-				worker.onmessage = originalOnMessage;
-				isUpdatingMetadata = false;
-				dbMetadataCache.lastUpdate = Date.now();
-				console.log('✓ Database metadata updated: 0 tables');
 			}
+			
+			dbMetadataCache.lastUpdate = Date.now();
+			console.log('✓ Database metadata updated:', dbMetadataCache.tables.length, 'tables,',
+				Object.keys(dbMetadataCache.columns).length, 'columns mapped');
+		} else {
+			dbMetadataCache.tables = [];
+			dbMetadataCache.columns = {};
+			dbMetadataCache.lastUpdate = Date.now();
+			console.log('✓ Database metadata updated: 0 tables');
 		}
-	};
-	
-	// Lancer la requête pour récupérer les tables
-	worker.postMessage({ 
-		action: 'exec', 
-		sql: "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name" 
-	});
+	} catch (err) {
+		console.warn('Error updating database metadata:', err);
+	} finally {
+		isUpdatingMetadata = false;
+	}
 }
 
 // Mettre à jour les métadonnées quand la base est chargée
@@ -900,29 +941,24 @@ elements.dbFileElm.onchange = function () {
 };
 
 function loadDatabaseFromFile() {
-	var f = elements.dbFileElm.files[0];
-	var r = new FileReader();
+	const f = elements.dbFileElm.files[0];
+	if (!f) return;
+	const r = new FileReader();
 	r.onload = function () {
-		worker.onmessage = function () {
-			toc("Chargement de la base de données depuis un fichier");
-			editor.setValue("SELECT `name`, `sql`\n  FROM `sqlite_master`\n  WHERE type='table';");
-			execEditorContents();
-			showNotification('Base de données chargée avec succès');
-			updateStatus('success', 'Base de données chargée avec succès');
-			
-			// Mettre à jour les métadonnées pour l'autocomplétion
-			setTimeout(() => {
-				refreshDatabaseMetadata();
-			}, 500);
-		};
 		tic();
-		try {
-			worker.postMessage({ action: 'open', buffer: r.result }, [r.result]);
-		}
-		catch (exception) {
-			worker.postMessage({ action: 'open', buffer: r.result });
-		}
-	}
+		postWorkerMessage({ action: 'open', buffer: r.result }, [r.result])
+			.then(() => {
+				toc("Chargement de la base de données depuis un fichier");
+				editor.setValue("SELECT `name`, `sql`\n  FROM `sqlite_master`\n  WHERE type='table';");
+				execEditorContents();
+				showNotification('Base de données chargée avec succès');
+				updateStatus('success', 'Base de données chargée avec succès');
+				
+				// Mettre à jour les métadonnées pour l'autocomplétion
+				refreshDatabaseMetadata();
+			})
+			.catch(handleError);
+	};
 	r.readAsArrayBuffer(f);
 }
 
@@ -930,15 +966,16 @@ function loadDatabaseFromFile() {
 function savedb() {
 	updateStatus('info', 'Sauvegarde de la base de données...');
 	
-	worker.onmessage = function (event) {
-		toc("Exportation de la base de données");
-		downloadDatabaseFile(event.data.buffer);
-		showNotification('Base de données sauvegardée avec succès');
-		updateStatus('success', 'Base de données sauvegardée avec succès');
-		addButtonClickFeedback(elements.savedbElm);
-	};
 	tic();
-	worker.postMessage({ action: 'export' });
+	postWorkerMessage({ action: 'export' })
+		.then(data => {
+			toc("Exportation de la base de données");
+			downloadDatabaseFile(data.buffer);
+			showNotification('Base de données sauvegardée avec succès');
+			updateStatus('success', 'Base de données sauvegardée avec succès');
+			addButtonClickFeedback(elements.savedbElm);
+		})
+		.catch(handleError);
 }
 
 function downloadDatabaseFile(arraybuff) {
@@ -1057,8 +1094,9 @@ function initTabs() {
 			return;
 		}
 		
-		if (target.classList.contains('tab') && !target.id) {
-			const tabId = target.dataset.tab;
+		const tabBtn = target.closest('.tab');
+		if (tabBtn && !tabBtn.id) {
+			const tabId = tabBtn.dataset.tab;
 			if (tabId) {
 				setActiveTab(tabId);
 			}
@@ -1239,53 +1277,49 @@ function executeExpectedResult(qid, obfuscatedQuery) {
 	updateStatus('executing', `Calcul du résultat attendu pour ${qid}...`);
 	tic();
 
-	const handleExpectedMessage = function (event) {
-		// Ignore internal schema queries or metadata queries if any
-		if (event.data && event.data.results && event.data.results[0] && event.data.results[0].columns) {
-			const cols = event.data.results[0].columns;
-			if ((cols.length === 2 && cols[0] === 'name' && cols[1] === 'sql') || (cols.length === 1 && cols[0] === 'sql')) {
+	const reqToken = ++panelRequestSeq;
+	latestPanelRequests.set(panel, reqToken);
+
+	postWorkerMessage({ action: 'exec', sql: sql })
+		.then(data => {
+			if (!panel.isConnected || latestPanelRequests.get(panel) !== reqToken) return;
+
+			const results = data.results;
+			const executionTime = toc("Executing expected SQL");
+
+			if (!results) {
+				handleError({ message: data.error || "Erreur lors de l'exécution de la solution" }, panel);
 				return;
 			}
-		}
 
-		worker.removeEventListener('message', handleExpectedMessage);
+			panel.innerHTML = "";
 
-		const results = event.data.results;
-		const executionTime = toc("Executing expected SQL");
+			const banner = document.createElement('div');
+			banner.className = 'expected-result-banner';
+			banner.innerHTML = `
+				<div class="expected-banner-content">
+					<span class="expected-badge">🎯 RÉSULTAT ATTENDU</span>
+					<span class="expected-title">Question ${escapeHtml(qid)}</span>
+					<span class="expected-hint">— Comparez vos colonnes, l'ordre et le nombre de lignes avec ce tableau</span>
+				</div>
+			`;
+			panel.appendChild(banner);
 
-		if (!results) {
-			handleError({ message: event.data.error || "Erreur lors de l'exécution de la solution" });
-			return;
-		}
+			if (results.length === 0) {
+				displayNoResults(panel);
+				return;
+			}
 
-		panel.innerHTML = "";
+			displayResultSets(results, panel);
 
-		const banner = document.createElement('div');
-		banner.className = 'expected-result-banner';
-		banner.innerHTML = `
-			<div class="expected-banner-content">
-				<span class="expected-badge">🎯 RÉSULTAT ATTENDU</span>
-				<span class="expected-title">Question ${qid}</span>
-				<span class="expected-hint">— Comparez vos colonnes, l'ordre et le nombre de lignes avec ce tableau</span>
-			</div>
-		`;
-		panel.appendChild(banner);
-
-		if (results.length === 0) {
-			displayNoResults(panel);
-			return;
-		}
-
-		displayResultSets(results, panel);
-
-		const displayTime = toc("Displaying expected results");
-		updateQueryTime(executionTime + displayTime);
-		updateStatus('success', `Résultat attendu pour ${qid} affiché (${results[0].values.length} lignes)`);
-	};
-
-	worker.addEventListener('message', handleExpectedMessage);
-	worker.postMessage({ action: 'exec', sql: sql });
-	worker.onerror = handleError;
+			const displayTime = toc("Displaying expected results");
+			updateQueryTime(executionTime + displayTime);
+			updateStatus('success', `Résultat attendu pour ${qid} affiché (${results[0].values.length} lignes)`);
+		})
+		.catch(err => {
+			if (!panel.isConnected || latestPanelRequests.get(panel) !== reqToken) return;
+			handleError(err, panel);
+		});
 }
 
 // Query history functions
@@ -1632,10 +1666,8 @@ function loadDatabaseSchema(dbConfig) {
 		img.src = schemaImagePath;
 	}
 	
-	// Load table structure with a delay to ensure database is ready
-	setTimeout(() => {
-		loadTableStructure();
-	}, 1000);
+	// Load table structure directly since the database is already open
+	loadTableStructure();
 }
 
 function loadTableStructure() {
@@ -1643,41 +1675,37 @@ function loadTableStructure() {
 	
 	const query = "SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'test%' ORDER BY name";
 	
-	const handleSchemaResponse = function(event) {
-		if (!event.data || !event.data.results || !event.data.results[0]) return;
-		const cols = event.data.results[0].columns;
-		if (!cols || cols[0] !== 'name' || cols[1] !== 'sql') return;
-		
-		worker.removeEventListener('message', handleSchemaResponse);
-		
-		const rows = event.data.results[0].values || [];
-		const detailsDiv = document.getElementById('schemaDetails');
-		if (rows.length === 0) {
-			if (detailsDiv) {
-				detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
+	postWorkerMessage({ action: 'exec', sql: query })
+		.then(data => {
+			if (!data || !data.results || !data.results[0]) return;
+			const rows = data.results[0].values || [];
+			const detailsDiv = document.getElementById('schemaDetails');
+			if (rows.length === 0) {
+				if (detailsDiv) {
+					detailsDiv.innerHTML = '<p class="schema-placeholder">Aucune table trouvée dans cette base de données</p>';
+				}
+				return;
 			}
-			return;
-		}
-		
-		const tables = rows.map(r => r[0]);
-		const tableData = {};
-		
-		rows.forEach(([tableName, createSQL]) => {
-			tableData[tableName] = {
-				columns: [],
-				primaryKeys: new Set(),
-				foreignKeys: new Set()
-			};
-			if (createSQL) {
-				parseTableStructure(tableName, createSQL, tableData);
-			}
+			
+			const tables = rows.map(r => r[0]);
+			const tableData = {};
+			
+			rows.forEach(([tableName, createSQL]) => {
+				tableData[tableName] = {
+					columns: [],
+					primaryKeys: new Set(),
+					foreignKeys: new Set()
+				};
+				if (createSQL) {
+					parseTableStructure(tableName, createSQL, tableData);
+				}
+			});
+			
+			displayTableStructure(tables, tableData);
+		})
+		.catch(err => {
+			console.warn('Error loading table structure:', err);
 		});
-		
-		displayTableStructure(tables, tableData);
-	};
-	
-	worker.addEventListener('message', handleSchemaResponse);
-	worker.postMessage({ action: 'exec', sql: query });
 }
 
 function parseTableStructure(tableName, createSQL, tableData) {
